@@ -1,0 +1,4 @@
+# Chapter 1 — Foundations, Configuration Space & Degrees of Freedom
+# Python 3.11 recommended (Isaac Sim / MuJoCo ecosystem is not yet on 3.14)
+mujoco>=3.11.0
+numpy
