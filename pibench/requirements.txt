@@ -1,0 +1,7 @@
+# PIBench — Physical Intuition Benchmark
+# Python 3.11 strongly recommended
+mujoco>=3.11.0
+numpy>=1.24.0
+pydantic>=2.0
+pillow>=10.0
+pytest>=8.0

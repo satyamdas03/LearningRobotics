@@ -48,6 +48,7 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | Chapter | Topic | Status | Key Deliverables |
 |---|---|---|---|
 | **1** | Foundations, Configuration Space & Degrees of Freedom | ✅ Complete | `chapter01_foundation/` with 2R arm, 6-DOF arm, DOF inspector |
+| **P0** | **PIBench — Physical Intuition Benchmark** | ✅ Phase 0 Complete | `pibench/` engine + `TowerFall` statics scene, tests passing |
 | 2 | Rigid-Body Motions (frames, rotations, transforms) | 🚧 Next | TBD |
 | 3 | Forward Kinematics | ⏳ Planned | TBD |
 | 4 | Velocity Kinematics & Jacobians | ⏳ Planned | TBD |
@@ -67,13 +68,19 @@ LearningRobotics/
 ├── README.md                      # This file — the project log
 ├── .gitignore                     # Ignore venvs, pycache, OS files
 ├── requirements.txt               # Global shared deps (mostly pointers)
-└── chapter01_foundation/          # Chapter 1: C-space & DOF
-    ├── requirements.txt           # Chapter-specific pinned deps
-    ├── .venv/                     # Local virtual environment (ignored by git)
-    ├── simple_2r_arm.xml          # Minimal 2-revolute planar arm (2 DOF)
-    ├── simple_6dof_arm.xml        # Minimal 6-revolute spatial arm (6 DOF)
-    ├── inspect_dof.py             # DOF counter, FK demo, C-space torus demo
-    └── notes.md                   # Session notes with numbers
+├── chapter01_foundation/          # Chapter 1: C-space & DOF
+│   ├── requirements.txt           # Chapter-specific pinned deps
+│   ├── .venv/                     # Local virtual environment (ignored by git)
+│   ├── simple_2r_arm.xml          # Minimal 2-revolute planar arm (2 DOF)
+│   ├── simple_6dof_arm.xml        # Minimal 6-revolute spatial arm (6 DOF)
+│   ├── inspect_dof.py             # DOF counter, FK demo, C-space torus demo
+│   └── notes.md                   # Session notes with numbers
+└── pibench/                       # Physical Intuition Benchmark (Phase 0)
+    ├── README.md                  # PIBench overview and quickstart
+    ├── requirements.txt           # MuJoCo + benchmark deps
+    ├── pibench/                   # Python package
+    ├── tests/                     # pytest suite
+    └── run_all.py                 # Run all suites across all predictors
 ```
 
 ---
@@ -185,6 +192,17 @@ python inspect_dof.py
 
 Expected output: a table of joints, DOF counts, forward-kinematics comparisons, and the C-space topology demo.
 
+### 3. Run PIBench
+
+```powershell
+cd pibench
+. .venv\Scripts\Activate.ps1
+$env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
+python -m pibench run --suite statics --predictor physics_oracle --n 5
+```
+
+Expected output: `Overall accuracy: 100.0%` on the `TowerFall` scene.
+
 ---
 
 ## 🧠 Test Yourself — Chapter 1 Answers
@@ -195,6 +213,35 @@ Expected output: a table of joints, DOF counts, forward-kinematics comparisons, 
 4. **Why C-space reframing helps planning** — It turns a complex physical robot into a single point moving through an abstract space. Obstacles become forbidden regions, and planning becomes "find a path for the point."
 5. **Planar mechanism with 5 links and 5 revolute joints** — Using Grübler's formula with `m=3`, `N=5`, `J=5`, `Σf_i=5`:
    `DOF = 3(5 - 1 - 5) + 5 = 3(-1) + 5 = 2`.
+
+---
+
+## 🧱 PIBench — First Revolutionary Deliverable (Phase 0)
+
+PIBench is the executable first step toward the *Revolutionary Robotics* north star. It evaluates whether a model truly understands physical common sense, starting with static stability.
+
+### What works now
+
+* **Engine scaffold:** `Problem`, `Suite`, `Runner`, `Evaluator`, `Registry`, and model-agnostic `Predictor` interface.
+* **First scene:** `TowerFall` — predict which of two towers falls when the platform tilts.
+* **Baselines:** `physics_oracle` (100% on deterministic scenes) and `random`.
+* **CLI:** `pibench list`, `pibench run`, `pibench render`.
+* **Tests:** 7 passing.
+
+### Run it
+
+```powershell
+cd pibench
+. .venv\Scripts\Activate.ps1
+$env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
+python -m pibench run --suite statics --predictor physics_oracle --n 10
+```
+
+Expected output: `Overall accuracy: 100.0%` on the `TowerFall` scene.
+
+### Why this matters
+
+A model that can answer "which tower falls?" is being forced to reason about center of mass and support polygon — the same concepts in Chapter 2. As the textbook progresses, PIBench progresses: dynamics, contact, articulated bodies, and finally parameter estimation / counterfactuals.
 
 ---
 
@@ -213,13 +260,14 @@ Each chapter feeds into that stack. Chapter 1 is the foundation: know the links,
 
 ## 📝 Changelog
 
-### 2026-08-13 — Chapter 1 Complete
+### 2026-08-13 — Chapter 1 Complete + PIBench Phase 0
 
 * Created repo `LearningRobotics`.
 * Set up Python 3.11 virtual environment with MuJoCo 3.11.0.
 * Built `simple_2r_arm.xml` and `simple_6dof_arm.xml`.
 * Wrote `inspect_dof.py` to demonstrate configuration, DOF, FK, and C-space topology.
-* Wrote `chapter01_foundation/notes.md` and this `README.md`.
+* Wrote `chapter01_foundation/notes.md` and the root `README.md`.
+* **PIBench Phase 0:** built the benchmark engine, `TowerFall` statics scene, physics-oracle and random baselines, CLI, and tests (7 passing).
 * Committed and pushed to GitHub.
 
 ---

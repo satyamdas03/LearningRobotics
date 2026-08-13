@@ -395,23 +395,47 @@ It asks for help or slows down when uncertainty is high.
 
 ---
 
-### Concept L: Robotic "Physical Intuition" Benchmark
+### Concept L: Robotic "Physical Intuition" Benchmark (PIBench) — Phase 0 Active
 
-**The problem:** There is no standardized way to measure whether a robot (or model) understands physical common sense.
+**The problem:** There is no standardized, model-agnostic, causal way to measure whether a robot (or model) understands physical common sense. Existing benchmarks test passive video QA, 2D puzzles, or task-specific robot planning — not the underlying physical concepts.
 
-**The idea:** Create an open benchmark of physical reasoning tasks:
-* Which object is heavier?
-* Will this tower fall?
-* What happens if I pull this cloth?
-* Which tool can reach that screw?
+**The idea:** Create an open benchmark of physical reasoning tasks that can evaluate analytical functions, neural nets, VLMs, or humans. Each scene exposes latent physical parameters (mass, friction, CoM, shape) so a failure tells you *which concept* the model does not understand.
 
-With sim + real variants, and a leaderboard. This becomes the "ImageNet of physical intuition."
+**PIBench is now being built.** Current codename: `pibench/` in the `LearningRobotics` repo.
 
-**Why revolutionary:** Standardization accelerates the field. A good benchmark redirects research effort.
+**Phase 0 — Engine scaffold (complete):**
+* Model-agnostic harness: `Problem`, `Suite`, `Runner`, `Evaluator`, `Predictor`.
+* First scene: `TowerFall` (statics — which tower falls when the platform tilts?).
+* Baselines: `physics_oracle` (100% on deterministic scenes) and `random`.
+* CLI: `pibench list`, `pibench run`, `pibench render`.
+* Tests: 7 passing.
 
-**Blockers solved:** Evaluation fragmentation.
+**Planned phases:**
 
-**Feasibility:** Very High. Can be built entirely in MuJoCo.
+| Phase | Suite | What it tests |
+|---|---|---|
+| **1** | Statics & stability | CoM, support polygon, stability, friction angle |
+| **2** | Dynamics | Momentum, energy, pendulum/projectile motion, rolling |
+| **3** | Contact & friction | Tip vs slide, stack stability, slip, grip |
+| **4** | Articulated & deformable | Joints, constraints, ropes, cloth, gears |
+| **5** | Parameter estimation & counterfactuals | Mass/friction ordering, "what if mass doubled?" |
+| **6** | Model evaluation harness + leaderboard | VLM stub, calibration metrics, static HTML leaderboard |
+| **7** | Real-robot validation subset | Protocols for AM-ARM / Forte real-world counterparts |
+
+**Why revolutionary:** Standardization accelerates the field, but *causal* standardization redirects research toward the actual concepts robots are missing. PIBench also proves that a single developer on a laptop can ship a credible benchmark.
+
+**Blockers solved:** Evaluation fragmentation; model-agnostic physical-reasoning evaluation; diagnostic failure analysis.
+
+**Feasibility:** Very High. Built entirely in MuJoCo; first scene already runs on the RTX 5060 laptop.
+
+**Run it now:**
+
+```powershell
+cd C:\Users\point\projects\LearningRobotics\pibench
+. .venv\Scripts\Activate.ps1
+$env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
+python -m pibench run --suite statics --predictor physics_oracle --n 10
+```
 
 ---
 
@@ -435,7 +459,7 @@ Given our current setup — **MuJoCo, RTX 5060, Chapter 2 next** — here is a p
 ### Phase 0: Foundations (now — Chapters 2–5)
 * Master rigid-body transforms, forward/inverse kinematics, Jacobians, dynamics.
 * Build reusable MuJoCo robot models.
-* Create the **Physical Intuition Benchmark** (Concept L) as a side project — high value, low compute.
+* **PIBench (Concept L) is now active.** Engine scaffold + `TowerFall` scene complete; expand statics suite while reading Chapter 2.
 
 ### Phase 1: Skill Representation (Chapters 6–7)
 * Build a library of contact primitives in MuJoCo (Concept H seed).

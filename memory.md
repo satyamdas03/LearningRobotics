@@ -298,16 +298,71 @@ User asked for a `memory.md` file at the project root that stores all context en
 
 ---
 
+### Session 3 — 2026-08-13 (continued)
+
+#### 4.15 What the user asked
+
+User asked to make the first revolutionary concept concrete: build the **Physical Intuition Benchmark (PIBench)** — plan it, divide into phases, define the goal, update all dossiers (`memory.md`, `README.md`, `REVOLUTIONARY_ROBOTICS_IDEAS.md`), and push everything to `satyamdas03/LearningRobotics`.
+
+#### 4.16 Plan created
+
+Created `C:\Users\point\.claude\projects\C--Users-point-projects-LearningRobotics\plan.md`:
+
+* **Goal:** A lightweight, MuJoCo-based, model-agnostic benchmark for physical common-sense reasoning.
+* **Differentiation:** pure MuJoCo/Python, latent-factor control, counterfactual queries, curriculum-aligned suites, built-in model-agnostic harness, static leaderboard.
+* **Phases 0–7:** engine scaffold → statics → dynamics → contact → articulated/deformable → parameter/counterfactual → model harness + leaderboard → real-robot validation.
+
+#### 4.17 Phase 0 implementation
+
+Built under `C:\Users\point\projects\LearningRobotics\pibench/`:
+
+1. **Package skeleton:** `pibench/pibench/` with `core/`, `scenes/`, `predictors/`, `utils/`, `cli.py`, `__main__.py`.
+2. **Core engine:** abstract `Problem`, `Question`/`GroundTruth`/`Prediction` Pydantic models, `Suite`, `Runner`, `RunResult`/`SuiteResult`/`ProblemResult`, `Evaluator`, and registry decorator `@register_problem`.
+3. **MJCF helpers:** `pibench/utils/mjcf.py` with `mjcf_header`, `mjcf_worldbody_floor`, `mjcf_box`, `mjcf_footer`, `build_xml`. Fixed schema issues:
+   * Self-closing `<compiler>`/`<option>` tags.
+   * `<body>` tag closed before `<inertial>` child.
+   * `friction` attribute moved from `<body>` to `<geom>`.
+   * `positional` removed from `<light>` (replaced with `directional="false"`).
+   * `<inertial>` given explicit `pos="0 0 0"`.
+4. **First scene:** `scenes/statics/tower_fall.py` — two towers on a tilting platform, asks "Which tower falls?". Ground truth computed by MuJoCo rollout.
+5. **Baselines:** `PhysicsOraclePredictor` (uses problem ground truth), `RandomPredictor`.
+6. **CLI:** `python -m pibench list --suites`, `python -m pibench run --suite statics --predictor physics_oracle --n 5`, `python -m pibench render TowerFall --seed 0 --output output/tower_fall.png`.
+7. **Tests:** `tests/test_core.py` — registry, tower_fall question/ground_truth, physics oracle 100%, suite/runner/evaluator, random baseline < oracle. **7 passed.**
+8. **Convenience script:** `run_all.py` runs all suites across all baselines and writes JSON.
+9. **PIBench README:** `pibench/README.md` with overview, quickstart, layout, scene catalog, contributing, roadmap.
+
+#### 4.18 Bug fixes during Session 3
+
+| Bug | File | Fix |
+|---|---|---|
+| Unclosed `<compiler>`/`<option>` tags | `utils/mjcf.py` | Made them self-closing. |
+| Malformed `<body>` opening tag | `utils/mjcf.py` | Closed `<body ...>` before `<inertial>`. |
+| `friction` attribute on `<body>` | `utils/mjcf.py` | Moved `friction` to `<geom>`. |
+| `positional` unrecognized on `<light>` | `utils/mjcf.py` | Replaced with `directional="false"`. |
+| `<inertial>` missing `pos` | `utils/mjcf.py` | Added `pos="0 0 0"`. |
+| CLI `python -m pibench` not found | `pibench/__main__.py` | Created `__main__.py` calling `cli.main()`. |
+| Registry empty from CLI | `pibench/__init__.py` | Added `from pibench import scenes` to auto-register. |
+
+#### 4.19 Documentation updates
+
+* `README.md`: added `pibench/` to repo structure, progress row, quick-start, PIBench section, updated changelog.
+* `memory.md`: this section.
+* `REVOLUTIONARY_ROBOTICS_IDEAS.md`: Concept L updated from a one-paragraph idea to a Phase 0–7 executable plan with current status.
+* `.gitignore`: added `output/`, `.pytest_cache/`, `*.egg-info/`.
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
 |---|---|
 | Chapter 1 practical | ✅ Complete and pushed |
 | GitHub repo | ✅ Live at https://github.com/satyamdas03/LearningRobotics |
-| README | ✅ Complete |
-| Revolutionary manifesto | ✅ Complete and pushed |
+| README | ✅ Complete (includes PIBench Phase 0) |
+| Revolutionary manifesto | ✅ Complete and pushed (Concept L now has Phase 0–7 plan) |
+| PIBench Phase 0 | ✅ Complete — engine + `TowerFall` + tests passing |
 | Chapter 2 reading | 🚧 User currently reading Chapter 2 (Rigid-Body Motions) |
-| Next implementation work | ⏳ Not started — decide based on user's next message |
+| Next implementation work | ⏳ PIBench Phase 1 (statics suite expansion) or continue Chapter 2 exercises |
 | Hardware purchase | ⏳ None yet; consider AM-ARM / Forte / U-ARM in Phase 3 |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -315,10 +370,11 @@ User asked for a `memory.md` file at the project root that stores all context en
 
 ## 6. Open Decisions / Questions
 
-1. Should the next immediate project be the **Physical Intuition Benchmark** while continuing Chapter 2 study, or should we follow the textbook linearly first?
+1. Should we expand PIBench Phase 1 next (statics scenes: slope_slide, support_balance, topple_direction) while reading Chapter 2, or focus on Chapter 2 textbook exercises first?
 2. Which cheap robot arm should be the long-term hardware target? AM-ARM ($380, 6+1 DoF, 1 kg payload) is the leading candidate for capability; Forte ($215) is cheapest for a real manipulator; U-ARM ($50) is best for teleop-only data collection.
 3. Should the README or manifesto be converted into a polished website / artifact for sharing?
 4. Should we install Isaac Sim in headless pip mode now to verify it runs on the RTX 5060, or wait until needed?
+5. Which dashboard technology should PIBench Phase 6 use? Static Jinja2 (current plan) vs Streamlit vs Next.js.
 
 ---
 
@@ -327,8 +383,15 @@ User asked for a `memory.md` file at the project root that stores all context en
 | File | Purpose | When to read / update |
 |---|---|---|
 | `memory.md` | Full project context for restarts | **Read first on every restart** |
-| `README.md` | Public project overview | Update after each chapter |
+| `README.md` | Public project overview | Update after each chapter / milestone |
 | `REVOLUTIONARY_ROBOTICS_IDEAS.md` | Research manifesto + 12 concepts | Update as ideas evolve |
+| `pibench/README.md` | PIBench overview and quickstart | Update each PIBench phase |
+| `pibench/pibench/cli.py` | PIBench command-line interface | Extend when adding CLI commands |
+| `pibench/pibench/core/` | PIBench engine | Extend for new metrics / result types |
+| `pibench/pibench/scenes/` | All PIBench scene implementations | Add one file per new scene |
+| `pibench/pibench/utils/mjcf.py` | MJCF composition helpers | Reuse for all MuJoCo scene building |
+| `pibench/tests/test_core.py` | PIBench engine tests | Add a test for every new scene |
+| `pibench/run_all.py` | Convenience runner across baselines | Run before pushing PIBench updates |
 | `chapter01_foundation/notes.md` | Chapter 1 session notes | Reference for Chapter 1 details |
 | `chapter01_foundation/inspect_dof.py` | Chapter 1 runnable demo | Run whenever showing Chapter 1 |
 | `chapter01_foundation/simple_2r_arm.xml` | 2-DOF robot model | Reuse/extend for kinematics chapters |
@@ -345,6 +408,18 @@ User asked for a `memory.md` file at the project root that stores all context en
 cd C:\Users\point\projects\LearningRobotics\chapter01_foundation
 . .venv\Scripts\Activate.ps1
 python inspect_dof.py
+```
+
+### Run PIBench
+
+```powershell
+cd C:\Users\point\projects\LearningRobotics\pibench
+. .venv\Scripts\Activate.ps1
+$env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
+python -m pytest tests -q
+python -m pibench list --suites
+python -m pibench run --suite statics --predictor physics_oracle --n 10
+python -m pibench render TowerFall --seed 0 --output output/tower_fall_seed0.png
 ```
 
 ### Commit and push future changes
@@ -375,7 +450,7 @@ Note: this repo is independent of the `C:\Users\point` mega-repo. Do not acciden
 
 If you are resuming this session with no other context, here is the one-paragraph summary:
 
-> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapter 1 is complete in MuJoCo with a 2R arm and a 6-DOF arm, plus a DOF inspector. We researched the 2025–2026 frontier and wrote a manifesto with 12 revolutionary project ideas targeting real-world blockers like data scarcity, sim-to-real, long-horizon planning, and cheap hardware. The top immediate candidate is the **Physical Intuition Benchmark** — a standardized MuJoCo benchmark for physical common-sense reasoning that can be built during Chapters 2–5. The long-term north star is a sub-$500 robot that learns from video, reasons with physics, executes safely, and shares skills with other robots.
+> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapter 1 is complete in MuJoCo with a 2R arm and a 6-DOF arm, plus a DOF inspector. We researched the 2025–2026 frontier and wrote a manifesto with 12 revolutionary project ideas targeting real-world blockers like data scarcity, sim-to-real, long-horizon planning, and cheap hardware. **PIBench (Physical Intuition Benchmark) Phase 0 is now complete:** a runnable MuJoCo-based benchmark engine with the `TowerFall` statics scene, physics-oracle and random baselines, a CLI, and 7 passing tests. The long-term north star is a sub-$500 robot that learns from video, reasons with physics, executes safely, and shares skills with other robots.
 
 ---
 
