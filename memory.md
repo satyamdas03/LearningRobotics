@@ -45,21 +45,36 @@
 
 ```
 LearningRobotics/
-├── README.md                            # Public-facing project overview + Chapter 1 log
+├── README.md                            # Public-facing project overview + milestone log
 ├── memory.md                            # This file — full internal context for restarts
 ├── .gitignore                           # Ignore .venv/, __pycache__/, *.pyc, .DS_Store
-└── chapter01_foundation/                  # Chapter 1 deliverables
-    ├── requirements.txt                   # mujoco>=3.11.0, numpy
-    ├── .venv/                             # Local Python 3.11 virtual environment (ignored by git)
-    ├── simple_2r_arm.xml                  # 2-revolute planar arm (2 DOF)
-    ├── simple_6dof_arm.xml                # 6-revolute spatial arm (6 DOF)
-    ├── inspect_dof.py                     # DOF counter + FK demo + C-space topology demo
-    └── notes.md                           # Chapter 1 session notes with observed numbers
+├── chapter01_foundation/              # Chapter 1 deliverables
+│   ├── requirements.txt                 # mujoco>=3.11.0, numpy
+│   ├── .venv/                           # Local Python 3.11 virtual environment (ignored by git)
+│   ├── simple_2r_arm.xml                # 2-revolute planar arm (2 DOF)
+│   ├── simple_6dof_arm.xml              # 6-revolute spatial arm (6 DOF)
+│   ├── inspect_dof.py                   # DOF counter + FK demo + C-space topology demo
+│   └── notes.md                         # Chapter 1 session notes with observed numbers
+├── chapter02_rigid_body_motions/        # Chapter 2 deliverables
+│   ├── requirements.txt                 # mujoco + numpy
+│   ├── transforms.py                    # SO(3)/SE(3) helpers
+│   └── test_transforms.py               # 6 pytest tests
+├── chapter03_forward_kinematics/          # Chapter 3 deliverables
+│   ├── requirements.txt                 # mujoco + numpy + pytest
+│   ├── forward_kinematics.py            # PoE + geometric + MuJoCo FK for 6-DOF arm
+│   └── test_forward_kinematics.py       # 4 pytest tests
+└── pibench/                             # Physical Intuition Benchmark
+    ├── pibench/                         # Engine + scenes
+    │   ├── scenes/statics/            # TowerFall, SlopeSlide, SupportBalance, ToppleDirection
+    │   └── scenes/dynamics/             # PendulumSwing, CollisionBounce, ProjectileHit
+    ├── tests/                           # pytest suite
+    ├── docs/SCENE_CATALOG.md            # Scene coverage map
+    └── run_all.py                       # Multi-suite baseline runner
 
 Planned future structure (not yet created):
-├── chapter02_rigid_body_motions/
-├── chapter03_forward_kinematics/
 ├── ...
+├── chapter04_velocity_kinematics/
+├── chapter05_inverse_kinematics/
 ├── REVOLUTIONARY_ROBOTICS_IDEAS.md        # Already exists at root; see Section 7
 ```
 
@@ -352,17 +367,109 @@ Built under `C:\Users\point\projects\LearningRobotics\pibench/`:
 
 ---
 
+### Session 4 — 2026-08-13 (continued)
+
+#### 4.20 What the user asked
+
+User chose **Option A**: keep textbook progress and PIBench advancing in parallel, end-to-end. Specifically, complete:
+1. Chapter 2 rigid-body motions practical.
+2. Chapter 3 forward kinematics practical.
+3. PIBench Phase 1 statics suite expansion.
+4. PIBench Phase 2 dynamics suite expansion.
+5. Documentation updates and GitHub push.
+
+#### 4.21 Chapter 2 — Rigid-Body Motions implementation
+
+Created `C:\Users\point\projects\LearningRobotics\chapter02_rigid_body_motions/`:
+
+1. **`requirements.txt`** — pinned `mujoco>=3.11.0`, `numpy`.
+2. **`transforms.py`** — helper library:
+   * `rotx`, `roty`, `rotz` — basic axis rotations.
+   * `euler_xyz(roll, pitch, yaw)` — intrinsic ZYX Euler angles, returns `Rz @ Ry @ Rx`.
+   * `rotation_matrix_to_euler_xyz(R)` — recover `(roll, pitch, yaw)` from the ZYX convention.
+   * `axis_angle(axis, angle)` — Rodrigues' formula to rotation matrix.
+   * `rotation_matrix_to_axis_angle(R)` — recover axis and angle.
+   * `homogeneous_transform(R, p)` and `inverse_transform(T)` — SE(3) composition/inversion.
+   * `transform_point(T, point)` — apply a 4×4 transform to a 3-D point.
+3. **`test_transforms.py`** — 6 pytest tests:
+   * Rotation matrix orthogonality and right-handedness.
+   * Euler angle round-trip.
+   * Axis-angle round-trip.
+   * SE(3) transform composition/inversion and point transform.
+
+Validation: all tests pass; Euler recovery works for non-degenerate pitch; axis-angle recovers `R` to machine precision.
+
+#### 4.22 Chapter 3 — Forward Kinematics implementation
+
+Created `C:\Users\point\projects\LearningRobotics\chapter03_forward_kinematics/`:
+
+1. **`requirements.txt`** — `mujoco`, `numpy`, `pytest`.
+2. **`forward_kinematics.py`** — `Arm6DOFFK` class for the 6-DOF arm from `simple_6dof_arm.xml`:
+   * `poe_fk(q)` — Product-of-Exponentials FK using screw axes and home configuration `M`.
+   * `geometric_fk(q)` — explicit transform-chain FK aligned with MuJoCo XML frames.
+   * `mujoco_fk(q)` — query MuJoCo's built-in FK for the same configuration.
+   * `end_effector_position(...)` — convenience extractor.
+3. **`test_forward_kinematics.py`** — 4 pytest tests:
+   * PoE vs MuJoCo for default configuration (error ~1e-16).
+   * PoE vs MuJoCo for 50 random configurations.
+   * Geometric FK vs PoE FK.
+   * Waist-only rotation sanity check.
+
+Validation: PoE and geometric FK both match MuJoCo to machine precision.
+
+#### 4.23 PIBench Phase 1 — Statics suite expansion
+
+Added three new statics scenes in `pibench/pibench/scenes/statics/`:
+
+1. **`slope_slide.py`** — predicts whether a block slides down an incline. Ground truth is analytic: slide if `tan(θ) > μ_s`.
+2. **`support_balance.py`** — predicts balance point of an asymmetric loaded beam. Simulation outcome is cached so the physics oracle remains deterministic.
+3. **`topple_direction.py`** — predicts which way an off-center stack topples when its support shifts. Uses analytic direction plus cached MuJoCo verification.
+
+Also updated `tower_fall.py` to cache its simulated `_outcome` so `ground_truth()` is deterministic across calls.
+
+#### 4.24 PIBench Phase 2 — Dynamics suite expansion
+
+Created `pibench/pibench/scenes/dynamics/` with three new scenes:
+
+1. **`pendulum_swing.py`** — single-body pendulum with hinge at top and bob at tip. Answer based on small-angle period `T ≈ 2π√(L/g)`, scored with tolerance.
+2. **`collision_bounce.py`** — 1D elastic collision between two masses. Answer uses analytic conservation of momentum + kinetic energy.
+3. **`projectile_hit.py`** — projectile range `R = v² sin(2θ)/g`, validated against MuJoCo rollout, scored with tolerance.
+
+Package exports updated: `pibench/scenes/dynamics/__init__.py`, `pibench/scenes/statics/__init__.py`, `pibench/scenes/__init__.py`.
+
+#### 4.25 Bug fixes during Session 4
+
+| Bug | File | Fix |
+|---|---|---|
+| Wrong Euler-angle recovery | `transforms.py` | Switched to ZYX decomposition: `pitch = asin(-R[2,0])`, `yaw = atan2(R[1,0], R[0,0])`, `roll = atan2(R[2,1], R[2,2])`. |
+| `ground_truth()` non-deterministic due to resim | `tower_fall.py`, `support_balance.py`, `topple_direction.py` | Cached simulation outcomes in instance attributes so every call returns the same answer. |
+| "free joint can only be used on top level" | `pendulum_swing.py` | Restructured as single body with hinge at top, inertial + bob geom at tip; removed nested freejoint. |
+| Malformed `<body>` tag | `pendulum_swing.py` | Corrected f-string to close `<body ... >`. |
+| SuiteMetrics not JSON serializable | `run_all.py` | Converted Pydantic values with `.model_dump()` before writing JSON. |
+
+#### 4.26 Documentation updates
+
+* `README.md`: updated curriculum table to show Chapters 2 and 3 complete, PIBench Phases 1 and 2 complete; added Chapter 2 and 3 sections; updated PIBench section with 7 scenes; updated quick-start; added new changelog entry.
+* `memory.md`: this section.
+* `pibench/docs/SCENE_CATALOG.md`: documented all statics and dynamics scenes plus concept-coverage map.
+* `pibench/README.md`: updated scene counts, suite examples, test counts, roadmap.
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
 |---|---|
 | Chapter 1 practical | ✅ Complete and pushed |
+| Chapter 2 practical | ✅ Complete — `transforms.py` + 6 tests passing |
+| Chapter 3 practical | ✅ Complete — `forward_kinematics.py` + 4 tests passing |
 | GitHub repo | ✅ Live at https://github.com/satyamdas03/LearningRobotics |
-| README | ✅ Complete (includes PIBench Phase 0) |
+| README | ✅ Complete (includes Chapters 1–3 + PIBench Phases 0–2) |
 | Revolutionary manifesto | ✅ Complete and pushed (Concept L now has Phase 0–7 plan) |
-| PIBench Phase 0 | ✅ Complete — engine + `TowerFall` + tests passing |
-| Chapter 2 reading | 🚧 User currently reading Chapter 2 (Rigid-Body Motions) |
-| Next implementation work | ⏳ PIBench Phase 1 (statics suite expansion) or continue Chapter 2 exercises |
+| PIBench Phase 0 | ✅ Complete — engine + `TowerFall` |
+| PIBench Phase 1 | ✅ Complete — statics suite: `SlopeSlide`, `SupportBalance`, `ToppleDirection` |
+| PIBench Phase 2 | ✅ Complete — dynamics suite: `PendulumSwing`, `CollisionBounce`, `ProjectileHit` |
+| Next implementation work | ⏳ Chapter 4 Velocity Kinematics + PIBench Phase 3 (contact/articulated bodies) |
 | Hardware purchase | ⏳ None yet; consider AM-ARM / Forte / U-ARM in Phase 3 |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -370,7 +477,7 @@ Built under `C:\Users\point\projects\LearningRobotics\pibench/`:
 
 ## 6. Open Decisions / Questions
 
-1. Should we expand PIBench Phase 1 next (statics scenes: slope_slide, support_balance, topple_direction) while reading Chapter 2, or focus on Chapter 2 textbook exercises first?
+1. Which chapter next after Chapter 4? The textbook is *Modern Robotics*; continue with velocity kinematics / Jacobians, then inverse kinematics.
 2. Which cheap robot arm should be the long-term hardware target? AM-ARM ($380, 6+1 DoF, 1 kg payload) is the leading candidate for capability; Forte ($215) is cheapest for a real manipulator; U-ARM ($50) is best for teleop-only data collection.
 3. Should the README or manifesto be converted into a polished website / artifact for sharing?
 4. Should we install Isaac Sim in headless pip mode now to verify it runs on the RTX 5060, or wait until needed?
@@ -396,6 +503,10 @@ Built under `C:\Users\point\projects\LearningRobotics\pibench/`:
 | `chapter01_foundation/inspect_dof.py` | Chapter 1 runnable demo | Run whenever showing Chapter 1 |
 | `chapter01_foundation/simple_2r_arm.xml` | 2-DOF robot model | Reuse/extend for kinematics chapters |
 | `chapter01_foundation/simple_6dof_arm.xml` | 6-DOF robot model | Reuse/extend for kinematics/control chapters |
+| `chapter02_rigid_body_motions/transforms.py` | SO(3)/SE(3) helpers | Reuse for all future transforms/poses |
+| `chapter02_rigid_body_motions/test_transforms.py` | Chapter 2 tests | Run with `pytest` after any transform change |
+| `chapter03_forward_kinematics/forward_kinematics.py` | 6-DOF FK implementations | Reference for PoE vs geometric FK |
+| `chapter03_forward_kinematics/test_forward_kinematics.py` | Chapter 3 tests | Run with `pytest` after any FK change |
 | `.gitignore` | Git exclusions | Update if new tooling adds artifacts |
 
 ---
@@ -410,6 +521,22 @@ cd C:\Users\point\projects\LearningRobotics\chapter01_foundation
 python inspect_dof.py
 ```
 
+### Run Chapter 2 tests
+
+```powershell
+cd C:\Users\point\projects\LearningRobotics\chapter02_rigid_body_motions
+. .venv\Scripts\Activate.ps1
+python -m pytest test_transforms.py -v
+```
+
+### Run Chapter 3 tests
+
+```powershell
+cd C:\Users\point\projects\LearningRobotics\chapter03_forward_kinematics
+. .venv\Scripts\Activate.ps1
+python -m pytest test_forward_kinematics.py -v
+```
+
 ### Run PIBench
 
 ```powershell
@@ -419,7 +546,9 @@ $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python -m pytest tests -q
 python -m pibench list --suites
 python -m pibench run --suite statics --predictor physics_oracle --n 10
+python -m pibench run --suite dynamics --predictor physics_oracle --n 10
 python -m pibench render TowerFall --seed 0 --output output/tower_fall_seed0.png
+python run_all.py
 ```
 
 ### Commit and push future changes
@@ -450,7 +579,7 @@ Note: this repo is independent of the `C:\Users\point` mega-repo. Do not acciden
 
 If you are resuming this session with no other context, here is the one-paragraph summary:
 
-> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapter 1 is complete in MuJoCo with a 2R arm and a 6-DOF arm, plus a DOF inspector. We researched the 2025–2026 frontier and wrote a manifesto with 12 revolutionary project ideas targeting real-world blockers like data scarcity, sim-to-real, long-horizon planning, and cheap hardware. **PIBench (Physical Intuition Benchmark) Phase 0 is now complete:** a runnable MuJoCo-based benchmark engine with the `TowerFall` statics scene, physics-oracle and random baselines, a CLI, and 7 passing tests. The long-term north star is a sub-$500 robot that learns from video, reasons with physics, executes safely, and shares skills with other robots.
+> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–3 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward kinematics). **PIBench (Physical Intuition Benchmark) Phases 0–2 are complete:** a runnable MuJoCo-based benchmark engine with statics (`TowerFall`, `SlopeSlide`, `SupportBalance`, `ToppleDirection`) and dynamics (`PendulumSwing`, `CollisionBounce`, `ProjectileHit`) suites, physics-oracle/random/constant baselines, a CLI, and 14+ passing tests. We wrote a manifesto with 12 revolutionary project ideas targeting real-world blockers like data scarcity, sim-to-real, long-horizon planning, and cheap hardware. The long-term north star is a sub-$500 robot that learns from video, reasons with physics, executes safely, and shares skills with other robots.
 
 ---
 

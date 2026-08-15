@@ -1,0 +1,5 @@
+# Chapter 3 — Forward Kinematics
+# Python 3.11 recommended (Isaac Sim / MuJoCo ecosystem is not yet on 3.14)
+mujoco>=3.11.0
+numpy
+pytest

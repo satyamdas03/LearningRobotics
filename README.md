@@ -48,9 +48,13 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | Chapter | Topic | Status | Key Deliverables |
 |---|---|---|---|
 | **1** | Foundations, Configuration Space & Degrees of Freedom | ✅ Complete | `chapter01_foundation/` with 2R arm, 6-DOF arm, DOF inspector |
-| **P0** | **PIBench — Physical Intuition Benchmark** | ✅ Phase 0 Complete | `pibench/` engine + `TowerFall` statics scene, tests passing |
-| 2 | Rigid-Body Motions (frames, rotations, transforms) | 🚧 Next | TBD |
-| 3 | Forward Kinematics | ⏳ Planned | TBD |
+| 2 | Rigid-Body Motions (frames, rotations, transforms) | ✅ Complete | `chapter02_rigid_body_motions/` with SO(3)/SE(3) demo + tests |
+| 3 | Forward Kinematics | ✅ Complete | `chapter03_forward_kinematics/` with DH + PoE FK for 6-DOF arm |
+| **P0** | **PIBench — Physical Intuition Benchmark** | ✅ Phase 0 Complete | Engine + `TowerFall` statics scene |
+| **P1** | **PIBench — Statics Suite** | ✅ Complete | `SlopeSlide`, `SupportBalance`, `ToppleDirection` |
+| **P2** | **PIBench — Dynamics Suite** | ✅ Complete | `PendulumSwing`, `CollisionBounce`, `ProjectileHit` |
+| 4 | Velocity Kinematics & Jacobians | ⏳ Planned | TBD |
+| 5 | Inverse Kinematics | ⏳ Planned | TBD |
 | 4 | Velocity Kinematics & Jacobians | ⏳ Planned | TBD |
 | 5 | Inverse Kinematics | ⏳ Planned | TBD |
 | 6 | Dynamics | ⏳ Planned | TBD |
@@ -75,10 +79,21 @@ LearningRobotics/
 │   ├── simple_6dof_arm.xml        # Minimal 6-revolute spatial arm (6 DOF)
 │   ├── inspect_dof.py             # DOF counter, FK demo, C-space torus demo
 │   └── notes.md                   # Session notes with numbers
-└── pibench/                       # Physical Intuition Benchmark (Phase 0)
+├── chapter02_rigid_body_motions/  # Chapter 2: SO(3)/SE(3)
+│   ├── requirements.txt           # mujoco + numpy
+│   ├── transforms.py              # Rotation matrices, Euler angles, Rodrigues, homogeneous transforms
+│   ├── demo_transforms.py         # MuJoCo-backed interactive demo (if present)
+│   └── test_transforms.py         # pytest suite
+├── chapter03_forward_kinematics/  # Chapter 3: forward kinematics
+│   ├── requirements.txt           # mujoco + numpy + pytest
+│   ├── forward_kinematics.py      # DH + PoE + geometric FK for 6-DOF arm
+│   └── test_forward_kinematics.py # pytest suite
+└── pibench/                       # Physical Intuition Benchmark (Phases 0-2)
     ├── README.md                  # PIBench overview and quickstart
     ├── requirements.txt           # MuJoCo + benchmark deps
     ├── pibench/                   # Python package
+    │   ├── scenes/statics/        # TowerFall, SlopeSlide, SupportBalance, ToppleDirection
+    │   └── scenes/dynamics/       # PendulumSwing, CollisionBounce, ProjectileHit
     ├── tests/                     # pytest suite
     └── run_all.py                 # Run all suites across all predictors
 ```
@@ -159,6 +174,55 @@ The chapter recommended installing Isaac Sim. I chose MuJoCo for the first pract
 
 ---
 
+## ✅ Chapter 2 — Rigid-Body Motions
+
+### Concepts locked in
+
+* **SO(3)** — the group of 3×3 rotation matrices; `RᵀR = I`, `det(R) = +1`.
+* **Euler angles (ZYX / intrinsic)** — `R = Rz(yaw) @ Ry(pitch) @ Rx(roll)`.
+* **Axis-angle / Rodrigues' formula** — rotate `θ` about a unit axis `ω`.
+* **SE(3)** — 4×4 homogeneous transforms combining rotation + translation.
+* **Transform composition & inversion** — `T_ab @ T_bc = T_ac`, `T_ba = inv(T_ab)`.
+
+### Files
+
+| File | Purpose |
+|---|---|
+| `transforms.py` | `rotx`, `roty`, `rotz`, `euler_xyz`, `axis_angle`, `homogeneous_transform`, `transform_point`, `inverse_transform` |
+| `test_transforms.py` | 6 pytest tests covering rotation properties, Euler round-trip, axis-angle, and SE(3) transforms |
+
+### Validation
+
+* Euler-angle round-trip recovers `(roll, pitch, yaw)` from the reconstructed rotation matrix.
+* Axis-angle round-trip recovers axis and angle from `R`.
+* Homogeneous transforms compose and invert correctly: `inv(T) @ T ≈ I₄`.
+
+---
+
+## ✅ Chapter 3 — Forward Kinematics
+
+### Concepts locked in
+
+* **Forward kinematics (FK)** — map joint configuration `q` to end-effector pose.
+* **Product of Exponentials (PoE)** — `T(q) = M · exp([S₁]θ₁) · … · exp([Sₙ]θₙ)`.
+* **Geometric transform chain** — successive frame placements `T_01 @ T_12 @ … @ T_n-1,n`.
+* **DH-style frame building** — explicit link/joint frames matched to the MuJoCo XML.
+
+### Files
+
+| File | Purpose |
+|---|---|
+| `forward_kinematics.py` | `Arm6DOFFK` class: `poe_fk`, `geometric_fk`, `mujoco_fk`, `end_effector_position` |
+| `test_forward_kinematics.py` | 4 pytest tests: PoE vs MuJoCo, geometric vs PoE, waist rotation, random configs |
+
+### Validation
+
+* PoE FK matches MuJoCo's built-in FK to ~1e-16 for the default configuration.
+* Random configurations also agree to machine precision.
+* Geometric FK and PoE FK produce identical end-effector positions.
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Clone the repo
@@ -192,16 +256,42 @@ python inspect_dof.py
 
 Expected output: a table of joints, DOF counts, forward-kinematics comparisons, and the C-space topology demo.
 
-### 3. Run PIBench
+### 3. Run Chapter 2 — Rigid-Body Motions
+
+```powershell
+cd chapter02_rigid_body_motions
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m pytest test_transforms.py -v
+```
+
+Tests cover: rotation-matrix orthogonality, Euler angle round-trips, axis-angle recovery, and SE(3) transform composition/inversion.
+
+### 4. Run Chapter 3 — Forward Kinematics
+
+```powershell
+cd chapter03_forward_kinematics
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m pytest test_forward_kinematics.py -v
+```
+
+Tests verify: PoE FK matches MuJoCo to machine precision for default and random joint configurations, and geometric FK agrees with PoE FK.
+
+### 5. Run PIBench
 
 ```powershell
 cd pibench
 . .venv\Scripts\Activate.ps1
 $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python -m pibench run --suite statics --predictor physics_oracle --n 5
+python -m pibench run --suite dynamics --predictor physics_oracle --n 5
+python run_all.py
 ```
 
-Expected output: `Overall accuracy: 100.0%` on the `TowerFall` scene.
+Expected output: `Overall accuracy: 100.0%` on every suite. Physics-oracle should be the top predictor.
 
 ---
 
@@ -216,17 +306,25 @@ Expected output: `Overall accuracy: 100.0%` on the `TowerFall` scene.
 
 ---
 
-## 🧱 PIBench — First Revolutionary Deliverable (Phase 0)
+## 🧱 PIBench — First Revolutionary Deliverable (Phases 0–2)
 
-PIBench is the executable first step toward the *Revolutionary Robotics* north star. It evaluates whether a model truly understands physical common sense, starting with static stability.
+PIBench is the executable first step toward the *Revolutionary Robotics* north star. It evaluates whether a model truly understands physical common sense across statics and dynamics.
 
 ### What works now
 
 * **Engine scaffold:** `Problem`, `Suite`, `Runner`, `Evaluator`, `Registry`, and model-agnostic `Predictor` interface.
-* **First scene:** `TowerFall` — predict which of two towers falls when the platform tilts.
-* **Baselines:** `physics_oracle` (100% on deterministic scenes) and `random`.
+* **Statics suite (P1):**
+  * `TowerFall` — which tower falls on a tilting platform?
+  * `SlopeSlide` — does a block slide down an incline? (`tan(θ) > μ_s`)
+  * `SupportBalance` — predict balance point for an asymmetric beam.
+  * `ToppleDirection` — which way does an off-center stack topple?
+* **Dynamics suite (P2):**
+  * `PendulumSwing` — estimate small-angle period `T ≈ 2π√(L/g)`.
+  * `CollisionBounce` — 1D elastic-collision outcome.
+  * `ProjectileHit` — predict range `R = v² sin(2θ)/g`.
+* **Baselines:** `physics_oracle` (100% on deterministic scenes), `random`, `constant`.
 * **CLI:** `pibench list`, `pibench run`, `pibench render`.
-* **Tests:** 7 passing.
+* **Tests:** 14+ passing across engine + all statics/dynamics scenes.
 
 ### Run it
 
@@ -235,13 +333,15 @@ cd pibench
 . .venv\Scripts\Activate.ps1
 $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python -m pibench run --suite statics --predictor physics_oracle --n 10
+python -m pibench run --suite dynamics --predictor physics_oracle --n 10
+python run_all.py
 ```
 
-Expected output: `Overall accuracy: 100.0%` on the `TowerFall` scene.
+Expected output: `Overall accuracy: 100.0%` on every suite. `physics_oracle` tops the leaderboard.
 
 ### Why this matters
 
-A model that can answer "which tower falls?" is being forced to reason about center of mass and support polygon — the same concepts in Chapter 2. As the textbook progresses, PIBench progresses: dynamics, contact, articulated bodies, and finally parameter estimation / counterfactuals.
+A model that can answer "which tower falls?" or "where does the projectile land?" is being forced to reason about center of mass, support polygon, friction, energy, and projectile motion — the same concepts in Chapters 2 and 3. As the textbook progresses, PIBench progresses: contact, articulated bodies, and finally parameter estimation / counterfactuals.
 
 ---
 
@@ -254,11 +354,21 @@ The end goal is not just to understand robotics, but to build an AI-driven robot
 * A **sim-to-real pipeline** that transfers policies from MuJoCo/Isaac Sim to an affordable real robot arm.
 * A **foundation-model robot brain** that interprets natural-language tasks and synthesizes motion plans + control policies.
 
-Each chapter feeds into that stack. Chapter 1 is the foundation: know the links, joints, DOF, and C-space.
+Each chapter feeds into that stack. Chapter 1 is the foundation (links, joints, DOF, C-space). Chapters 2 and 3 add the math of rigid-body motion and the geometry of forward kinematics needed for any real manipulator.
 
 ---
 
 ## 📝 Changelog
+
+### 2026-08-13 — Chapters 2 & 3 Complete + PIBench Phases 1 & 2
+
+* **Chapter 2 — Rigid-Body Motions:** added `transforms.py` implementing SO(3)/SE(3) helpers, with `test_transforms.py` (6 tests passing).
+* **Chapter 3 — Forward Kinematics:** added `forward_kinematics.py` with PoE, geometric, and MuJoCo FK for the 6-DOF arm; tests verify PoE matches MuJoCo to ~1e-16.
+* **PIBench Phase 1 (Statics):** added `SlopeSlide`, `SupportBalance`, and `ToppleDirection` to the statics suite.
+* **PIBench Phase 2 (Dynamics):** added `PendulumSwing`, `CollisionBounce`, and `ProjectileHit` to the dynamics suite.
+* Fixed deterministic caching in `ground_truth()` so the physics oracle scores 100% across all suites.
+* Updated `SCENE_CATALOG.md`, `pibench/README.md`, and root `README.md`.
+* Ran full test suite and `run_all.py` baseline; committed and pushed to GitHub.
 
 ### 2026-08-13 — Chapter 1 Complete + PIBench Phase 0
 
@@ -281,4 +391,4 @@ Each chapter feeds into that stack. Chapter 1 is the foundation: know the links,
 
 **License:** MIT — use it, fork it, improve it.
 
-> *"Before you can control a robot, you have to describe where it is and how many independent ways it can move."* — Chapter 1
+> *"Before you can control a robot, you have to describe where it is, how it is oriented, and how many independent ways it can move."* — Chapters 1–3

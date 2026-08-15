@@ -24,7 +24,17 @@ def main() -> int:
         runner = Runner(predictor)
         result = runner.run(suites)
         metrics = Evaluator.metrics(result)
-        all_metrics.append(metrics)
+        # Convert Pydantic sub-models to plain dicts for JSON serialization.
+        metrics_dict = {
+            k: (v.model_dump() if hasattr(v, "model_dump") else v)
+            for k, v in metrics.items()
+        }
+        # Also convert per-suite metrics list.
+        metrics_dict["suite_metrics"] = [
+            sm.model_dump() if hasattr(sm, "model_dump") else sm
+            for sm in metrics_dict["suite_metrics"]
+        ]
+        all_metrics.append(metrics_dict)
 
         result_path = output_dir / f"results_{predictor.name}.json"
         with open(result_path, "w", encoding="utf-8") as f:

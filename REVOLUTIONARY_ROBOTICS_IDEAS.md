@@ -395,7 +395,7 @@ It asks for help or slows down when uncertainty is high.
 
 ---
 
-### Concept L: Robotic "Physical Intuition" Benchmark (PIBench) — Phase 0 Active
+### Concept L: Robotic "Physical Intuition" Benchmark (PIBench) — Phases 0–2 Complete
 
 **The problem:** There is no standardized, model-agnostic, causal way to measure whether a robot (or model) understands physical common sense. Existing benchmarks test passive video QA, 2D puzzles, or task-specific robot planning — not the underlying physical concepts.
 
@@ -410,12 +410,20 @@ It asks for help or slows down when uncertainty is high.
 * CLI: `pibench list`, `pibench run`, `pibench render`.
 * Tests: 7 passing.
 
+**Phase 1 — Statics suite (complete):**
+* `SlopeSlide` — does a block slide down an incline? (`tan(θ) > μ_s`).
+* `SupportBalance` — balance point of an asymmetric loaded beam.
+* `ToppleDirection` — which way does an off-center stack topple?
+
+**Phase 2 — Dynamics suite (complete):**
+* `PendulumSwing` — estimate small-angle period `T ≈ 2π√(L/g)`.
+* `CollisionBounce` — 1D elastic collision outcome.
+* `ProjectileHit` — predict range `R = v² sin(2θ)/g`.
+
 **Planned phases:**
 
 | Phase | Suite | What it tests |
 |---|---|---|
-| **1** | Statics & stability | CoM, support polygon, stability, friction angle |
-| **2** | Dynamics | Momentum, energy, pendulum/projectile motion, rolling |
 | **3** | Contact & friction | Tip vs slide, stack stability, slip, grip |
 | **4** | Articulated & deformable | Joints, constraints, ropes, cloth, gears |
 | **5** | Parameter estimation & counterfactuals | Mass/friction ordering, "what if mass doubled?" |
@@ -435,6 +443,8 @@ cd C:\Users\point\projects\LearningRobotics\pibench
 . .venv\Scripts\Activate.ps1
 $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python -m pibench run --suite statics --predictor physics_oracle --n 10
+python -m pibench run --suite dynamics --predictor physics_oracle --n 10
+python run_all.py
 ```
 
 ---
@@ -459,7 +469,7 @@ Given our current setup — **MuJoCo, RTX 5060, Chapter 2 next** — here is a p
 ### Phase 0: Foundations (now — Chapters 2–5)
 * Master rigid-body transforms, forward/inverse kinematics, Jacobians, dynamics.
 * Build reusable MuJoCo robot models.
-* **PIBench (Concept L) is now active.** Engine scaffold + `TowerFall` scene complete; expand statics suite while reading Chapter 2.
+* **PIBench (Concept L) Phases 0–2 are complete.** Engine scaffold + statics + dynamics suites done; continue with contact/articulated scenes while reading Chapter 4.
 
 ### Phase 1: Skill Representation (Chapters 6–7)
 * Build a library of contact primitives in MuJoCo (Concept H seed).

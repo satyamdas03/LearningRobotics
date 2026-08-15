@@ -44,7 +44,8 @@ Expected output:
 
 ```text
 Registered suites:
-  statics: ['TowerFall']
+  dynamics: ['CollisionBounce', 'PendulumSwing', 'ProjectileHit']
+  statics: ['SlopeSlide', 'SupportBalance', 'ToppleDirection', 'TowerFall']
 
 Predictor: physics_oracle
 Overall accuracy: 100.0% (5/5)
@@ -77,8 +78,14 @@ pibench/
 │   ├── core/                   # Engine: Problem, Suite, Runner, Evaluator, Registry
 │   ├── scenes/                 # MuJoCo scene implementations
 │   │   ├── statics/
+│   │   │   ├── slope_slide.py  # Phase 1: friction angle
+│   │   │   ├── support_balance.py  # Phase 1: torque balance
+│   │   │   ├── topple_direction.py # Phase 1: toppling direction
 │   │   │   └── tower_fall.py   # Phase 0 scene
-│   │   ├── dynamics/           # (Phase 2)
+│   │   ├── dynamics/
+│   │   │   ├── collision_bounce.py # Phase 2: elastic collision
+│   │   │   ├── pendulum_swing.py   # Phase 2: pendulum period
+│   │   │   └── projectile_hit.py   # Phase 2: projectile range
 │   │   ├── contact/            # (Phase 3)
 │   │   ├── articulated/        # (Phase 4)
 │   │   └── params/             # (Phase 5)
@@ -89,7 +96,7 @@ pibench/
 │   └── utils/
 │       └── mjcf.py             # Programmatic MJCF helpers
 ├── tests/
-│   └── test_core.py            # Engine + tower_fall tests
+│   └── test_core.py            # Engine + all statics/dynamics scenes (20+ tests)
 ├── run_all.py                  # Run all suites across all baselines
 ├── requirements.txt
 └── README.md                   # This file
@@ -100,22 +107,30 @@ pibench/
 ## 🧪 Running baselines
 
 ```powershell
-# Physics oracle (upper bound)
+# Physics oracle (upper bound) on every suite
 python -m pibench run --suite statics --predictor physics_oracle --n 20
+python -m pibench run --suite dynamics --predictor physics_oracle --n 20
 
 # Random baseline
 python -m pibench run --suite statics --predictor random --n 20 --seed 0
+python -m pibench run --suite dynamics --predictor random --n 20 --seed 0
 
 # Save results to JSON
 python -m pibench run --suite statics --predictor physics_oracle --n 20 --output output/results_oracle.json
 
 # Render a scene thumbnail
 python -m pibench render TowerFall --seed 0 --output output/tower_fall_seed0.png
+python -m pibench render ProjectileHit --seed 0 --output output/projectile_hit_seed0.png
+
+# Run all baselines across all suites
+python run_all.py
 ```
 
 ---
 
-## 🧩 The first scene: `TowerFall`
+## 🧩 Scene examples
+
+### `TowerFall` (statics)
 
 **Suite:** `statics`  
 **Concepts:** center of mass, support polygon, stability  
@@ -127,6 +142,20 @@ Two towers are generated with randomized dimensions:
 * **Tower B:** wide and short (stable)
 
 The ground truth is computed by a MuJoCo rollout: after the platform tilts, whichever tower's blocks fall below a height threshold is the loser. The predictor must answer `"A"` or `"B"`.
+
+### `PendulumSwing` (dynamics)
+
+**Concepts:** pendulum period, length scaling, mass independence  
+**Question:** *Two pendulums are released from the same angle. Which has the longer period?*
+
+The analytic ground truth is `T ≈ 2π√(L/g)`, so the longer pendulum wins regardless of mass.
+
+### `ProjectileHit` (dynamics)
+
+**Concepts:** projectile motion, range equation  
+**Question:** *A ball is launched from ground level at a given speed and angle. How far does it land?*
+
+The analytic range `R = v² sin(2θ) / g` is the answer, validated against a MuJoCo rollout.
 
 ---
 
@@ -174,7 +203,7 @@ $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python -m pytest tests -q
 ```
 
-Current status: **7 passed**.
+Current status: **20 passed**.
 
 ---
 
@@ -183,8 +212,8 @@ Current status: **7 passed**.
 | Phase | Suite | Textbook alignment | Target |
 |---|---|---|---|
 | **0** | Engine + `tower_fall` | Foundations | ✅ runnable package |
-| **1** | Statics & stability | Chapter 2 (rigid-body motions, CoM) | ≥4 scenes |
-| **2** | Dynamics | Newtonian mechanics | ≥5 scenes |
+| **1** | Statics & stability | Chapter 2 (rigid-body motions, CoM) | ✅ 4 scenes |
+| **2** | Dynamics | Newtonian mechanics | ✅ 3 scenes |
 | **3** | Contact & friction | Chapter 4 (velocity kinematics / contacts) | ≥5 scenes |
 | **4** | Articulated & deformable | Chapter 5 (IK / constraints) | ≥5 scenes |
 | **5** | Parameter estimation & counterfactuals | Consolidation + system ID | ≥5 scenes |

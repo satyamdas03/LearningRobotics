@@ -1,5 +1,5 @@
 """PIBench scene collection."""
-# Import statics so the registry is populated.
-from pibench.scenes import statics
+# Import suites so the registry is populated.
+from pibench.scenes import dynamics, statics
 
-__all__ = ["statics"]
+__all__ = ["statics", "dynamics"]

@@ -40,6 +40,42 @@ def mjcf_box(name: str, pos: tuple[float, float, float], size: tuple[float, floa
 """
 
 
+def mjcf_incline(name: str, pos: tuple[float, float, float], size: tuple[float, float, float],
+                 angle: float, rgba: tuple[float, float, float, float] = (0.5, 0.5, 0.5, 1.0),
+                 friction: tuple[float, float, float] | None = None) -> str:
+    """Return a static inclined plane (box rotated about Y by angle).
+
+    The box is sized as half-size (length, width, thickness). A positive angle
+    tilts the high end toward +X.
+    """
+    friction_attr = ""
+    if friction is not None:
+        friction_attr = f' friction="{friction[0]} {friction[1]} {friction[2]}"'
+    return f"""    <body name="{name}" pos="{pos[0]} {pos[1]} {pos[2]}" euler="0 {angle} 0">
+      <geom name="{name}_geom" type="box" size="{size[0]} {size[1]} {size[2]}" rgba="{rgba[0]} {rgba[1]} {rgba[2]} {rgba[3]}"{friction_attr} />
+    </body>
+"""
+
+
+def mjcf_sphere(name: str, pos: tuple[float, float, float], radius: float,
+                rgba: tuple[float, float, float, float] = (0.8, 0.2, 0.2, 1.0),
+                mass: float | None = None, friction: tuple[float, float, float] | None = None) -> str:
+    """Return a free-floating sphere body."""
+    friction_attr = ""
+    if friction is not None:
+        friction_attr = f' friction="{friction[0]} {friction[1]} {friction[2]}"'
+    inertial = ""
+    if mass is not None:
+        # Solid sphere inertia: (2/5) * m * r^2.
+        i = 0.4 * mass * radius * radius
+        inertial = f'\n      <inertial pos="0 0 0" mass="{mass}" diaginertia="{i} {i} {i}" />'
+    return f"""    <body name="{name}" pos="{pos[0]} {pos[1]} {pos[2]}">{inertial}
+      <freejoint />
+      <geom name="{name}_geom" type="sphere" size="{radius}" rgba="{rgba[0]} {rgba[1]} {rgba[2]} {rgba[3]}"{friction_attr} />
+    </body>
+"""
+
+
 def mjcf_footer() -> str:
     return "\n  </worldbody>\n</mujoco>\n"
 

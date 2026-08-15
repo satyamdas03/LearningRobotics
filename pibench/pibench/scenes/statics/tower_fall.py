@@ -145,6 +145,9 @@ class TowerFall(Problem):
 
     def _run_outcome(self) -> str:
         """Run the tilt and classify which tower falls."""
+        if getattr(self, "_outcome", None) is not None:
+            return self._outcome
+
         # Hold initial pose steady for a few steps.
         for _ in range(50):
             self.data.ctrl[0] = 0.0
@@ -178,12 +181,16 @@ class TowerFall(Problem):
         fell_b = disp_b > threshold
 
         if fell_a and fell_b:
-            return "both"
-        if fell_a:
-            return "A"
-        if fell_b:
-            return "B"
-        return "neither"
+            outcome = "both"
+        elif fell_a:
+            outcome = "A"
+        elif fell_b:
+            outcome = "B"
+        else:
+            outcome = "neither"
+
+        self._outcome = outcome
+        return outcome
 
     def question(self) -> Question:
         return Question(
