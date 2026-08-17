@@ -119,7 +119,80 @@ The platform tilts to a random angle. MuJoCo rolls the simulation forward until 
 
 ## Contact Suite
 
-*Coming in Phase 3.*
+### `PushTipVsSlide`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/contact/push_tip_vs_slide.py` |
+| **Question** | A block is pushed horizontally at a given height. Does it tip over or slide? |
+| **Answer type** | Choice: `"tip"`, `"slide"` |
+| **Concepts** | Moment balance, line of action, friction |
+| **Textbook link** | Chapter 4 — velocity kinematics / contact forces |
+| **Ground truth** | MuJoCo rollout: tipped if Z-axis tilt exceeds a threshold |
+
+**Latent parameters:** `block_mass`, `half_width`, `half_height`, `push_height`, `max_tilt_deg`.
+
+---
+
+### `StackStability`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/contact/stack_stability.py` |
+| **Question** | A stack of blocks is tapped from the side by a moving ball. Does it remain standing? |
+| **Answer type** | Boolean: `"yes"` / `"no"` |
+| **Concepts** | Impulse, support polygon, stacking stability |
+| **Textbook link** | Chapter 4 — contact / impulse |
+| **Ground truth** | MuJoCo rollout: collapsed if any block displacement exceeds a threshold |
+
+**Latent parameters:** `n_blocks`, `block_mass`, `ball_mass`, `ball_speed`, `impact_height`, `max_displacement`.
+
+---
+
+### `WedgeInsert`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/contact/wedge_insert.py` |
+| **Question** | A triangular wedge is pushed into a gap. Does it fit through or jam? |
+| **Answer type** | Choice: `"fits"`, `"jams"` |
+| **Concepts** | Contact geometry, clearance, jamming |
+| **Textbook link** | Chapter 4 — contact constraints |
+| **Ground truth** | MuJoCo rollout: fits if wedge tip advances past the gap |
+
+**Latent parameters:** `wedge_base_width`, `wedge_length`, `gap_width`, `wedge_delta_x`.
+
+---
+
+### `FrictionPile`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/contact/friction_pile.py` |
+| **Question** | Three objects with different mass and friction are pushed. Which is hardest to start moving? |
+| **Answer type** | Choice: `"A"`, `"B"`, `"C"` |
+| **Concepts** | Static friction, normal force, Coulomb friction |
+| **Textbook link** | Chapter 4 — contact / friction |
+| **Ground truth** | Object maximizing `mu_s * mass` |
+
+**Latent parameters:** `masses`, `mu_s`, `thresholds`.
+
+---
+
+### `SlipGrip`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/contact/slip_grip.py` |
+| **Question** | A gripper squeezes a block and lifts. Does the block lift or slip? |
+| **Answer type** | Choice: `"lift"`, `"slip"` |
+| **Concepts** | Coulomb friction, grip force, weight |
+| **Textbook link** | Chapter 4 — contact / friction |
+| **Ground truth** | Analytic: lift if `2 * mu * F_grip >= m * g` |
+
+**Latent parameters:** `block_mass`, `grip_force`, `mu_s`, `weight`, `total_friction_capacity`.
+
+---
 
 ## Articulated / Deformable Suite
 
@@ -133,18 +206,20 @@ The platform tilts to a random angle. MuJoCo rolls the simulation forward until 
 
 ## Concept coverage map
 
-| Concept | TowerFall | SlopeSlide | SupportBalance | ToppleDirection | CollisionBounce | PendulumSwing | ProjectileHit |
-|---|---|---|---|---|---|---|---|
-| Center of mass | ✅ | ✅ | ✅ | ✅ | | | |
-| Support polygon | ✅ | | ✅ | ✅ | | | |
-| Friction / angle of repose | | ✅ | | | | | |
-| Torque balance | | | ✅ | | | | |
-| Toppling direction | | | | ✅ | | | |
-| Conservation of momentum | | | | | ✅ | | |
-| Conservation of energy | | | | | ✅ | ✅ | |
-| Period / length scaling | | | | | | ✅ | |
-| Projectile range | | | | | | | ✅ |
+| Concept | TowerFall | SlopeSlide | SupportBalance | ToppleDirection | CollisionBounce | PendulumSwing | ProjectileHit | PushTipVsSlide | StackStability | WedgeInsert | FrictionPile | SlipGrip |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Center of mass | ✅ | ✅ | ✅ | ✅ | | | | ✅ | ✅ | | | |
+| Support polygon | ✅ | | ✅ | ✅ | | | | | ✅ | | | |
+| Friction / angle of repose | | ✅ | | | | | | ✅ | | ✅ | ✅ | ✅ |
+| Torque balance | | | ✅ | | | | | ✅ | | | | |
+| Toppling direction | | | | ✅ | | | | ✅ | | | | |
+| Conservation of momentum | | | | | ✅ | | | | ✅ | | | |
+| Conservation of energy | | | | | ✅ | ✅ | | | | | | |
+| Period / length scaling | | | | | | ✅ | | | | | | |
+| Projectile range | | | | | | | ✅ | | | | | |
+| Contact geometry / jamming | | | | | | | | | | ✅ | | |
+| Grip friction / static threshold | | | | | | | | | | | ✅ | ✅ |
 
 ---
 
-*Last updated: 2026-08-13*
+*Last updated: 2026-08-18*

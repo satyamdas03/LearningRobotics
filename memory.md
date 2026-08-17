@@ -15,7 +15,7 @@
 | **Mission** | Learn robotics and AI from first principles fast, and build something extraordinary and revolutionary that solves real-world problems. |
 | **Owner** | Satyam Das (@satyamdas03, satyamdas03@gmail.com) |
 | **Start date** | 2026-08-13 |
-| **Current date** | 2026-08-13 |
+| **Current date** | 2026-08-18 |
 
 ---
 
@@ -63,17 +63,24 @@ LearningRobotics/
 │   ├── requirements.txt                 # mujoco + numpy + pytest
 │   ├── forward_kinematics.py            # PoE + geometric + MuJoCo FK for 6-DOF arm
 │   └── test_forward_kinematics.py       # 4 pytest tests
+├── chapter04_velocity_kinematics/         # Chapter 4 deliverables
+│   ├── requirements.txt                 # mujoco + numpy + pytest
+│   ├── jacobian.py                    # 6x6 geometric Jacobian (analytic + numeric)
+│   ├── velocity_kinematics.py         # Twist, inverse velocity, null-space demo
+│   ├── demo_jacobian_viewer.py        # MuJoCo passive viewer with J+ velocity control
+│   └── test_jacobian.py               # 8 pytest tests
 └── pibench/                             # Physical Intuition Benchmark
     ├── pibench/                         # Engine + scenes
     │   ├── scenes/statics/            # TowerFall, SlopeSlide, SupportBalance, ToppleDirection
-    │   └── scenes/dynamics/             # PendulumSwing, CollisionBounce, ProjectileHit
-    ├── tests/                           # pytest suite
+    │   ├── scenes/dynamics/             # PendulumSwing, CollisionBounce, ProjectileHit
+    │   ├── scenes/contact/            # PushTipVsSlide, StackStability, WedgeInsert, FrictionPile, SlipGrip
+    │   └── utils/                     # MJCF helpers + contact/pusher utilities
+    ├── tests/                           # pytest suite (31 tests)
     ├── docs/SCENE_CATALOG.md            # Scene coverage map
     └── run_all.py                       # Multi-suite baseline runner
 
 Planned future structure (not yet created):
 ├── ...
-├── chapter04_velocity_kinematics/
 ├── chapter05_inverse_kinematics/
 ├── REVOLUTIONARY_ROBOTICS_IDEAS.md        # Already exists at root; see Section 7
 ```
@@ -456,6 +463,57 @@ Package exports updated: `pibench/scenes/dynamics/__init__.py`, `pibench/scenes/
 
 ---
 
+### Session 5 — 2026-08-18
+
+#### 5.1 What the user asked
+
+User had completed Chapter 4 (Velocity Kinematics & Jacobians) study and asked for the next project steps, specifically:
+1. Build an interactive MuJoCo viewer demo for Chapter 4.
+2. Build all 5 PIBench Phase 3 contact/friction scenes, "iff can be done perfectly and efficiently".
+3. Continue using MuJoCo (not Isaac Sim) because it is working.
+
+#### 5.2 Chapter 4 deliverables
+
+Created `chapter04_velocity_kinematics/`:
+* `jacobian.py` — `ArmJacobian` class with numeric (MuJoCo `mj_jacSite`) and analytic geometric 6x6 Jacobian, twist, inverse twist (pure / damped pseudoinverse), null-space projector, and static-force duality.
+* `velocity_kinematics.py` — demo comparing analytic vs numeric Jacobian, twist, inverse velocity, null-space motion, and static-force duality.
+* `test_jacobian.py` — 8 pytest tests; analytic Jacobian matches MuJoCo numeric to machine precision.
+* `demo_jacobian_viewer.py` — MuJoCo passive viewer that drives the 6-DOF arm via Jacobian pseudoinverse to track a moving circular target.
+* `requirements.txt` — `mujoco>=3.11.0`, `numpy`, `pytest`.
+
+Key fix: switched from screw-axis/adjoint space-Jacobian to direct geometric Jacobian `[omega_i × (p_ee - p_i); omega_i]` so the analytic Jacobian matches MuJoCo's site Jacobian convention.
+
+#### 5.3 PIBench Phase 3 — Contact & Friction suite
+
+Created `pibench/pibench/scenes/contact/` with 5 scenes:
+* `push_tip_vs_slide.py` — pushed block tips or slides depending on push height; MuJoCo rollout ground truth.
+* `stack_stability.py` — stack of blocks tapped by a moving ball; MuJoCo rollout ground truth.
+* `wedge_insert.py` — triangular wedge pushed into a gap; mesh asset + MuJoCo rollout ground truth.
+* `friction_pile.py` — hardest object to start moving; analytic `mu_s * mass` ground truth.
+* `slip_grip.py` — gripper lifts or slips; analytic `2 * mu * F_grip vs m*g` ground truth.
+
+Engine additions:
+* `pibench/utils/contact.py` — prismatic pusher MJCF, mesh-wedge MJCF, contact queries (`body_in_contact`, `body_contact_force_norm`), body tilt measurement, constant-speed pusher runner.
+* Registration: `pibench/scenes/contact/__init__.py` + import in `pibench/scenes/__init__.py`.
+
+Tests: `tests/test_core.py` expanded from 20 to 31 tests; physics oracle scores 100% on contact suite.
+
+#### 5.4 Documentation updates
+
+* `README.md` (root): marked Chapter 4 and PIBench Phase 3 complete; added `chapter04_velocity_kinematics/` and `scenes/contact/` to repo layout; updated PIBench run commands and section.
+* `memory.md`: this section and summary table.
+* `pibench/docs/SCENE_CATALOG.md`: added full contact-suite scene cards and updated concept-coverage map.
+* `pibench/docs/PLAN.md`: marked Phase 3 complete with file list and engine additions.
+* `pibench/README.md`: updated suite list, layout, run commands, scene example, test count, roadmap.
+
+#### 5.5 Validation
+
+* `python -m pytest tests/test_core.py -v` — 31 passed.
+* `python run_all.py` — physics oracle 100.0%, random 42.5%.
+* `python -m pytest chapter04_velocity_kinematics/test_jacobian.py -v` — 8 passed.
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
@@ -463,14 +521,16 @@ Package exports updated: `pibench/scenes/dynamics/__init__.py`, `pibench/scenes/
 | Chapter 1 practical | ✅ Complete and pushed |
 | Chapter 2 practical | ✅ Complete — `transforms.py` + 6 tests passing |
 | Chapter 3 practical | ✅ Complete — `forward_kinematics.py` + 4 tests passing |
+| Chapter 4 practical | ✅ Complete — `jacobian.py` + `velocity_kinematics.py` + viewer + 8 tests |
 | GitHub repo | ✅ Live at https://github.com/satyamdas03/LearningRobotics |
-| README | ✅ Complete (includes Chapters 1–3 + PIBench Phases 0–2) |
+| README | ✅ Complete (includes Chapters 1–4 + PIBench Phases 0–3) |
 | Revolutionary manifesto | ✅ Complete and pushed (Concept L now has Phase 0–7 plan) |
 | PIBench Phase 0 | ✅ Complete — engine + `TowerFall` |
 | PIBench Phase 1 | ✅ Complete — statics suite: `SlopeSlide`, `SupportBalance`, `ToppleDirection` |
 | PIBench Phase 2 | ✅ Complete — dynamics suite: `PendulumSwing`, `CollisionBounce`, `ProjectileHit` |
-| Next implementation work | ⏳ Chapter 4 Velocity Kinematics + PIBench Phase 3 (contact/articulated bodies) |
-| Hardware purchase | ⏳ None yet; consider AM-ARM / Forte / U-ARM in Phase 3 |
+| PIBench Phase 3 | ✅ Complete — contact suite: `PushTipVsSlide`, `StackStability`, `WedgeInsert`, `FrictionPile`, `SlipGrip` |
+| Next implementation work | ⏳ Chapter 5 Inverse Kinematics + PIBench Phase 4 (articulated/deformable bodies) |
+| Hardware purchase | ⏳ None yet; consider AM-ARM / Forte / U-ARM in Phase 4+ |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
 ---

@@ -44,6 +44,7 @@ Expected output:
 
 ```text
 Registered suites:
+  contact: ['FrictionPile', 'PushTipVsSlide', 'SlipGrip', 'StackStability', 'WedgeInsert']
   dynamics: ['CollisionBounce', 'PendulumSwing', 'ProjectileHit']
   statics: ['SlopeSlide', 'SupportBalance', 'ToppleDirection', 'TowerFall']
 
@@ -51,7 +52,7 @@ Predictor: physics_oracle
 Overall accuracy: 100.0% (5/5)
 
 Per-suite accuracy:
-  statics             : 100.0% (5/5)
+  contact             : 100.0% (5/5)
 ```
 
 ---
@@ -86,7 +87,12 @@ pibench/
 │   │   │   ├── collision_bounce.py # Phase 2: elastic collision
 │   │   │   ├── pendulum_swing.py   # Phase 2: pendulum period
 │   │   │   └── projectile_hit.py   # Phase 2: projectile range
-│   │   ├── contact/            # (Phase 3)
+│   │   ├── contact/            # Phase 3: contact & friction
+│   │   │   ├── friction_pile.py      # Hardest object to push
+│   │   │   ├── push_tip_vs_slide.py  # Tip or slide?
+│   │   │   ├── slip_grip.py          # Lift or slip?
+│   │   │   ├── stack_stability.py    # Survive a side tap?
+│   │   │   └── wedge_insert.py       # Fit or jam?
 │   │   ├── articulated/        # (Phase 4)
 │   │   └── params/             # (Phase 5)
 │   ├── predictors/             # Baselines and model stubs
@@ -94,9 +100,10 @@ pibench/
 │   │   ├── random_predictor.py
 │   │   └── physics_oracle.py
 │   └── utils/
-│       └── mjcf.py             # Programmatic MJCF helpers
+│       ├── mjcf.py             # Programmatic MJCF helpers
+│       └── contact.py          # Contact-event and pusher helpers
 ├── tests/
-│   └── test_core.py            # Engine + all statics/dynamics scenes (20+ tests)
+│   └── test_core.py            # Engine + all scenes (30+ tests)
 ├── run_all.py                  # Run all suites across all baselines
 ├── requirements.txt
 └── README.md                   # This file
@@ -110,16 +117,19 @@ pibench/
 # Physics oracle (upper bound) on every suite
 python -m pibench run --suite statics --predictor physics_oracle --n 20
 python -m pibench run --suite dynamics --predictor physics_oracle --n 20
+python -m pibench run --suite contact --predictor physics_oracle --n 20
 
 # Random baseline
 python -m pibench run --suite statics --predictor random --n 20 --seed 0
 python -m pibench run --suite dynamics --predictor random --n 20 --seed 0
+python -m pibench run --suite contact --predictor random --n 20 --seed 0
 
 # Save results to JSON
-python -m pibench run --suite statics --predictor physics_oracle --n 20 --output output/results_oracle.json
+python -m pibench run --suite contact --predictor physics_oracle --n 20 --output output/results_oracle.json
 
 # Render a scene thumbnail
 python -m pibench render TowerFall --seed 0 --output output/tower_fall_seed0.png
+python -m pibench render PushTipVsSlide --seed 0 --output output/push_tip_vs_slide_seed0.png
 python -m pibench render ProjectileHit --seed 0 --output output/projectile_hit_seed0.png
 
 # Run all baselines across all suites
@@ -156,6 +166,13 @@ The analytic ground truth is `T ≈ 2π√(L/g)`, so the longer pendulum wins re
 **Question:** *A ball is launched from ground level at a given speed and angle. How far does it land?*
 
 The analytic range `R = v² sin(2θ) / g` is the answer, validated against a MuJoCo rollout.
+
+### `SlipGrip` (contact)
+
+**Concepts:** Coulomb friction, grip force, weight  
+**Question:** *A parallel-jaw gripper squeezes a block and lifts it. Does the block lift or slip?*
+
+The analytic ground truth compares the total available friction `2 * mu * F_grip` to the block's weight `m * g`.
 
 ---
 
@@ -203,7 +220,7 @@ $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python -m pytest tests -q
 ```
 
-Current status: **20 passed**.
+Current status: **31 passed**.
 
 ---
 
@@ -214,7 +231,7 @@ Current status: **20 passed**.
 | **0** | Engine + `tower_fall` | Foundations | ✅ runnable package |
 | **1** | Statics & stability | Chapter 2 (rigid-body motions, CoM) | ✅ 4 scenes |
 | **2** | Dynamics | Newtonian mechanics | ✅ 3 scenes |
-| **3** | Contact & friction | Chapter 4 (velocity kinematics / contacts) | ≥5 scenes |
+| **3** | Contact & friction | Chapter 4 (velocity kinematics / contacts) | ✅ 5 scenes |
 | **4** | Articulated & deformable | Chapter 5 (IK / constraints) | ≥5 scenes |
 | **5** | Parameter estimation & counterfactuals | Consolidation + system ID | ≥5 scenes |
 | **6** | Model harness + leaderboard | — | VLM stub, static leaderboard |

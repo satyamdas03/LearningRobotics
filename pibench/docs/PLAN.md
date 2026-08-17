@@ -200,7 +200,7 @@ LearningRobotics/
 
 ---
 
-### Phase 3 — Contact & Friction Suite
+### Phase 3 — Contact & Friction Suite ✅
 
 **Textbook alignment:** Chapter 4 (Velocity Kinematics / Jacobians) and introduction to contact forces.
 
@@ -211,14 +211,19 @@ LearningRobotics/
 4. `friction_pile` — which object is hardest to push? (mass + friction)
 5. `slip_grip` — gripper lift: object slips or lifts?
 
+Files: `pibench/scenes/contact/{push_tip_vs_slide,stack_stability,wedge_insert,friction_pile,slip_grip}.py`.
+
 **Engine additions:**
-* Contact-event detection (first contact time, contact forces).
-* Disturbance/action parameterization (push force, push location).
+* `pibench/utils/contact.py` — prismatic pusher MJCF, mesh-wedge MJCF, contact queries, constant-speed pusher runner, body tilt measurement.
+* Contact-event detection (`body_in_contact`, `body_contact_force_norm`).
+* Disturbance/action parameterization via velocity-controlled pushers.
 
 **Success criteria:**
-* Contact suite has ≥5 scenes.
-* Contact-event logging works.
-* Physics oracle remains near-perfect.
+* Contact suite has 5 scenes.
+* Physics oracle scores 100% on the suite.
+* All contact scenes tested in `tests/test_core.py`.
+
+**Status:** completed 2026-08-18.
 
 ---
 

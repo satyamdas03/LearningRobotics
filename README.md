@@ -53,9 +53,8 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | **P0** | **PIBench — Physical Intuition Benchmark** | ✅ Phase 0 Complete | Engine + `TowerFall` statics scene |
 | **P1** | **PIBench — Statics Suite** | ✅ Complete | `SlopeSlide`, `SupportBalance`, `ToppleDirection` |
 | **P2** | **PIBench — Dynamics Suite** | ✅ Complete | `PendulumSwing`, `CollisionBounce`, `ProjectileHit` |
-| 4 | Velocity Kinematics & Jacobians | ⏳ Planned | TBD |
-| 5 | Inverse Kinematics | ⏳ Planned | TBD |
-| 4 | Velocity Kinematics & Jacobians | ⏳ Planned | TBD |
+| 4 | Velocity Kinematics & Jacobians | ✅ Complete | `chapter04_velocity_kinematics/` with analytic + numeric Jacobian, viewer demo |
+| **P3** | **PIBench — Contact Suite** | ✅ Complete | `PushTipVsSlide`, `StackStability`, `WedgeInsert`, `FrictionPile`, `SlipGrip` |
 | 5 | Inverse Kinematics | ⏳ Planned | TBD |
 | 6 | Dynamics | ⏳ Planned | TBD |
 | 7 | Control | ⏳ Planned | TBD |
@@ -88,12 +87,20 @@ LearningRobotics/
 │   ├── requirements.txt           # mujoco + numpy + pytest
 │   ├── forward_kinematics.py      # DH + PoE + geometric FK for 6-DOF arm
 │   └── test_forward_kinematics.py # pytest suite
-└── pibench/                       # Physical Intuition Benchmark (Phases 0-2)
+├── chapter04_velocity_kinematics/ # Chapter 4: velocity kinematics & Jacobians
+│   ├── requirements.txt           # mujoco + numpy + pytest
+│   ├── jacobian.py                # 6x6 geometric Jacobian (analytic + numeric)
+│   ├── velocity_kinematics.py     # Twist, inverse velocity, null-space demo
+│   ├── demo_jacobian_viewer.py    # MuJoCo viewer with J⁺ velocity control
+│   └── test_jacobian.py           # pytest suite
+└── pibench/                       # Physical Intuition Benchmark (Phases 0-3)
     ├── README.md                  # PIBench overview and quickstart
     ├── requirements.txt           # MuJoCo + benchmark deps
     ├── pibench/                   # Python package
     │   ├── scenes/statics/        # TowerFall, SlopeSlide, SupportBalance, ToppleDirection
-    │   └── scenes/dynamics/       # PendulumSwing, CollisionBounce, ProjectileHit
+    │   ├── scenes/dynamics/       # PendulumSwing, CollisionBounce, ProjectileHit
+    │   ├── scenes/contact/        # PushTipVsSlide, StackStability, WedgeInsert, FrictionPile, SlipGrip
+    │   └── utils/                 # MJCF + contact helpers
     ├── tests/                     # pytest suite
     └── run_all.py                 # Run all suites across all predictors
 ```
@@ -288,6 +295,7 @@ cd pibench
 $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python -m pibench run --suite statics --predictor physics_oracle --n 5
 python -m pibench run --suite dynamics --predictor physics_oracle --n 5
+python -m pibench run --suite contact --predictor physics_oracle --n 5
 python run_all.py
 ```
 
@@ -306,9 +314,9 @@ Expected output: `Overall accuracy: 100.0%` on every suite. Physics-oracle shoul
 
 ---
 
-## 🧱 PIBench — First Revolutionary Deliverable (Phases 0–2)
+## 🧱 PIBench — First Revolutionary Deliverable (Phases 0–3)
 
-PIBench is the executable first step toward the *Revolutionary Robotics* north star. It evaluates whether a model truly understands physical common sense across statics and dynamics.
+PIBench is the executable first step toward the *Revolutionary Robotics* north star. It evaluates whether a model truly understands physical common sense across statics, dynamics, and contact/friction.
 
 ### What works now
 
@@ -322,9 +330,15 @@ PIBench is the executable first step toward the *Revolutionary Robotics* north s
   * `PendulumSwing` — estimate small-angle period `T ≈ 2π√(L/g)`.
   * `CollisionBounce` — 1D elastic-collision outcome.
   * `ProjectileHit` — predict range `R = v² sin(2θ)/g`.
-* **Baselines:** `physics_oracle` (100% on deterministic scenes), `random`, `constant`.
+* **Contact suite (P3):**
+  * `PushTipVsSlide` — pushed block tips or slides depending on push height.
+  * `StackStability` — does a stack survive a side tap?
+  * `WedgeInsert` — does a wedge fit through a gap or jam?
+  * `FrictionPile` — which object is hardest to start moving?
+  * `SlipGrip` — gripper lifts the block or slips?
+* **Baselines:** `physics_oracle` (100% on deterministic scenes), `random`.
 * **CLI:** `pibench list`, `pibench run`, `pibench render`.
-* **Tests:** 14+ passing across engine + all statics/dynamics scenes.
+* **Tests:** 31 passing across engine + all scenes.
 
 ### Run it
 
@@ -334,6 +348,7 @@ cd pibench
 $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python -m pibench run --suite statics --predictor physics_oracle --n 10
 python -m pibench run --suite dynamics --predictor physics_oracle --n 10
+python -m pibench run --suite contact --predictor physics_oracle --n 10
 python run_all.py
 ```
 
@@ -341,7 +356,7 @@ Expected output: `Overall accuracy: 100.0%` on every suite. `physics_oracle` top
 
 ### Why this matters
 
-A model that can answer "which tower falls?" or "where does the projectile land?" is being forced to reason about center of mass, support polygon, friction, energy, and projectile motion — the same concepts in Chapters 2 and 3. As the textbook progresses, PIBench progresses: contact, articulated bodies, and finally parameter estimation / counterfactuals.
+A model that can answer "which tower falls?" or "where does the projectile land?" is being forced to reason about center of mass, support polygon, friction, energy, and projectile motion — the same concepts in Chapters 2 and 3. With the contact suite it must also reason about moment balance, impulse, contact geometry, and Coulomb friction — the concepts in Chapter 4. As the textbook progresses, PIBench progresses: articulated bodies, and finally parameter estimation / counterfactuals.
 
 ---
 
