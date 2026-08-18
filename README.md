@@ -58,7 +58,6 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | 5 | Inverse Kinematics | ✅ Complete | `chapter05_inverse_kinematics/` with numeric/analytic IK + null-space redundancy |
 | **P4** | **PIBench — Articulated & Deformable Suite** | ✅ Complete | `DrawerPull`, `DoorSwing`, `RopeTension`, `GearTurn`, `ChainDrape` |
 | 6 | Dynamics | ⏳ Planned | TBD |
-| 6 | Dynamics | ⏳ Planned | TBD |
 | 7 | Control | ⏳ Planned | TBD |
 | 8 | Motion Planning | ⏳ Planned | TBD |
 | 9 | Reinforcement Learning with Isaac Lab | ⏳ Planned | TBD |
@@ -423,8 +422,8 @@ PIBench is the executable first step toward the *Revolutionary Robotics* north s
 * **Deformable suite (P4):**
   * `ChainDrape` — how high is the free end of a chain draped over a bar?
 * **Baselines:** `physics_oracle` (100% on deterministic scenes), `random`.
-* **CLI:** `pibench list`, `pibench run`, `pibench render`.
-* **Tests:** 43 passing across engine + all scenes.
+* **CLI:** `pibench list`, `pibench run`, `pibench render`, `pibench view`.
+* **Tests:** 44 passing across engine + all scenes.
 
 ### Run it
 
@@ -437,6 +436,7 @@ python -m pibench run --suite dynamics --predictor physics_oracle --n 10
 python -m pibench run --suite contact --predictor physics_oracle --n 10
 python -m pibench run --suite articulated --predictor physics_oracle --n 10
 python -m pibench run --suite deformable --predictor physics_oracle --n 10
+python -m pibench view TowerFall
 python run_all.py
 ```
 
