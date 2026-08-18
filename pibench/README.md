@@ -146,6 +146,10 @@ python -m pibench render PushTipVsSlide --seed 0 --output output/push_tip_vs_sli
 python -m pibench render ProjectileHit --seed 0 --output output/projectile_hit_seed0.png
 python -m pibench render DrawerPull --seed 0 --output output/drawer_pull_seed0.png
 
+# Render a full visual showcase of every chapter + PIBench scene
+python showcase.py                 # writes output/showcase/*.png
+python build_showcase_artifact.py  # writes output/showcase/index.html
+
 # Run all baselines across all suites
 python run_all.py
 ```

@@ -597,6 +597,7 @@ Key fixes:
 * `python -m pytest chapter05_inverse_kinematics/test_inverse_kinematics.py -v` — 4 passed.
 * `python -m pytest tests/test_core.py -v` — 43 passed.
 * `python run_all.py` — physics oracle 100.0%, random 41.2%.
+* `python showcase.py` + `python build_showcase_artifact.py` — rendered 19 framed thumbnails and a self-contained HTML gallery at `output/showcase/index.html`.
 
 ---
 
@@ -648,6 +649,8 @@ Key fixes:
 | `pibench/pibench/utils/mjcf.py` | MJCF composition helpers | Reuse for all MuJoCo scene building |
 | `pibench/tests/test_core.py` | PIBench engine tests | Add a test for every new scene |
 | `pibench/run_all.py` | Convenience runner across baselines | Run before pushing PIBench updates |
+| `pibench/showcase.py` | Render framed thumbnails of every scene | Run after adding new scenes to update visuals |
+| `pibench/build_showcase_artifact.py` | Build self-contained HTML gallery | Generates `output/showcase/index.html` |
 | `chapter01_foundation/notes.md` | Chapter 1 session notes | Reference for Chapter 1 details |
 | `chapter01_foundation/inspect_dof.py` | Chapter 1 runnable demo | Run whenever showing Chapter 1 |
 | `chapter01_foundation/simple_2r_arm.xml` | 2-DOF robot model | Reuse/extend for kinematics chapters |
