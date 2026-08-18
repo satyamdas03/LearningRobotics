@@ -82,7 +82,7 @@ LearningRobotics/
     │   ├── scenes/articulated/        # DrawerPull, DoorSwing, RopeTension, GearTurn
     │   ├── scenes/deformable/         # ChainDrape
     │   └── utils/                     # MJCF helpers + contact + articulated utilities
-    ├── tests/                           # pytest suite (43 tests)
+    ├── tests/                           # pytest suite (44 tests)
     ├── docs/SCENE_CATALOG.md            # Scene coverage map
     └── run_all.py                       # Multi-suite baseline runner
 
@@ -355,7 +355,7 @@ Built under `C:\Users\point\projects\LearningRobotics\pibench/`:
    * `<inertial>` given explicit `pos="0 0 0"`.
 4. **First scene:** `scenes/statics/tower_fall.py` — two towers on a tilting platform, asks "Which tower falls?". Ground truth computed by MuJoCo rollout.
 5. **Baselines:** `PhysicsOraclePredictor` (uses problem ground truth), `RandomPredictor`.
-6. **CLI:** `python -m pibench list --suites`, `python -m pibench run --suite statics --predictor physics_oracle --n 5`, `python -m pibench render TowerFall --seed 0 --output output/tower_fall.png`.
+6. **CLI:** `python -m pibench list --suites`, `python -m pibench run --suite statics --predictor physics_oracle --n 5`, `python -m pibench render TowerFall --seed 0 --output output/tower_fall.png`, `python -m pibench view TowerFall` (interactive MuJoCo viewer).
 7. **Tests:** `tests/test_core.py` — registry, tower_fall question/ground_truth, physics oracle 100%, suite/runner/evaluator, random baseline < oracle. **7 passed.**
 8. **Convenience script:** `run_all.py` runs all suites across all baselines and writes JSON.
 9. **PIBench README:** `pibench/README.md` with overview, quickstart, layout, scene catalog, contributing, roadmap.
@@ -581,7 +581,7 @@ Key fixes:
 
 * Added `pibench/scenes/articulated/__init__.py` and `pibench/scenes/deformable/__init__.py`.
 * Updated `pibench/scenes/__init__.py` to import both new suites.
-* Expanded `pibench/tests/test_core.py` from 31 to 43 passing tests.
+* Expanded `pibench/tests/test_core.py` from 31 to 44 passing tests.
 * Physics oracle scores 100% across all five suites.
 
 #### 6.6 Documentation updates
@@ -595,7 +595,7 @@ Key fixes:
 #### 6.7 Validation
 
 * `python -m pytest chapter05_inverse_kinematics/test_inverse_kinematics.py -v` — 4 passed.
-* `python -m pytest tests/test_core.py -v` — 43 passed.
+* `python -m pytest tests/test_core.py -v` — 44 passed.
 * `python run_all.py` — physics oracle 100.0%, random 41.2%.
 * `python showcase.py` + `python build_showcase_artifact.py` — rendered 19 framed thumbnails and a self-contained HTML gallery at `output/showcase/index.html`.
 

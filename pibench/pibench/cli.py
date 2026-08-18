@@ -88,6 +88,43 @@ def cmd_render(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_view(args: argparse.Namespace) -> int:
+    try:
+        import mujoco
+        import mujoco.viewer
+    except ImportError as exc:
+        print(f"Interactive viewing requires mujoco: {exc}", file=sys.stderr)
+        return 1
+
+    import time
+
+    problem_classes = {cls.__name__: cls for cls in list_problems()}
+    if args.problem not in problem_classes:
+        print(f"Unknown problem '{args.problem}'. Registered problems: {list(problem_classes)}", file=sys.stderr)
+        return 1
+
+    cls = problem_classes[args.problem]
+    problem = cls(seed=args.seed)
+    if not hasattr(problem, "model") or not hasattr(problem, "data"):
+        print(f"Problem '{args.problem}' does not expose a MuJoCo model/data", file=sys.stderr)
+        return 1
+
+    model = problem.model
+    data = problem.data
+
+    print(f"Opening MuJoCo viewer for {args.problem} (seed={args.seed})...")
+    print("Controls: left-drag to rotate, right-drag to pan, scroll to zoom, Esc to close.")
+
+    with mujoco.viewer.launch_passive(model, data) as viewer:
+        while viewer.is_running():
+            if args.simulate:
+                mujoco.mj_step(model, data)
+            viewer.sync()
+            time.sleep(model.opt.timestep if args.simulate else 1.0 / 60.0)
+
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="pibench", description="Physical Intuition Benchmark")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -114,6 +151,12 @@ def main(argv: list[str] | None = None) -> int:
     render_parser.add_argument("--seed", type=int, default=0)
     render_parser.add_argument("--output", default="output/render.png")
     render_parser.set_defaults(func=cmd_render)
+
+    view_parser = subparsers.add_parser("view", help="Open a scene in the interactive MuJoCo viewer")
+    view_parser.add_argument("problem", help="Problem class name")
+    view_parser.add_argument("--seed", type=int, default=0)
+    view_parser.add_argument("--simulate", action="store_true", help="Step physics while viewing")
+    view_parser.set_defaults(func=cmd_view)
 
     args = parser.parse_args(argv)
     return args.func(args)

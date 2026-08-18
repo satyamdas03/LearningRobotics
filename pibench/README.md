@@ -112,7 +112,7 @@ pibench/
 │       ├── contact.py          # Contact-event and pusher helpers
 │       └── articulated.py      # Joints, tendons, capsule chains
 ├── tests/
-│   └── test_core.py            # Engine + all scenes (43 tests)
+│   └── test_core.py            # Engine + all scenes (44 tests)
 ├── run_all.py                  # Run all suites across all baselines
 ├── requirements.txt
 └── README.md                   # This file
@@ -145,6 +145,11 @@ python -m pibench render TowerFall --seed 0 --output output/tower_fall_seed0.png
 python -m pibench render PushTipVsSlide --seed 0 --output output/push_tip_vs_slide_seed0.png
 python -m pibench render ProjectileHit --seed 0 --output output/projectile_hit_seed0.png
 python -m pibench render DrawerPull --seed 0 --output output/drawer_pull_seed0.png
+
+# Open any scene in the interactive MuJoCo viewer
+python -m pibench view TowerFall            # static inspection
+python -m pibench view PendulumSwing --simulate  # watch it run live
+python -m pibench view DrawerPull --simulate
 
 # Render a full visual showcase of every chapter + PIBench scene
 python showcase.py                 # writes output/showcase/*.png

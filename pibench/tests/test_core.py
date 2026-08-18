@@ -384,3 +384,45 @@ def test_random_baseline_scores_less_than_oracle():
     random_acc = Evaluator.metrics(random_result)["overall_accuracy"]
     assert oracle_acc == 1.0
     assert random_acc < 1.0
+
+
+def test_cli_view_command(monkeypatch):
+    import time
+
+    import mujoco.viewer
+    from pibench.cli import cmd_view
+
+    calls = []
+
+    class FakeViewer:
+        _calls = 0
+
+        def is_running(self):
+            self._calls += 1
+            return self._calls <= 2
+
+        def sync(self):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    def fake_launch(model, data):
+        calls.append((model, data))
+        return FakeViewer()
+
+    monkeypatch.setattr(mujoco.viewer, "launch_passive", fake_launch)
+    monkeypatch.setattr(time, "sleep", lambda _seconds: None)
+
+    class Args:
+        problem = "TowerFall"
+        seed = 0
+        simulate = False
+
+    assert cmd_view(Args()) == 0
+    assert len(calls) == 1
+    assert calls[0][0] is not None
+    assert calls[0][1] is not None
