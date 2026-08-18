@@ -33,7 +33,7 @@ def main() -> None:
     model = ik.model
     data = ik.data
 
-    # A small red sphere to mark the target pose.
+    # A small red sphere to mark the target pose. It must live inside worldbody.
     target_body_xml = """
     <body name="target_marker" pos="0 0 0" mocap="true">
       <geom name="target_geom" type="sphere" size="0.035" rgba="1 0 0 0.6" />
@@ -41,7 +41,7 @@ def main() -> None:
 """
     # We create a separate model that includes both the arm and the marker.
     xml_str = ik._xml
-    xml_str = xml_str.replace("</mujoco>", target_body_xml + "</mujoco>")
+    xml_str = xml_str.replace("</worldbody>", target_body_xml + "    </worldbody>")
     marker_model = mujoco.MjModel.from_xml_string(xml_str)
     marker_data = mujoco.MjData(marker_model)
 
