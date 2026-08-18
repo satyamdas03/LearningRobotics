@@ -48,6 +48,10 @@ LearningRobotics/
 ├── REVOLUTIONARY_ROBOTICS_IDEAS.md
 ├── .gitignore
 ├── chapter01_foundation/
+├── chapter02_rigid_body_motions/
+├── chapter03_forward_kinematics/
+├── chapter04_velocity_kinematics/
+├── chapter05_inverse_kinematics/
 └── pibench/                                 # NEW — Physical Intuition Benchmark
     ├── README.md                            # PIBench overview, quickstart, leaderboard link
     ├── requirements.txt                     # mujoco, numpy, pydantic, pytest, jinja2, pillow
@@ -81,12 +85,18 @@ LearningRobotics/
     │   │   │   ├── __init__.py
     │   │   │   ├── push_tip_vs_slide.py     # Pushed block: tip or slide?
     │   │   │   ├── stack_stability.py       # Will stack survive a tap?
-    │   │   │   └── wedge_insert.py          # Can wedge fit into gap?
+    │   │   │   ├── wedge_insert.py          # Can wedge fit into gap?
+    │   │   │   ├── friction_pile.py       # Which object is hardest to push?
+    │   │   │   └── slip_grip.py             # Gripper lifts or slips?
     │   │   ├── articulated/
     │   │   │   ├── __init__.py
     │   │   │   ├── drawer_pull.py           # Pull drawer: does it open fully?
     │   │   │   ├── door_swing.py            # Which way does door swing under push?
-    │   │   │   └── rope_tension.py          # Which rope breaks first?
+    │   │   │   ├── rope_tension.py          # Which rope segment breaks first?
+    │   │   │   └── gear_turn.py             # Which way does the meshed gear turn?
+    │   │   ├── deformable/
+    │   │   │   ├── __init__.py
+    │   │   │   └── chain_drape.py           # Free-end height of chain over bar
     │   │   └── params/
     │   │       ├── __init__.py
     │   │       ├── mass_order.py            # Which object is heaviest?
@@ -108,7 +118,9 @@ LearningRobotics/
     │   │   └── template.html                # Jinja2 template for leaderboard
     │   └── utils/
     │       ├── __init__.py
-    │       └── mjcf.py                      # Helper to build/compose MJCF strings
+    │       ├── mjcf.py                      # Helper to build/compose MJCF strings
+    │       ├── contact.py                   # Contact-event and pusher helpers
+    │       └── articulated.py               # Joint/tendon/capsule-chain helpers
     ├── tests/
     │   ├── __init__.py
     │   ├── test_runner.py
@@ -227,24 +239,32 @@ Files: `pibench/scenes/contact/{push_tip_vs_slide,stack_stability,wedge_insert,f
 
 ---
 
-### Phase 4 — Articulated & Deformable Suite
+### Phase 4 — Articulated & Deformable Suite ✅
 
 **Textbook alignment:** Chapter 5 (Inverse Kinematics) and introduction to constraints/joints.
 
 **New scenes:**
-1. `drawer_pull` — pull force needed to open drawer; does it jam?
-2. `door_swing` — push near hinge vs handle: which opens easier?
-3. `rope_tension` — which rope segment breaks first under load?
-4. `cloth_drape` — which corner of cloth hangs lower? (intro to deformables)
-5. `gear_turn` — turning one gear: which direction does connected gear turn?
+1. `drawer_pull` — prismatic drawer with `frictionloss`; motor pulls; yes/no opening outcome.
+2. `door_swing` — hinge door with `frictionloss`; motor torque; yes/no swing outcome.
+3. `rope_tension` — two masses linked by a spatial tendon over a pulley; which descends?
+4. `gear_turn` — externally meshed gears; motor drives gear A; which way does B turn?
+5. `chain_drape` — coarse deformable capsule chain over a bar; free-end height.
+
+Files:
+* Articulated: `pibench/scenes/articulated/{drawer_pull,door_swing,rope_tension,gear_turn}.py`.
+* Deformable: `pibench/scenes/deformable/chain_drape.py`.
 
 **Engine additions:**
-* Support for equality constraints, tendons, soft bodies (MuJoCo flex/composite).
-* More complex ground-truth computation.
+* `pibench/utils/articulated.py` — MJCF builders for prismatic joints (`mjcf_prismatic`), hinge joints (`mjcf_hinge`), spatial tendons (`mjcf_tendon`), nested capsule chains (`mjcf_capsule_chain`), and runtime helpers (`body_id`, `joint_position`, `body_displacement`).
+* Support for equality constraints and spatial tendons.
+* Coarse deformable-body approximation via nested capsules connected by ball joints.
 
 **Success criteria:**
-* Articulated/deformable suite has ≥5 scenes.
+* Articulated/deformable suite has ≥5 scenes across both sub-suites.
+* Physics oracle scores 100% on deterministic scenes.
 * At least one deformable scene runs reliably.
+
+**Status:** completed 2026-08-18.
 
 ---
 
@@ -351,7 +371,7 @@ The dashboard is intentionally lightweight and static, so it runs on GitHub Page
 ### Visual style
 
 * Clean, technical, light/dark theme-aware.
-* Color-coded suites: Statics = blue, Dynamics = green, Contact = orange, Articulated = purple, Params = red.
+* Color-coded suites: Statics = blue, Dynamics = green, Contact = orange, Articulated = purple, Deformable = pink, Params = red.
 * Monospace fonts for code blocks.
 * Responsive CSS grid; no external dependencies (all inline, self-contained).
 * Favicon: ⚙️🧠.

@@ -44,7 +44,9 @@ Expected output:
 
 ```text
 Registered suites:
+  articulated: ['DoorSwing', 'DrawerPull', 'GearTurn', 'RopeTension']
   contact: ['FrictionPile', 'PushTipVsSlide', 'SlipGrip', 'StackStability', 'WedgeInsert']
+  deformable: ['ChainDrape']
   dynamics: ['CollisionBounce', 'PendulumSwing', 'ProjectileHit']
   statics: ['SlopeSlide', 'SupportBalance', 'ToppleDirection', 'TowerFall']
 
@@ -52,7 +54,7 @@ Predictor: physics_oracle
 Overall accuracy: 100.0% (5/5)
 
 Per-suite accuracy:
-  contact             : 100.0% (5/5)
+  articulated         : 100.0% (5/5)
 ```
 
 ---
@@ -93,7 +95,13 @@ pibench/
 │   │   │   ├── slip_grip.py          # Lift or slip?
 │   │   │   ├── stack_stability.py    # Survive a side tap?
 │   │   │   └── wedge_insert.py       # Fit or jam?
-│   │   ├── articulated/        # (Phase 4)
+│   │   ├── articulated/        # Phase 4: articulated constraints
+│   │   │   ├── drawer_pull.py        # Pull drawer: does it open?
+│   │   │   ├── door_swing.py         # Push door: does it swing?
+│   │   │   ├── gear_turn.py          # Which way does the meshed gear turn?
+│   │   │   └── rope_tension.py       # Which side of the pulley descends?
+│   │   ├── deformable/         # Phase 4: coarse deformable bodies
+│   │   │   └── chain_drape.py        # Free-end height of a chain over a bar
 │   │   └── params/             # (Phase 5)
 │   ├── predictors/             # Baselines and model stubs
 │   │   ├── base.py
@@ -101,9 +109,10 @@ pibench/
 │   │   └── physics_oracle.py
 │   └── utils/
 │       ├── mjcf.py             # Programmatic MJCF helpers
-│       └── contact.py          # Contact-event and pusher helpers
+│       ├── contact.py          # Contact-event and pusher helpers
+│       └── articulated.py      # Joints, tendons, capsule chains
 ├── tests/
-│   └── test_core.py            # Engine + all scenes (30+ tests)
+│   └── test_core.py            # Engine + all scenes (43 tests)
 ├── run_all.py                  # Run all suites across all baselines
 ├── requirements.txt
 └── README.md                   # This file
@@ -118,11 +127,15 @@ pibench/
 python -m pibench run --suite statics --predictor physics_oracle --n 20
 python -m pibench run --suite dynamics --predictor physics_oracle --n 20
 python -m pibench run --suite contact --predictor physics_oracle --n 20
+python -m pibench run --suite articulated --predictor physics_oracle --n 20
+python -m pibench run --suite deformable --predictor physics_oracle --n 20
 
 # Random baseline
 python -m pibench run --suite statics --predictor random --n 20 --seed 0
 python -m pibench run --suite dynamics --predictor random --n 20 --seed 0
 python -m pibench run --suite contact --predictor random --n 20 --seed 0
+python -m pibench run --suite articulated --predictor random --n 20 --seed 0
+python -m pibench run --suite deformable --predictor random --n 20 --seed 0
 
 # Save results to JSON
 python -m pibench run --suite contact --predictor physics_oracle --n 20 --output output/results_oracle.json
@@ -131,6 +144,7 @@ python -m pibench run --suite contact --predictor physics_oracle --n 20 --output
 python -m pibench render TowerFall --seed 0 --output output/tower_fall_seed0.png
 python -m pibench render PushTipVsSlide --seed 0 --output output/push_tip_vs_slide_seed0.png
 python -m pibench render ProjectileHit --seed 0 --output output/projectile_hit_seed0.png
+python -m pibench render DrawerPull --seed 0 --output output/drawer_pull_seed0.png
 
 # Run all baselines across all suites
 python run_all.py
@@ -173,6 +187,27 @@ The analytic range `R = v² sin(2θ) / g` is the answer, validated against a MuJ
 **Question:** *A parallel-jaw gripper squeezes a block and lifts it. Does the block lift or slip?*
 
 The analytic ground truth compares the total available friction `2 * mu * F_grip` to the block's weight `m * g`.
+
+### `DrawerPull` (articulated)
+
+**Concepts:** prismatic joints, static friction, actuators  
+**Question:** *A drawer is pulled with a constant force. Does it open or jam?*
+
+The drawer sits on a slide joint with `frictionloss`. A motor actuator applies the pull force, and the ground truth is yes/no based on whether the displacement exceeds a threshold.
+
+### `RopeTension` (articulated)
+
+**Concepts:** tension, pulleys, constrained motion, gravity  
+**Question:** *Two masses hang from a rope over a pulley. Which side descends?*
+
+Two free bodies are linked by a MuJoCo spatial tendon passing over a pulley site. The heavier side descends; if masses are close, the outcome is `same`.
+
+### `ChainDrape` (deformable)
+
+**Concepts:** deformable-body approximation, contact, sag geometry  
+**Question:** *A chain is draped over a horizontal bar. How high is the free end above the floor?*
+
+A coarse deformable approximation is built from nested capsules connected by ball joints. The numeric answer is the final height of the chain's free end after settling.
 
 ---
 
@@ -220,7 +255,7 @@ $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python -m pytest tests -q
 ```
 
-Current status: **31 passed**.
+Current status: **43 passed**.
 
 ---
 
@@ -232,7 +267,7 @@ Current status: **31 passed**.
 | **1** | Statics & stability | Chapter 2 (rigid-body motions, CoM) | ✅ 4 scenes |
 | **2** | Dynamics | Newtonian mechanics | ✅ 3 scenes |
 | **3** | Contact & friction | Chapter 4 (velocity kinematics / contacts) | ✅ 5 scenes |
-| **4** | Articulated & deformable | Chapter 5 (IK / constraints) | ≥5 scenes |
+| **4** | Articulated & deformable | Chapter 5 (IK / constraints) | ✅ 5 scenes |
 | **5** | Parameter estimation & counterfactuals | Consolidation + system ID | ≥5 scenes |
 | **6** | Model harness + leaderboard | — | VLM stub, static leaderboard |
 | **7** | Real-robot validation subset | — | Protocol for AM-ARM / Forte |

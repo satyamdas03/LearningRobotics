@@ -69,19 +69,26 @@ LearningRobotics/
 │   ├── velocity_kinematics.py         # Twist, inverse velocity, null-space demo
 │   ├── demo_jacobian_viewer.py        # MuJoCo passive viewer with J+ velocity control
 │   └── test_jacobian.py               # 8 pytest tests
+├── chapter05_inverse_kinematics/        # Chapter 5 deliverables
+│   ├── requirements.txt                 # mujoco + numpy + pytest
+│   ├── inverse_kinematics.py            # numeric + analytic IK, null-space redundancy
+│   ├── demo_ik_viewer.py                # interactive IK tracking demo
+│   └── test_inverse_kinematics.py       # 4 pytest tests
 └── pibench/                             # Physical Intuition Benchmark
     ├── pibench/                         # Engine + scenes
     │   ├── scenes/statics/            # TowerFall, SlopeSlide, SupportBalance, ToppleDirection
     │   ├── scenes/dynamics/             # PendulumSwing, CollisionBounce, ProjectileHit
     │   ├── scenes/contact/            # PushTipVsSlide, StackStability, WedgeInsert, FrictionPile, SlipGrip
-    │   └── utils/                     # MJCF helpers + contact/pusher utilities
-    ├── tests/                           # pytest suite (31 tests)
+    │   ├── scenes/articulated/        # DrawerPull, DoorSwing, RopeTension, GearTurn
+    │   ├── scenes/deformable/         # ChainDrape
+    │   └── utils/                     # MJCF helpers + contact + articulated utilities
+    ├── tests/                           # pytest suite (43 tests)
     ├── docs/SCENE_CATALOG.md            # Scene coverage map
     └── run_all.py                       # Multi-suite baseline runner
 
 Planned future structure (not yet created):
 ├── ...
-├── chapter05_inverse_kinematics/
+├── chapter06_dynamics/
 ├── REVOLUTIONARY_ROBOTICS_IDEAS.md        # Already exists at root; see Section 7
 ```
 
@@ -514,6 +521,85 @@ Tests: `tests/test_core.py` expanded from 20 to 31 tests; physics oracle scores 
 
 ---
 
+### Session 6 — 2026-08-18 (continued)
+
+#### 6.1 What the user asked
+
+User wanted to continue after Chapter 4 and PIBench Phase 3 completion:
+1. Implement Chapter 5 (Inverse Kinematics) practical.
+2. Implement PIBench Phase 4: Articulated suite (`DrawerPull`, `DoorSwing`, `RopeTension`, `GearTurn`) and Deformable suite (`ChainDrape` using a coarse capsule chain, not MuJoCo cloth composite).
+3. Make everything "perfect and efficient", tested with pytest, then commit and push to `origin/master`.
+
+#### 6.2 Chapter 5 — Inverse Kinematics implementation
+
+Created `chapter05_inverse_kinematics/`:
+* `inverse_kinematics.py` — `InverseKinematics` class:
+  * Numeric IK with damped pseudoinverse (and pure pseudoinverse option).
+  * `position_only` mode for 3-DOF null-space tasks.
+  * Separate `secondary_gain` for null-space redundancy resolution; true Moore-Penrose projector `N = I - J⁺ J` computed via `np.linalg.pinv(J)`.
+  * Analytic planar 2R IK using law of cosines for the waist/shoulder sub-problem.
+  * Joint-limit centering secondary objective helper.
+* `demo_ik_viewer.py` — interactive MuJoCo viewer where the 6-DOF arm tracks a cycling set of reachable target poses using damped-pseudoinverse IK.
+* `test_inverse_kinematics.py` — 4 pytest tests:
+  * Numeric IK reaches reachable target `[0.60, 0.20, 0.60]`.
+  * Analytic 2R solution satisfies planar FK exactly.
+  * Null-space centering produces a more centered configuration without losing position accuracy.
+  * Unreachable target stays finite and within joint limits.
+* `requirements.txt` — `mujoco>=3.11.0`, `numpy`, `pytest`.
+
+Key fixes during development:
+* Unreachable target `[0.50, 0.10, 0.70]` near workspace boundary switched to reachable `[0.60, 0.20, 0.60]`.
+* Null-space secondary objective originally used damped pseudoinverse projector, which is not a true projector for a full-rank 6×6 Jacobian. Fixed by computing `N` with the true pseudoinverse and decoupling primary/secondary gains.
+* Analytic 2R test bug (`target[2]` on a 2-tuple) fixed; test now verifies planar 2R forward kinematics.
+
+#### 6.3 PIBench Phase 4 — Articulated suite
+
+Created `pibench/pibench/scenes/articulated/`:
+* `drawer_pull.py` — prismatic drawer with `frictionloss`; motor actuator pulls; outcome yes/no based on displacement threshold.
+* `door_swing.py` — hinge door with `frictionloss`; motor applies torque; outcome yes/no based on angular displacement.
+* `rope_tension.py` — two masses connected by a spatial tendon over a pulley; outcome is which mass descends (A/B/same).
+* `gear_turn.py` — two externally meshed gears; motor drives gear A; answer follows gear-meshing principle (opposite rotation).
+
+Created `pibench/utils/articulated.py` with helpers:
+* `mjcf_prismatic` / `mjcf_hinge` — joint MJCF snippets with `frictionloss`.
+* `mjcf_tendon` — spatial tendon over child `<site>` elements.
+* `mjcf_capsule_chain` — nested capsule bodies connected by ball joints, root segment static.
+* `body_id`, `joint_position`, `body_displacement` — runtime helpers.
+
+Key fixes:
+* MuJoCo `<gear>` equality constraint does not exist. Attempted `joint` equality with polynomial coefficients but found unreliable under motor drive. Settled on conceptual implementation for `GearTurn` where answer follows kinematic principle; simulation still drives gear A for diagnostic data.
+
+#### 6.4 PIBench Phase 4 — Deformable suite
+
+Created `pibench/pibench/scenes/deformable/`:
+* `chain_drape.py` — coarse deformable approximation: nested capsules connected by ball joints, draped over a box-shaped bar. Numeric answer: free-end height above floor.
+
+Key fixes:
+* Initial small/thin capsules caused NaN QACC and unstable contact with the bar. Fixed by increasing capsule radius to 0.05, half-length to 0.15, mass to 0.2, spacing to 0.30, using a box-shaped bar, and running with timestep 0.001 and 8000 settle steps.
+
+#### 6.5 Registration and tests
+
+* Added `pibench/scenes/articulated/__init__.py` and `pibench/scenes/deformable/__init__.py`.
+* Updated `pibench/scenes/__init__.py` to import both new suites.
+* Expanded `pibench/tests/test_core.py` from 31 to 43 passing tests.
+* Physics oracle scores 100% across all five suites.
+
+#### 6.6 Documentation updates
+
+* `README.md` (root): marked Chapter 5 and PIBench Phase 4 complete; added Chapter 4 and 5 sections; updated repo layout; added articulated/deformable scenes to PIBench section; updated quick-start commands; added changelog entry.
+* `memory.md`: this section and updated status snapshot.
+* `pibench/docs/SCENE_CATALOG.md`: added full articulated/deformable scene cards and updated concept-coverage map.
+* `pibench/docs/PLAN.md`: marked Phase 4 complete with file list and engine additions.
+* `pibench/README.md`: updated suite list, layout, run commands, scene examples, test count, roadmap.
+
+#### 6.7 Validation
+
+* `python -m pytest chapter05_inverse_kinematics/test_inverse_kinematics.py -v` — 4 passed.
+* `python -m pytest tests/test_core.py -v` — 43 passed.
+* `python run_all.py` — physics oracle 100.0%, random 41.2%.
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
@@ -522,14 +608,17 @@ Tests: `tests/test_core.py` expanded from 20 to 31 tests; physics oracle scores 
 | Chapter 2 practical | ✅ Complete — `transforms.py` + 6 tests passing |
 | Chapter 3 practical | ✅ Complete — `forward_kinematics.py` + 4 tests passing |
 | Chapter 4 practical | ✅ Complete — `jacobian.py` + `velocity_kinematics.py` + viewer + 8 tests |
+| Chapter 5 practical | ✅ Complete — `inverse_kinematics.py` + null-space redundancy + analytic 2R + 4 tests |
 | GitHub repo | ✅ Live at https://github.com/satyamdas03/LearningRobotics |
-| README | ✅ Complete (includes Chapters 1–4 + PIBench Phases 0–3) |
+| README | ✅ Complete (includes Chapters 1–5 + PIBench Phases 0–4) |
 | Revolutionary manifesto | ✅ Complete and pushed (Concept L now has Phase 0–7 plan) |
 | PIBench Phase 0 | ✅ Complete — engine + `TowerFall` |
 | PIBench Phase 1 | ✅ Complete — statics suite: `SlopeSlide`, `SupportBalance`, `ToppleDirection` |
 | PIBench Phase 2 | ✅ Complete — dynamics suite: `PendulumSwing`, `CollisionBounce`, `ProjectileHit` |
 | PIBench Phase 3 | ✅ Complete — contact suite: `PushTipVsSlide`, `StackStability`, `WedgeInsert`, `FrictionPile`, `SlipGrip` |
-| Next implementation work | ⏳ Chapter 5 Inverse Kinematics + PIBench Phase 4 (articulated/deformable bodies) |
+| PIBench Phase 4 (Articulated) | ✅ Complete — `DrawerPull`, `DoorSwing`, `RopeTension`, `GearTurn` |
+| PIBench Phase 4 (Deformable) | ✅ Complete — `ChainDrape` (coarse capsule-chain approximation) |
+| Next implementation work | ⏳ Chapter 6 Dynamics + PIBench Phase 5 (parameter estimation / counterfactuals) |
 | Hardware purchase | ⏳ None yet; consider AM-ARM / Forte / U-ARM in Phase 4+ |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -537,7 +626,7 @@ Tests: `tests/test_core.py` expanded from 20 to 31 tests; physics oracle scores 
 
 ## 6. Open Decisions / Questions
 
-1. Which chapter next after Chapter 4? The textbook is *Modern Robotics*; continue with velocity kinematics / Jacobians, then inverse kinematics.
+1. Which chapter next? Continue *Modern Robotics* Chapter 6 (Dynamics) and PIBench Phase 5 (parameter estimation / counterfactuals).
 2. Which cheap robot arm should be the long-term hardware target? AM-ARM ($380, 6+1 DoF, 1 kg payload) is the leading candidate for capability; Forte ($215) is cheapest for a real manipulator; U-ARM ($50) is best for teleop-only data collection.
 3. Should the README or manifesto be converted into a polished website / artifact for sharing?
 4. Should we install Isaac Sim in headless pip mode now to verify it runs on the RTX 5060, or wait until needed?
@@ -567,6 +656,14 @@ Tests: `tests/test_core.py` expanded from 20 to 31 tests; physics oracle scores 
 | `chapter02_rigid_body_motions/test_transforms.py` | Chapter 2 tests | Run with `pytest` after any transform change |
 | `chapter03_forward_kinematics/forward_kinematics.py` | 6-DOF FK implementations | Reference for PoE vs geometric FK |
 | `chapter03_forward_kinematics/test_forward_kinematics.py` | Chapter 3 tests | Run with `pytest` after any FK change |
+| `chapter04_velocity_kinematics/jacobian.py` | 6×6 geometric Jacobian | Reference for Chapter 4 velocity kinematics |
+| `chapter04_velocity_kinematics/test_jacobian.py` | Chapter 4 tests | Run with `pytest` after any Jacobian change |
+| `chapter05_inverse_kinematics/inverse_kinematics.py` | Numeric + analytic IK | Reference for Chapter 5 IK and null-space redundancy |
+| `chapter05_inverse_kinematics/demo_ik_viewer.py` | Interactive IK viewer demo | Run to watch arm track cycling targets |
+| `chapter05_inverse_kinematics/test_inverse_kinematics.py` | Chapter 5 tests | Run with `pytest` after any IK change |
+| `pibench/pibench/utils/articulated.py` | Articulated/deformable MJCF helpers | Reuse for joints, tendons, capsule chains |
+| `pibench/pibench/scenes/articulated/` | PIBench Phase 4 articulated scenes | Add one file per new articulated problem |
+| `pibench/pibench/scenes/deformable/` | PIBench Phase 4 deformable scenes | Add one file per new deformable problem |
 | `.gitignore` | Git exclusions | Update if new tooling adds artifacts |
 
 ---
@@ -597,6 +694,22 @@ cd C:\Users\point\projects\LearningRobotics\chapter03_forward_kinematics
 python -m pytest test_forward_kinematics.py -v
 ```
 
+### Run Chapter 4 tests
+
+```powershell
+cd C:\Users\point\projects\LearningRobotics\chapter04_velocity_kinematics
+. .venv\Scripts\Activate.ps1
+python -m pytest test_jacobian.py -v
+```
+
+### Run Chapter 5 tests
+
+```powershell
+cd C:\Users\point\projects\LearningRobotics\chapter05_inverse_kinematics
+. .venv\Scripts\Activate.ps1
+python -m pytest test_inverse_kinematics.py -v
+```
+
 ### Run PIBench
 
 ```powershell
@@ -607,6 +720,9 @@ python -m pytest tests -q
 python -m pibench list --suites
 python -m pibench run --suite statics --predictor physics_oracle --n 10
 python -m pibench run --suite dynamics --predictor physics_oracle --n 10
+python -m pibench run --suite contact --predictor physics_oracle --n 10
+python -m pibench run --suite articulated --predictor physics_oracle --n 10
+python -m pibench run --suite deformable --predictor physics_oracle --n 10
 python -m pibench render TowerFall --seed 0 --output output/tower_fall_seed0.png
 python run_all.py
 ```
@@ -639,8 +755,8 @@ Note: this repo is independent of the `C:\Users\point` mega-repo. Do not acciden
 
 If you are resuming this session with no other context, here is the one-paragraph summary:
 
-> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–3 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward kinematics). **PIBench (Physical Intuition Benchmark) Phases 0–2 are complete:** a runnable MuJoCo-based benchmark engine with statics (`TowerFall`, `SlopeSlide`, `SupportBalance`, `ToppleDirection`) and dynamics (`PendulumSwing`, `CollisionBounce`, `ProjectileHit`) suites, physics-oracle/random/constant baselines, a CLI, and 14+ passing tests. We wrote a manifesto with 12 revolutionary project ideas targeting real-world blockers like data scarcity, sim-to-real, long-horizon planning, and cheap hardware. The long-term north star is a sub-$500 robot that learns from video, reasons with physics, executes safely, and shares skills with other robots.
+> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–5 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward kinematics, velocity kinematics/Jacobians, inverse kinematics). **PIBench (Physical Intuition Benchmark) Phases 0–4 are complete:** a runnable MuJoCo-based benchmark engine with statics (`TowerFall`, `SlopeSlide`, `SupportBalance`, `ToppleDirection`), dynamics (`PendulumSwing`, `CollisionBounce`, `ProjectileHit`), contact/friction (`PushTipVsSlide`, `StackStability`, `WedgeInsert`, `FrictionPile`, `SlipGrip`), articulated (`DrawerPull`, `DoorSwing`, `RopeTension`, `GearTurn`), and deformable (`ChainDrape`) suites, physics-oracle/random baselines, a CLI, and 43 passing tests. We wrote a manifesto with 12 revolutionary project ideas targeting real-world blockers like data scarcity, sim-to-real, long-horizon planning, and cheap hardware. The long-term north star is a sub-$500 robot that learns from video, reasons with physics, executes safely, and shares skills with other robots.
 
 ---
 
-*Last updated: 2026-08-13*
+*Last updated: 2026-08-18*

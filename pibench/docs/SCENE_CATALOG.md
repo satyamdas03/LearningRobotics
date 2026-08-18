@@ -194,9 +194,84 @@ The platform tilts to a random angle. MuJoCo rolls the simulation forward until 
 
 ---
 
-## Articulated / Deformable Suite
+## Articulated Suite
 
-*Coming in Phase 4.*
+### `DrawerPull`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/articulated/drawer_pull.py` |
+| **Question** | A drawer is pulled with a constant force. Does it open or jam? |
+| **Answer type** | Boolean: `"yes"` / `"no"` |
+| **Concepts** | Prismatic joints, static friction, actuators |
+| **Textbook link** | Chapter 5 — constraints / inverse kinematics |
+| **Ground truth** | MuJoCo rollout: opens if displacement exceeds threshold |
+
+**Latent parameters:** `drawer_mass`, `applied_force`, `frictionloss`, `max_displacement`.
+
+---
+
+### `DoorSwing`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/articulated/door_swing.py` |
+| **Question** | A door is pushed with a constant torque. Does it swing open or stick? |
+| **Answer type** | Boolean: `"yes"` / `"no"` |
+| **Concepts** | Revolute joints, hinge friction, torque, angular motion |
+| **Textbook link** | Chapter 5 — constraints / inverse kinematics |
+| **Ground truth** | MuJoCo rollout: opens if angular displacement exceeds threshold |
+
+**Latent parameters:** `door_mass`, `applied_torque`, `frictionloss`, `max_angle_deg`.
+
+---
+
+### `RopeTension`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/articulated/rope_tension.py` |
+| **Question** | Two masses hang from a rope over a pulley. Which mass descends? |
+| **Answer type** | Choice: `"A"`, `"B"`, `"same"` |
+| **Concepts** | Tension, pulleys, constrained motion, gravity |
+| **Textbook link** | Chapter 5 — constraints / tendons |
+| **Ground truth** | MuJoCo rollout: compares final average heights of the two masses |
+
+**Latent parameters:** `mass_a`, `mass_b`, `final_z_a`, `final_z_b`.
+
+---
+
+### `GearTurn`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/articulated/gear_turn.py` |
+| **Question** | Gear A is driven counter-clockwise and meshes externally with gear B. Which way does gear B turn? |
+| **Answer type** | Choice: `"clockwise"`, `"counter-clockwise"` |
+| **Concepts** | External gear meshing, rotation direction, kinematic constraints |
+| **Textbook link** | Chapter 5 — constraints / kinematic chains |
+| **Ground truth** | External meshing produces opposite rotation: gear B turns clockwise |
+
+**Latent parameters:** `radius_a`, `radius_b`, `mass_a`, `mass_b`, `applied_torque`, `gear_a_rotation_deg`.
+
+---
+
+## Deformable Suite
+
+### `ChainDrape`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/deformable/chain_drape.py` |
+| **Question** | A chain is draped over a horizontal bar. How high is the free end above the floor? |
+| **Answer type** | Numeric (meters), tolerance-based scoring |
+| **Concepts** | Deformable-body approximation, contact, sag geometry |
+| **Textbook link** | Chapter 5 — introduction to deformables / constraints |
+| **Ground truth** | MuJoCo rollout: final Z height of the chain's free end |
+
+**Latent parameters:** `n_segments`, `segment_mass`, `segment_radius`, `segment_half_length`, `bar_height`, `free_end_height`.
+
+---
 
 ## Parameter Estimation / Counterfactual Suite
 
@@ -206,19 +281,23 @@ The platform tilts to a random angle. MuJoCo rolls the simulation forward until 
 
 ## Concept coverage map
 
-| Concept | TowerFall | SlopeSlide | SupportBalance | ToppleDirection | CollisionBounce | PendulumSwing | ProjectileHit | PushTipVsSlide | StackStability | WedgeInsert | FrictionPile | SlipGrip |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Center of mass | ✅ | ✅ | ✅ | ✅ | | | | ✅ | ✅ | | | |
-| Support polygon | ✅ | | ✅ | ✅ | | | | | ✅ | | | |
-| Friction / angle of repose | | ✅ | | | | | | ✅ | | ✅ | ✅ | ✅ |
-| Torque balance | | | ✅ | | | | | ✅ | | | | |
-| Toppling direction | | | | ✅ | | | | ✅ | | | | |
-| Conservation of momentum | | | | | ✅ | | | | ✅ | | | |
-| Conservation of energy | | | | | ✅ | ✅ | | | | | | |
-| Period / length scaling | | | | | | ✅ | | | | | | |
-| Projectile range | | | | | | | ✅ | | | | | |
-| Contact geometry / jamming | | | | | | | | | | ✅ | | |
-| Grip friction / static threshold | | | | | | | | | | | ✅ | ✅ |
+| Concept | TowerFall | SlopeSlide | SupportBalance | ToppleDirection | CollisionBounce | PendulumSwing | ProjectileHit | PushTipVsSlide | StackStability | WedgeInsert | FrictionPile | SlipGrip | DrawerPull | DoorSwing | RopeTension | GearTurn | ChainDrape |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Center of mass | ✅ | ✅ | ✅ | ✅ | | | | ✅ | ✅ | | | | | | | | |
+| Support polygon | ✅ | | ✅ | ✅ | | | | | ✅ | | | | | | | | |
+| Friction / angle of repose | | ✅ | | | | | | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | | | |
+| Torque balance | | | ✅ | | | | | ✅ | | | | | | ✅ | | | |
+| Toppling direction | | | | ✅ | | | | ✅ | | | | | | | | | |
+| Conservation of momentum | | | | | ✅ | | | | ✅ | | | | | | | | |
+| Conservation of energy | | | | | ✅ | ✅ | | | | | | | | | | | |
+| Period / length scaling | | | | | | ✅ | | | | | | | | | | | |
+| Projectile range | | | | | | | ✅ | | | | | | | | | | |
+| Contact geometry / jamming | | | | | | | | | | ✅ | | | | | | | |
+| Grip friction / static threshold | | | | | | | | | | | ✅ | ✅ | | | | | |
+| Prismatic / hinge constraints | | | | | | | | | | | | | ✅ | ✅ | | | |
+| Tendons / pulleys | | | | | | | | | | | | | | | ✅ | | |
+| Gear meshing / kinematic chains | | | | | | | | | | | | | | | | ✅ | |
+| Deformable-body approximation | | | | | | | | | | | | | | | | | ✅ |
 
 ---
 

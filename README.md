@@ -55,7 +55,9 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | **P2** | **PIBench — Dynamics Suite** | ✅ Complete | `PendulumSwing`, `CollisionBounce`, `ProjectileHit` |
 | 4 | Velocity Kinematics & Jacobians | ✅ Complete | `chapter04_velocity_kinematics/` with analytic + numeric Jacobian, viewer demo |
 | **P3** | **PIBench — Contact Suite** | ✅ Complete | `PushTipVsSlide`, `StackStability`, `WedgeInsert`, `FrictionPile`, `SlipGrip` |
-| 5 | Inverse Kinematics | ⏳ Planned | TBD |
+| 5 | Inverse Kinematics | ✅ Complete | `chapter05_inverse_kinematics/` with numeric/analytic IK + null-space redundancy |
+| **P4** | **PIBench — Articulated & Deformable Suite** | ✅ Complete | `DrawerPull`, `DoorSwing`, `RopeTension`, `GearTurn`, `ChainDrape` |
+| 6 | Dynamics | ⏳ Planned | TBD |
 | 6 | Dynamics | ⏳ Planned | TBD |
 | 7 | Control | ⏳ Planned | TBD |
 | 8 | Motion Planning | ⏳ Planned | TBD |
@@ -93,14 +95,16 @@ LearningRobotics/
 │   ├── velocity_kinematics.py     # Twist, inverse velocity, null-space demo
 │   ├── demo_jacobian_viewer.py    # MuJoCo viewer with J⁺ velocity control
 │   └── test_jacobian.py           # pytest suite
-└── pibench/                       # Physical Intuition Benchmark (Phases 0-3)
+└── pibench/                       # Physical Intuition Benchmark (Phases 0-4)
     ├── README.md                  # PIBench overview and quickstart
     ├── requirements.txt           # MuJoCo + benchmark deps
     ├── pibench/                   # Python package
     │   ├── scenes/statics/        # TowerFall, SlopeSlide, SupportBalance, ToppleDirection
     │   ├── scenes/dynamics/       # PendulumSwing, CollisionBounce, ProjectileHit
     │   ├── scenes/contact/        # PushTipVsSlide, StackStability, WedgeInsert, FrictionPile, SlipGrip
-    │   └── utils/                 # MJCF + contact helpers
+    │   ├── scenes/articulated/    # DrawerPull, DoorSwing, RopeTension, GearTurn
+    │   ├── scenes/deformable/     # ChainDrape
+    │   └── utils/                 # MJCF + contact + articulated helpers
     ├── tests/                     # pytest suite
     └── run_all.py                 # Run all suites across all predictors
 ```
@@ -230,6 +234,61 @@ The chapter recommended installing Isaac Sim. I chose MuJoCo for the first pract
 
 ---
 
+## ✅ Chapter 4 — Velocity Kinematics & Jacobians
+
+### Concepts locked in
+
+* **Geometric Jacobian** — maps joint velocities to end-effector twists.
+* **Analytic vs numeric Jacobian** — analytic formula matches MuJoCo `mj_jacSite`.
+* **Twist** — 6D spatial velocity `[ω; v]`.
+* **Inverse velocity** — `q̇ = J⁺ V_ee` (Moore-Penrose or damped pseudoinverse).
+* **Null-space motion** — redundancy resolution for staying away from joint limits.
+* **Static-force duality** — `τ = Jᵀ F`.
+
+### Files
+
+| File | Purpose |
+|---|---|
+| `jacobian.py` | `ArmJacobian`: numeric + analytic 6×6 Jacobian, twist, inverse twist, null-space projector, static-force duality |
+| `velocity_kinematics.py` | Demo comparing analytic vs numeric Jacobian, twist, inverse velocity, null-space motion, static-force duality |
+| `demo_jacobian_viewer.py` | MuJoCo passive viewer driving the 6-DOF arm with Jacobian pseudoinverse to track a moving target |
+| `test_jacobian.py` | 8 pytest tests: analytic Jacobian matches MuJoCo numeric to machine precision |
+
+### Validation
+
+* Analytic geometric Jacobian matches MuJoCo's numeric site Jacobian to ~1e-16.
+* Jacobian pseudoinverse tracks a moving circular target in the interactive viewer.
+* Inverse velocity and null-space projector behave as expected.
+
+---
+
+## ✅ Chapter 5 — Inverse Kinematics
+
+### Concepts locked in
+
+* **Numeric IK** — iteratively minimize pose error via the Jacobian pseudoinverse.
+* **Damped pseudoinverse** — robust inverse when the arm is near a singularity.
+* **Position-only IK** — track only the 3D position, leaving a 3-DOF null-space.
+* **Null-space redundancy resolution** — maximize a secondary objective (joint-limit centering) without disturbing the primary task.
+* **Analytic planar 2R IK** — law-of-cosines solution for the waist-shoulder sub-problem.
+
+### Files
+
+| File | Purpose |
+|---|---|
+| `inverse_kinematics.py` | `InverseKinematics`: numeric IK (damped/pure pseudoinverse), position-only mode, null-space secondary objective, analytic 2R IK, joint-limit centering helper |
+| `demo_ik_viewer.py` | MuJoCo viewer where the 6-DOF arm cycles through reachable target poses via damped-pseudoinverse IK |
+| `test_inverse_kinematics.py` | 4 pytest tests: numeric IK convergence, analytic 2R solution, null-space centering, unreachable target stays in limits |
+
+### Validation
+
+* Numeric IK converges to reachable target `[0.60, 0.20, 0.60]` with position error < 1e-3 and rotation error < 1e-2.
+* Analytic planar 2R solver recovers the exact law-of-cosines configuration.
+* Position-only IK + joint-limit centering objective keeps joints closer to mid-range without losing accuracy.
+* Unreachable targets produce finite, in-limit best-effort solutions.
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Clone the repo
@@ -287,7 +346,25 @@ python -m pytest test_forward_kinematics.py -v
 
 Tests verify: PoE FK matches MuJoCo to machine precision for default and random joint configurations, and geometric FK agrees with PoE FK.
 
-### 5. Run PIBench
+### 5. Run Chapter 5 — Inverse Kinematics
+
+```powershell
+cd chapter05_inverse_kinematics
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m pytest test_inverse_kinematics.py -v
+```
+
+Tests verify: numeric IK reaches a reachable target, analytic 2R IK recovers the planar solution, null-space centering helps redundancy resolution, and unreachable targets stay finite and in limits.
+
+To open the interactive viewer demo (optional, requires a display):
+
+```powershell
+python demo_ik_viewer.py
+```
+
+### 6. Run PIBench
 
 ```powershell
 cd pibench
@@ -296,6 +373,8 @@ $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python -m pibench run --suite statics --predictor physics_oracle --n 5
 python -m pibench run --suite dynamics --predictor physics_oracle --n 5
 python -m pibench run --suite contact --predictor physics_oracle --n 5
+python -m pibench run --suite articulated --predictor physics_oracle --n 5
+python -m pibench run --suite deformable --predictor physics_oracle --n 5
 python run_all.py
 ```
 
@@ -314,9 +393,9 @@ Expected output: `Overall accuracy: 100.0%` on every suite. Physics-oracle shoul
 
 ---
 
-## 🧱 PIBench — First Revolutionary Deliverable (Phases 0–3)
+## 🧱 PIBench — First Revolutionary Deliverable (Phases 0–4)
 
-PIBench is the executable first step toward the *Revolutionary Robotics* north star. It evaluates whether a model truly understands physical common sense across statics, dynamics, and contact/friction.
+PIBench is the executable first step toward the *Revolutionary Robotics* north star. It evaluates whether a model truly understands physical common sense across statics, dynamics, contact/friction, articulated constraints, and deformable bodies.
 
 ### What works now
 
@@ -336,9 +415,16 @@ PIBench is the executable first step toward the *Revolutionary Robotics* north s
   * `WedgeInsert` — does a wedge fit through a gap or jam?
   * `FrictionPile` — which object is hardest to start moving?
   * `SlipGrip` — gripper lifts the block or slips?
+* **Articulated suite (P4):**
+  * `DrawerPull` — does a pulled drawer open or jam on its slide?
+  * `DoorSwing` — does a pushed door swing open or stick at the hinge?
+  * `RopeTension` — which side of a pulley descends?
+  * `GearTurn` — which way does a meshed gear turn?
+* **Deformable suite (P4):**
+  * `ChainDrape` — how high is the free end of a chain draped over a bar?
 * **Baselines:** `physics_oracle` (100% on deterministic scenes), `random`.
 * **CLI:** `pibench list`, `pibench run`, `pibench render`.
-* **Tests:** 31 passing across engine + all scenes.
+* **Tests:** 43 passing across engine + all scenes.
 
 ### Run it
 
@@ -349,6 +435,8 @@ $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python -m pibench run --suite statics --predictor physics_oracle --n 10
 python -m pibench run --suite dynamics --predictor physics_oracle --n 10
 python -m pibench run --suite contact --predictor physics_oracle --n 10
+python -m pibench run --suite articulated --predictor physics_oracle --n 10
+python -m pibench run --suite deformable --predictor physics_oracle --n 10
 python run_all.py
 ```
 
@@ -356,7 +444,7 @@ Expected output: `Overall accuracy: 100.0%` on every suite. `physics_oracle` top
 
 ### Why this matters
 
-A model that can answer "which tower falls?" or "where does the projectile land?" is being forced to reason about center of mass, support polygon, friction, energy, and projectile motion — the same concepts in Chapters 2 and 3. With the contact suite it must also reason about moment balance, impulse, contact geometry, and Coulomb friction — the concepts in Chapter 4. As the textbook progresses, PIBench progresses: articulated bodies, and finally parameter estimation / counterfactuals.
+A model that can answer "which tower falls?" or "where does the projectile land?" is being forced to reason about center of mass, support polygon, friction, energy, and projectile motion — the same concepts in Chapters 2 and 3. With the contact suite it must also reason about moment balance, impulse, contact geometry, and Coulomb friction — the concepts in Chapter 4. With the articulated/deformable suite it must reason about constraints, prismatic and revolute joints, tendons, and coarse deformable approximations — the concepts in Chapter 5.
 
 ---
 
@@ -374,6 +462,16 @@ Each chapter feeds into that stack. Chapter 1 is the foundation (links, joints, 
 ---
 
 ## 📝 Changelog
+
+### 2026-08-18 — Chapter 5 Complete + PIBench Phase 4
+
+* **Chapter 5 — Inverse Kinematics:** added `chapter05_inverse_kinematics/` with numeric IK (damped/pure pseudoinverse), position-only mode, true null-space redundancy resolution, analytic planar 2R IK, and 4 pytest tests.
+* **PIBench Phase 4 (Articulated):** added `DrawerPull`, `DoorSwing`, `RopeTension`, and `GearTurn` using prismatic/hinge joints, spatial tendons, and gear-meshing kinematic principles.
+* **PIBench Phase 4 (Deformable):** added `ChainDrape` as a coarse capsule-chain approximation draped over a bar; numeric height answer.
+* **Engine helpers:** added `pibench/utils/articulated.py` with MJCF builders for prismatic joints, hinge joints, spatial tendons, and nested capsule chains.
+* **Tests:** expanded `tests/test_core.py` from 31 to 43 passing tests; physics oracle scores 100% across all five suites.
+* Updated `SCENE_CATALOG.md`, `pibench/README.md`, root `README.md`, and `memory.md`.
+* Ran full test suite and `run_all.py` baseline; committed and pushed to GitHub.
 
 ### 2026-08-13 — Chapters 2 & 3 Complete + PIBench Phases 1 & 2
 
