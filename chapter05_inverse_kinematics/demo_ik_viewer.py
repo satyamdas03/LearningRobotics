@@ -40,7 +40,7 @@ def main() -> None:
     </body>
 """
     # We create a separate model that includes both the arm and the marker.
-    xml_str = model.xml
+    xml_str = ik._xml
     xml_str = xml_str.replace("</mujoco>", target_body_xml + "</mujoco>")
     marker_model = mujoco.MjModel.from_xml_string(xml_str)
     marker_data = mujoco.MjData(marker_model)

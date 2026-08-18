@@ -33,7 +33,8 @@ class InverseKinematics:
                 / "simple_6dof_arm.xml"
             )
         with open(xml_path, "r", encoding="utf-8") as f:
-            self.model = mujoco.MjModel.from_xml_string(f.read())
+            self._xml = f.read()
+        self.model = mujoco.MjModel.from_xml_string(self._xml)
         self.data = mujoco.MjData(self.model)
         self.ee_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, "ee")
         self.joint_ids = [
