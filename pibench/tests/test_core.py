@@ -20,6 +20,13 @@ from pibench.scenes.contact import (
 )
 from pibench.scenes.deformable import ChainDrape
 from pibench.scenes.dynamics import CollisionBounce, PendulumSwing, ProjectileHit
+from pibench.scenes.params import (
+    BalanceAfterMove,
+    CounterfactualFriction,
+    CounterfactualMass,
+    FrictionOrder,
+    MassOrder,
+)
 from pibench.scenes.statics import SlopeSlide, SupportBalance, ToppleDirection, TowerFall
 
 
@@ -28,17 +35,24 @@ DYNAMICS_CLASSES = [PendulumSwing, CollisionBounce, ProjectileHit]
 CONTACT_CLASSES = [PushTipVsSlide, StackStability, WedgeInsert, FrictionPile, SlipGrip]
 ARTICULATED_CLASSES = [DrawerPull, DoorSwing, RopeTension, GearTurn]
 DEFORMABLE_CLASSES = [ChainDrape]
-ALL_CLASSES = STATICS_CLASSES + DYNAMICS_CLASSES + CONTACT_CLASSES + ARTICULATED_CLASSES + DEFORMABLE_CLASSES
+PARAMS_CLASSES = [MassOrder, FrictionOrder, CounterfactualMass, CounterfactualFriction, BalanceAfterMove]
+ALL_CLASSES = STATICS_CLASSES + DYNAMICS_CLASSES + CONTACT_CLASSES + ARTICULATED_CLASSES + DEFORMABLE_CLASSES + PARAMS_CLASSES
 
 
 def test_registry_populated():
     assert "statics" in list_suites()
     assert "dynamics" in list_suites()
     assert "contact" in list_suites()
+    assert "articulated" in list_suites()
+    assert "deformable" in list_suites()
+    assert "params" in list_suites()
     for suite, classes in [
         ("statics", STATICS_CLASSES),
         ("dynamics", DYNAMICS_CLASSES),
         ("contact", CONTACT_CLASSES),
+        ("articulated", ARTICULATED_CLASSES),
+        ("deformable", DEFORMABLE_CLASSES),
+        ("params", PARAMS_CLASSES),
     ]:
         names = [cls.__name__ for cls in list_problems(suite)]
         for cls in classes:
@@ -325,7 +339,84 @@ def test_physics_oracle_perfect_on_each_deformable_scene():
         assert problem.score(pred) == 1.0, f"physics oracle failed on {cls.__name__}"
 
 
+def test_mass_order_question():
+    problem = MassOrder(seed=0)
+    q = problem.question()
+    assert q.answer_type == AnswerType.CHOICE
+    assert set(q.choices) == {"A", "B", "C"}
+
+
+def test_mass_order_ground_truth_runs():
+    problem = MassOrder(seed=0)
+    gt = problem.ground_truth()
+    assert gt.answer in {"A", "B", "C"}
+    assert "mass_a" in gt.latent_params
+
+
+def test_friction_order_question():
+    problem = FrictionOrder(seed=0)
+    q = problem.question()
+    assert q.answer_type == AnswerType.CHOICE
+    assert set(q.choices) == {"A", "B", "C"}
+
+
+def test_friction_order_ground_truth_runs():
+    problem = FrictionOrder(seed=0)
+    gt = problem.ground_truth()
+    assert gt.answer in {"A", "B", "C"}
+    assert "mu_a" in gt.latent_params
+
+
+def test_counterfactual_mass_question():
+    problem = CounterfactualMass(seed=0)
+    q = problem.question()
+    assert q.answer_type == AnswerType.BOOLEAN
+
+
+def test_counterfactual_mass_ground_truth_runs():
+    problem = CounterfactualMass(seed=0)
+    gt = problem.ground_truth()
+    assert gt.answer in {"yes", "no"}
+    assert "counterfactual_top_mass" in gt.latent_params
+
+
+def test_counterfactual_friction_question():
+    problem = CounterfactualFriction(seed=0)
+    q = problem.question()
+    assert q.answer_type == AnswerType.BOOLEAN
+
+
+def test_counterfactual_friction_ground_truth_runs():
+    problem = CounterfactualFriction(seed=0)
+    gt = problem.ground_truth()
+    assert gt.answer in {"yes", "no"}
+    assert "mu_s" in gt.latent_params
+
+
+def test_balance_after_move_question():
+    problem = BalanceAfterMove(seed=0)
+    q = problem.question()
+    assert q.answer_type == AnswerType.NUMERIC
+    assert q.units == "m"
+
+
+def test_balance_after_move_ground_truth_runs():
+    problem = BalanceAfterMove(seed=0)
+    gt = problem.ground_truth()
+    assert isinstance(gt.answer, float)
+    assert "new_balance" in gt.latent_params
+
+
+def test_physics_oracle_perfect_on_each_params_scene():
+    for cls in PARAMS_CLASSES:
+        problem = cls(seed=1)
+        oracle = PhysicsOraclePredictor()
+        pred = oracle.predict(problem)
+        assert problem.score(pred) == 1.0, f"physics oracle failed on {cls.__name__}"
+
+
 def test_suite_instantiates():
+
     suite = Suite("statics", seed=0, n_instances=2)
     problems = suite.problems()
     assert len(problems) == len(STATICS_CLASSES) * 2
@@ -351,6 +442,11 @@ def test_suite_instantiates():
     assert len(def_problems) == len(DEFORMABLE_CLASSES) * 2
     assert all(type(p) in DEFORMABLE_CLASSES for p in def_problems)
 
+    params_suite = Suite("params", seed=0, n_instances=2)
+    params_problems = params_suite.problems()
+    assert len(params_problems) == len(PARAMS_CLASSES) * 2
+    assert all(type(p) in PARAMS_CLASSES for p in params_problems)
+
 
 def test_runner_and_evaluator():
     statics_suite = Suite("statics", seed=0, n_instances=3)
@@ -358,6 +454,7 @@ def test_runner_and_evaluator():
     contact_suite = Suite("contact", seed=0, n_instances=3)
     articulated_suite = Suite("articulated", seed=0, n_instances=3)
     deformable_suite = Suite("deformable", seed=0, n_instances=3)
+    params_suite = Suite("params", seed=0, n_instances=3)
     runner = Runner(PhysicsOraclePredictor())
     result = runner.run([
         statics_suite,
@@ -365,6 +462,7 @@ def test_runner_and_evaluator():
         contact_suite,
         articulated_suite,
         deformable_suite,
+        params_suite,
     ])
     metrics = Evaluator.metrics(result)
     assert metrics["overall_accuracy"] == 1.0
@@ -377,7 +475,8 @@ def test_random_baseline_scores_less_than_oracle():
     contact_suite = Suite("contact", seed=0, n_instances=10)
     articulated_suite = Suite("articulated", seed=0, n_instances=10)
     deformable_suite = Suite("deformable", seed=0, n_instances=10)
-    suites = [statics_suite, dynamics_suite, contact_suite, articulated_suite, deformable_suite]
+    params_suite = Suite("params", seed=0, n_instances=10)
+    suites = [statics_suite, dynamics_suite, contact_suite, articulated_suite, deformable_suite, params_suite]
     oracle_result = Runner(PhysicsOraclePredictor()).run(suites)
     random_result = Runner(RandomPredictor(seed=7)).run(suites)
     oracle_acc = Evaluator.metrics(oracle_result)["overall_accuracy"]

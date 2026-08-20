@@ -1,5 +1,5 @@
 """PIBench scene collection."""
 # Import suites so the registry is populated.
-from pibench.scenes import articulated, contact, deformable, dynamics, statics
+from pibench.scenes import articulated, contact, deformable, dynamics, params, statics
 
-__all__ = ["statics", "dynamics", "contact", "articulated", "deformable"]
+__all__ = ["statics", "dynamics", "contact", "articulated", "deformable", "params"]

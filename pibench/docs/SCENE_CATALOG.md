@@ -275,30 +275,104 @@ The platform tilts to a random angle. MuJoCo rolls the simulation forward until 
 
 ## Parameter Estimation / Counterfactual Suite
 
-*Coming in Phase 5.*
+### `MassOrder`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/params/mass_order.py` |
+| **Question** | Three blocks receive identical pushes on a frictionless surface. Which is heaviest? |
+| **Answer type** | Choice: `"A"`, `"B"`, `"C"` |
+| **Concepts** | Mass, impulse, displacement inference, Newton's second law |
+| **Textbook link** | Chapter 6 — dynamics / force and acceleration |
+| **Ground truth** | Heaviest block has smallest displacement under identical impulse |
+
+**Latent parameters:** `mass_a`, `mass_b`, `mass_c`, `force`, `duration`, `displacements`.
+
+---
+
+### `FrictionOrder`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/params/friction_order.py` |
+| **Question** | Three blocks sit on a platform that slowly tilts. Which surface is most slippery? |
+| **Answer type** | Choice: `"A"`, `"B"`, `"C"` |
+| **Concepts** | Static friction, tilt threshold, angle of repose, surface ranking |
+| **Textbook link** | Chapter 4 — contact / friction |
+| **Ground truth** | Block with lowest `mu_s` slides first |
+
+**Latent parameters:** `mu_a`, `mu_b`, `mu_c`, `tilt_angle_deg`.
+
+---
+
+### `CounterfactualMass`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/params/counterfactual_mass.py` |
+| **Question** | A tower stands on a tilting platform. If the top block's mass were doubled, would it still stand? |
+| **Answer type** | Boolean: `"yes"` / `"no"` |
+| **Concepts** | Counterfactual reasoning, stability, mass scaling |
+| **Textbook link** | Chapter 6 — dynamics / stability |
+| **Ground truth** | Rebuild the scene with doubled top mass and rerun tilt simulation |
+
+**Latent parameters:** `base_width`, `top_mass`, `top_mass_multiplier`, `counterfactual_top_mass`, `tilt_angle_deg`.
+
+---
+
+### `CounterfactualFriction`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/params/counterfactual_friction.py` |
+| **Question** | A block rests on an incline. If static friction were zero, would it slide down? |
+| **Answer type** | Boolean: `"yes"` / `"no"` |
+| **Concepts** | Counterfactual reasoning, friction, inclined plane |
+| **Textbook link** | Chapter 4 — contact / friction |
+| **Ground truth** | Rebuild the incline with `mu_s = 0` and check motion |
+
+**Latent parameters:** `angle_deg`, `mu_s`, `counterfactual_mu_s`, `block_mass`.
+
+---
+
+### `BalanceAfterMove`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/params/balance_after_move.py` |
+| **Question** | A point mass on a beam is moved a known distance. How far must the support shift to keep the beam balanced? |
+| **Answer type** | Numeric (meters), tolerance-based scoring |
+| **Concepts** | Center of mass, torque balance, support shift |
+| **Textbook link** | Chapter 2 — rigid-body moments / static equilibrium |
+| **Ground truth** | Analytic support-location update; numeric verification via counterfactual rebuild |
+
+**Latent parameters:** `beam_mass`, `point_mass`, `mass_offset`, `move_distance`, `new_balance`.
 
 ---
 
 ## Concept coverage map
 
-| Concept | TowerFall | SlopeSlide | SupportBalance | ToppleDirection | CollisionBounce | PendulumSwing | ProjectileHit | PushTipVsSlide | StackStability | WedgeInsert | FrictionPile | SlipGrip | DrawerPull | DoorSwing | RopeTension | GearTurn | ChainDrape |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Center of mass | ✅ | ✅ | ✅ | ✅ | | | | ✅ | ✅ | | | | | | | | |
-| Support polygon | ✅ | | ✅ | ✅ | | | | | ✅ | | | | | | | | |
-| Friction / angle of repose | | ✅ | | | | | | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | | | |
-| Torque balance | | | ✅ | | | | | ✅ | | | | | | ✅ | | | |
-| Toppling direction | | | | ✅ | | | | ✅ | | | | | | | | | |
-| Conservation of momentum | | | | | ✅ | | | | ✅ | | | | | | | | |
-| Conservation of energy | | | | | ✅ | ✅ | | | | | | | | | | | |
-| Period / length scaling | | | | | | ✅ | | | | | | | | | | | |
-| Projectile range | | | | | | | ✅ | | | | | | | | | | |
-| Contact geometry / jamming | | | | | | | | | | ✅ | | | | | | | |
-| Grip friction / static threshold | | | | | | | | | | | ✅ | ✅ | | | | | |
-| Prismatic / hinge constraints | | | | | | | | | | | | | ✅ | ✅ | | | |
-| Tendons / pulleys | | | | | | | | | | | | | | | ✅ | | |
-| Gear meshing / kinematic chains | | | | | | | | | | | | | | | | ✅ | |
-| Deformable-body approximation | | | | | | | | | | | | | | | | | ✅ |
+| Concept | TowerFall | SlopeSlide | SupportBalance | ToppleDirection | CollisionBounce | PendulumSwing | ProjectileHit | PushTipVsSlide | StackStability | WedgeInsert | FrictionPile | SlipGrip | DrawerPull | DoorSwing | RopeTension | GearTurn | ChainDrape | MassOrder | FrictionOrder | CounterfactualMass | CounterfactualFriction | BalanceAfterMove |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Center of mass | ✅ | ✅ | ✅ | ✅ | | | | ✅ | ✅ | | | | | | | | | | | | | |
+| Support polygon | ✅ | | ✅ | ✅ | | | | | ✅ | | | | | | | | | | | | | |
+| Friction / angle of repose | | ✅ | | | | | | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | | | | | ✅ | | ✅ | |
+| Torque balance | | | ✅ | | | | | ✅ | | | | | | ✅ | | | | | | | | ✅ |
+| Toppling direction | | | | ✅ | | | | ✅ | | | | | | | | | | | | ✅ | | |
+| Conservation of momentum | | | | | ✅ | | | | ✅ | | | | | | | | | ✅ | | | | |
+| Conservation of energy | | | | | ✅ | ✅ | | | | | | | | | | | | ✅ | | | | |
+| Period / length scaling | | | | | | ✅ | | | | | | | | | | | | | | | | |
+| Projectile range | | | | | | | ✅ | | | | | | | | | | | | | | | |
+| Contact geometry / jamming | | | | | | | | | | ✅ | | | | | | | | | | | | |
+| Grip friction / static threshold | | | | | | | | | | | ✅ | ✅ | | | | | | | ✅ | | | |
+| Prismatic / hinge constraints | | | | | | | | | | | | | ✅ | ✅ | | | | | | | | |
+| Tendons / pulleys | | | | | | | | | | | | | | | ✅ | | | | | | | |
+| Gear meshing / kinematic chains | | | | | | | | | | | | | | | | ✅ | | | | | | |
+| Deformable-body approximation | | | | | | | | | | | | | | | | | ✅ | | | | | |
+| Mass / inertia | | | | | ✅ | | | | | | ✅ | | | | | | | ✅ | | ✅ | | |
+| Counterfactual reasoning | | | | | | | | | | | | | | | | | | | | ✅ | ✅ | |
+| Parameter estimation | | | | | | | | | | | | | | | | | | ✅ | ✅ | | | |
 
 ---
 
-*Last updated: 2026-08-18*
+*Last updated: 2026-08-20*

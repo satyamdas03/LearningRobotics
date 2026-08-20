@@ -268,25 +268,34 @@ Files:
 
 ---
 
-### Phase 5 — Parameter Estimation & Counterfactual Suite
+### Phase 5 — Parameter Estimation & Counterfactual Suite ✅
 
 **Textbook alignment:** Consolidates Chapters 2–5; introduces system identification and causal reasoning.
 
 **New scenes:**
-1. `mass_order` — order objects by mass from observations of collisions/pushes.
-2. `friction_order` — rank surfaces by friction from sliding distances.
-3. `counterfactual_mass` — "If this object had double mass, would the tower still stand?"
-4. `counterfactual_friction` — "If friction were zero, would the block slide?"
-5. `property_from_video_stub` — placeholder scene that will later consume rendered frames.
+1. `mass_order.py` — order objects by mass from observed displacements after identical pushes.
+2. `friction_order.py` — rank surfaces by friction from tilt threshold.
+3. `counterfactual_mass.py` — "If this object had double mass, would the tower still stand?"
+4. `counterfactual_friction.py` — "If friction were zero, would the block slide?"
+5. `balance_after_move.py` — "How far must the support shift after a point mass is moved on a beam?"
+
+Files: `pibench/scenes/params/{mass_order,friction_order,counterfactual_mass,counterfactual_friction,balance_after_move}.py`.
 
 **Engine additions:**
-* Counterfactual query API: clone scene, modify parameter, rerun.
-* Support for multi-step reasoning questions.
+* `pibench/core/counterfactual.py` — `CounterfactualBuilder` and `counterfactual(problem, **overrides)` convenience function.
+* `pibench/core/problem.py` — `_counterfactual_params()` defaulting to `latent_params` keys; scenes override to control rebuildable parameters.
+* Cloning by re-instantiation with the same seed and applying overrides before `_build_scene()`, avoiding unsafe deep-copy of MuJoCo objects.
+
+**Predictor additions:**
+* `pibench/predictors/llm_predictor.py` — optional Anthropic API predictor with local cache and random fallback.
+* `pibench/cli.py` — dynamic `--predictor` choices; `llm` shown only when `anthropic` is installed.
 
 **Success criteria:**
-* Parameter/counterfactual suite has ≥5 scenes.
-* Counterfactual API works for mass and friction.
-* A model-agnostic "reasoning trace" field is captured.
+* Parameter/counterfactual suite has ≥5 scenes. ✅
+* Counterfactual API works for mass and friction. ✅
+* A model-agnostic predictor harness accepts an optional LLM. ✅
+
+**Status:** completed 2026-08-20.
 
 ---
 

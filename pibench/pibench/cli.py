@@ -6,19 +6,32 @@ import json
 import sys
 from pathlib import Path
 
-from pibench.core.evaluator import Evaluator
-from pibench.core.registry import list_suites, list_problems
+from pibench.core.registry import list_problems, list_suites
 from pibench.core.suite import Suite
-from pibench.predictors.physics_oracle import PhysicsOraclePredictor
-from pibench.predictors.random_predictor import RandomPredictor
+from pibench.core.evaluator import Evaluator
 
 
 def _get_predictor(name: str):
     if name == "random":
+        from pibench.predictors.random_predictor import RandomPredictor
         return RandomPredictor()
     if name == "physics_oracle":
+        from pibench.predictors.physics_oracle import PhysicsOraclePredictor
         return PhysicsOraclePredictor()
-    raise ValueError(f"Unknown predictor '{name}'. Available: random, physics_oracle")
+    if name == "llm":
+        from pibench.predictors.llm_predictor import LLMPredictor
+        return LLMPredictor()
+    raise ValueError(f"Unknown predictor: {name}")
+
+
+def _available_predictor_choices() -> list[str]:
+    choices = ["random", "physics_oracle"]
+    try:
+        import anthropic  # noqa: F401
+        choices.append("llm")
+    except ImportError:
+        pass
+    return choices
 
 
 def cmd_list(args: argparse.Namespace) -> int:
@@ -135,7 +148,7 @@ def main(argv: list[str] | None = None) -> int:
 
     run_parser = subparsers.add_parser("run", help="Run a predictor on suites")
     run_parser.add_argument(
-        "--predictor", default="physics_oracle", choices=["random", "physics_oracle"],
+        "--predictor", default="physics_oracle", choices=_available_predictor_choices(),
         help="Predictor to evaluate",
     )
     run_parser.add_argument(

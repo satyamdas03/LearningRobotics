@@ -48,6 +48,7 @@ Registered suites:
   contact: ['FrictionPile', 'PushTipVsSlide', 'SlipGrip', 'StackStability', 'WedgeInsert']
   deformable: ['ChainDrape']
   dynamics: ['CollisionBounce', 'PendulumSwing', 'ProjectileHit']
+  params: ['BalanceAfterMove', 'CounterfactualFriction', 'CounterfactualMass', 'FrictionOrder', 'MassOrder']
   statics: ['SlopeSlide', 'SupportBalance', 'ToppleDirection', 'TowerFall']
 
 Predictor: physics_oracle
@@ -68,7 +69,7 @@ source .venv/bin/activate  # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 ```
 
-Dependencies: `mujoco>=3.11.0`, `numpy`, `pydantic`, `pillow`, `pytest`.
+Dependencies: `mujoco>=3.11.0`, `numpy`, `pydantic`, `pillow`, `pytest`. Optional: `anthropic>=0.30.0` for the LLM predictor.
 
 ---
 
@@ -102,17 +103,23 @@ pibench/
 │   │   │   └── rope_tension.py       # Which side of the pulley descends?
 │   │   ├── deformable/         # Phase 4: coarse deformable bodies
 │   │   │   └── chain_drape.py        # Free-end height of a chain over a bar
-│   │   └── params/             # (Phase 5)
+│   │   └── params/                # Phase 5: parameter estimation & counterfactuals
+│       ├── mass_order.py         # Order blocks by mass from observed displacements
+│       ├── friction_order.py     # Rank surfaces by slipperiness from tilt threshold
+│       ├── counterfactual_mass.py     # What if top mass doubled?
+│       ├── counterfactual_friction.py   # What if friction were zero?
+│       └── balance_after_move.py        # Support shift after moving a point mass
 │   ├── predictors/             # Baselines and model stubs
 │   │   ├── base.py
 │   │   ├── random_predictor.py
-│   │   └── physics_oracle.py
+│   │   ├── physics_oracle.py
+│   │   └── llm_predictor.py   # Optional Anthropic API predictor (cache + random fallback)
 │   └── utils/
 │       ├── mjcf.py             # Programmatic MJCF helpers
 │       ├── contact.py          # Contact-event and pusher helpers
 │       └── articulated.py      # Joints, tendons, capsule chains
 ├── tests/
-│   └── test_core.py            # Engine + all scenes (44 tests)
+│   └── test_core.py            # Engine + all scenes (55 tests)
 ├── run_all.py                  # Run all suites across all baselines
 ├── requirements.txt
 └── README.md                   # This file
@@ -129,6 +136,7 @@ python -m pibench run --suite dynamics --predictor physics_oracle --n 20
 python -m pibench run --suite contact --predictor physics_oracle --n 20
 python -m pibench run --suite articulated --predictor physics_oracle --n 20
 python -m pibench run --suite deformable --predictor physics_oracle --n 20
+python -m pibench run --suite params --predictor physics_oracle --n 20
 
 # Random baseline
 python -m pibench run --suite statics --predictor random --n 20 --seed 0
@@ -136,6 +144,10 @@ python -m pibench run --suite dynamics --predictor random --n 20 --seed 0
 python -m pibench run --suite contact --predictor random --n 20 --seed 0
 python -m pibench run --suite articulated --predictor random --n 20 --seed 0
 python -m pibench run --suite deformable --predictor random --n 20 --seed 0
+python -m pibench run --suite params --predictor random --n 20 --seed 0
+
+# Optional LLM baseline (requires anthropic SDK + ANTHROPIC_API_KEY)
+python -m pibench run --suite params --predictor llm --n 5
 
 # Save results to JSON
 python -m pibench run --suite contact --predictor physics_oracle --n 20 --output output/results_oracle.json
@@ -218,6 +230,34 @@ Two free bodies are linked by a MuJoCo spatial tendon passing over a pulley site
 
 A coarse deformable approximation is built from nested capsules connected by ball joints. The numeric answer is the final height of the chain's free end after settling.
 
+### `MassOrder` (params)
+
+**Concepts:** Mass, impulse, displacement inference  
+**Question:** *Three blocks receive identical pushes on a frictionless surface. Which is heaviest?*
+
+The heaviest block experiences the smallest displacement, so the answer follows the inverse of observed displacement.
+
+### `FrictionOrder` (params)
+
+**Concepts:** Static friction, tilt threshold, surface ranking  
+**Question:** *Three blocks sit on a tilting platform with different surface friction. Which surface is most slippery?*
+
+The block with the lowest static-friction coefficient slides first, so its surface is the slipperiest.
+
+### `CounterfactualMass` (params)
+
+**Concepts:** Counterfactual reasoning, stability, mass scaling  
+**Question:** *A tower stands with a top block. If the top block's mass were doubled, would the tower still stand?*
+
+The scene rebuilds itself with the doubled mass and reruns the tilt simulation to answer yes/no.
+
+### `BalanceAfterMove` (params)
+
+**Concepts:** Torque balance, support shift, center of mass  
+**Question:** *A point mass on a beam is moved a known distance. How far must the support shift to keep the beam balanced?*
+
+The answer comes from an analytic support-location update; the scene verifies it numerically.
+
 ---
 
 ## 🧰 Adding a new scene
@@ -264,7 +304,7 @@ $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python -m pytest tests -q
 ```
 
-Current status: **44 passed**.
+Current status: **55 passed**.
 
 ---
 
@@ -277,8 +317,8 @@ Current status: **44 passed**.
 | **2** | Dynamics | Newtonian mechanics | ✅ 3 scenes |
 | **3** | Contact & friction | Chapter 4 (velocity kinematics / contacts) | ✅ 5 scenes |
 | **4** | Articulated & deformable | Chapter 5 (IK / constraints) | ✅ 5 scenes |
-| **5** | Parameter estimation & counterfactuals | Consolidation + system ID | ≥5 scenes |
-| **6** | Model harness + leaderboard | — | VLM stub, static leaderboard |
+| **5** | Parameter estimation & counterfactuals | Consolidation + system ID | ✅ 5 scenes |
+| **6** | Model harness + leaderboard | — | VLM/LLM harness, static leaderboard |
 | **7** | Real-robot validation subset | — | Protocol for AM-ARM / Forte |
 
 ---

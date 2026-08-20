@@ -5,3 +5,5 @@ numpy>=1.24.0
 pydantic>=2.0
 pillow>=10.0
 pytest>=8.0
+# Optional: enable the LLM predictor (Claude) and cached API calls.
+anthropic>=0.30.0

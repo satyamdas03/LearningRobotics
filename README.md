@@ -57,7 +57,8 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | **P3** | **PIBench — Contact Suite** | ✅ Complete | `PushTipVsSlide`, `StackStability`, `WedgeInsert`, `FrictionPile`, `SlipGrip` |
 | 5 | Inverse Kinematics | ✅ Complete | `chapter05_inverse_kinematics/` with numeric/analytic IK + null-space redundancy |
 | **P4** | **PIBench — Articulated & Deformable Suite** | ✅ Complete | `DrawerPull`, `DoorSwing`, `RopeTension`, `GearTurn`, `ChainDrape` |
-| 6 | Dynamics | ⏳ Planned | TBD |
+| 6 | Dynamics | ✅ Complete | `ArmDynamics`: mass matrix, Coriolis+gravity, forward/inverse dynamics |
+| **P5** | **PIBench — Parameter Estimation & Counterfactuals** | ✅ Complete | `MassOrder`, `FrictionOrder`, `CounterfactualMass`, `CounterfactualFriction`, `BalanceAfterMove` |
 | 7 | Control | ⏳ Planned | TBD |
 | 8 | Motion Planning | ⏳ Planned | TBD |
 | 9 | Reinforcement Learning with Isaac Lab | ⏳ Planned | TBD |
@@ -94,15 +95,27 @@ LearningRobotics/
 │   ├── velocity_kinematics.py     # Twist, inverse velocity, null-space demo
 │   ├── demo_jacobian_viewer.py    # MuJoCo viewer with J⁺ velocity control
 │   └── test_jacobian.py           # pytest suite
-└── pibench/                       # Physical Intuition Benchmark (Phases 0-4)
+├── chapter05_inverse_kinematics/  # Chapter 5: inverse kinematics
+│   ├── requirements.txt           # mujoco + numpy + pytest
+│   ├── inverse_kinematics.py      # numeric + analytic IK, null-space redundancy
+│   ├── demo_ik_viewer.py          # interactive IK tracking demo
+│   └── test_inverse_kinematics.py # pytest suite
+├── chapter06_dynamics/            # Chapter 6: dynamics
+│   ├── requirements.txt           # mujoco + numpy + pytest
+│   ├── dynamics.py                # mass matrix, bias forces, forward/inverse dynamics
+│   ├── demo_dynamics_viewer.py    # gravity compensation / free-fall toggle demo
+│   └── test_dynamics.py           # pytest suite
+└── pibench/                       # Physical Intuition Benchmark (Phases 0-5)
     ├── README.md                  # PIBench overview and quickstart
     ├── requirements.txt           # MuJoCo + benchmark deps
     ├── pibench/                   # Python package
+    │   ├── core/                  # Engine + counterfactual builder
     │   ├── scenes/statics/        # TowerFall, SlopeSlide, SupportBalance, ToppleDirection
     │   ├── scenes/dynamics/       # PendulumSwing, CollisionBounce, ProjectileHit
     │   ├── scenes/contact/        # PushTipVsSlide, StackStability, WedgeInsert, FrictionPile, SlipGrip
     │   ├── scenes/articulated/    # DrawerPull, DoorSwing, RopeTension, GearTurn
     │   ├── scenes/deformable/     # ChainDrape
+    │   ├── scenes/params/         # MassOrder, FrictionOrder, CounterfactualMass, CounterfactualFriction, BalanceAfterMove
     │   └── utils/                 # MJCF + contact + articulated helpers
     ├── tests/                     # pytest suite
     └── run_all.py                 # Run all suites across all predictors
@@ -288,6 +301,33 @@ The chapter recommended installing Isaac Sim. I chose MuJoCo for the first pract
 
 ---
 
+## ✅ Chapter 6 — Dynamics
+
+### Concepts locked in
+
+* **Mass matrix M(q)** — the symmetric, positive-definite matrix mapping joint accelerations to generalized forces.
+* **Coriolis + gravity bias** — velocity-dependent and gravitational terms that must be overcome to maintain a state.
+* **Forward dynamics** — compute joint accelerations from applied torques: `q̈ = M(q)^{-1} (τ - C(q,q̇)q̇ - g(q))`.
+* **Inverse dynamics** — compute the torques required to produce a desired acceleration: `τ = M(q)q̈ + C(q,q̇)q̇ + g(q)`.
+* **Gravity compensation** — the torque needed to hold the arm stationary against gravity (`q̇ = 0, q̈ = 0`).
+
+### Files
+
+| File | Purpose |
+|---|---|
+| `dynamics.py` | `ArmDynamics`: mass matrix, Coriolis+gravity bias, gravity-only term, velocity-dependent Coriolis term, forward dynamics, inverse dynamics, Euler integration step |
+| `demo_dynamics_viewer.py` | MuJoCo viewer that toggles between gravity compensation and free fall every 3 seconds |
+| `test_dynamics.py` | 6 pytest tests: symmetry/positive-definiteness of M(q), M-column vs inverse dynamics, gravity compensation, free-fall acceleration, Euler step vs MuJoCo, inverse/forward consistency |
+
+### Validation
+
+* `M(q)` is symmetric and positive definite for every tested configuration.
+* Forward and inverse dynamics are mutually consistent to 1e-3 across random states.
+* Our simple Euler step matches MuJoCo's `mj_step` for one integration step to 1e-3.
+* Under zero torque the arm accelerates downward due to gravity; under gravity compensation it would remain static.
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Clone the repo
@@ -363,7 +403,25 @@ To open the interactive viewer demo (optional, requires a display):
 python demo_ik_viewer.py
 ```
 
-### 6. Run PIBench
+### 6. Run Chapter 6 — Dynamics
+
+```powershell
+cd chapter06_dynamics
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m pytest test_dynamics.py -v
+```
+
+Tests verify: `M(q)` is symmetric and positive definite, forward/inverse dynamics are consistent, gravity compensation matches static torque, and our Euler step matches MuJoCo for one step.
+
+To open the interactive viewer demo (optional, requires a display):
+
+```powershell
+python demo_dynamics_viewer.py
+```
+
+### 7. Run PIBench
 
 ```powershell
 cd pibench
@@ -374,6 +432,7 @@ python -m pibench run --suite dynamics --predictor physics_oracle --n 5
 python -m pibench run --suite contact --predictor physics_oracle --n 5
 python -m pibench run --suite articulated --predictor physics_oracle --n 5
 python -m pibench run --suite deformable --predictor physics_oracle --n 5
+python -m pibench run --suite params --predictor physics_oracle --n 5
 python run_all.py
 ```
 
@@ -392,9 +451,9 @@ Expected output: `Overall accuracy: 100.0%` on every suite. Physics-oracle shoul
 
 ---
 
-## 🧱 PIBench — First Revolutionary Deliverable (Phases 0–4)
+## 🧱 PIBench — First Revolutionary Deliverable (Phases 0–5)
 
-PIBench is the executable first step toward the *Revolutionary Robotics* north star. It evaluates whether a model truly understands physical common sense across statics, dynamics, contact/friction, articulated constraints, and deformable bodies.
+PIBench is the executable first step toward the *Revolutionary Robotics* north star. It evaluates whether a model truly understands physical common sense across statics, dynamics, contact/friction, articulated constraints, deformable bodies, and parameter estimation / counterfactual reasoning.
 
 ### What works now
 
@@ -421,9 +480,15 @@ PIBench is the executable first step toward the *Revolutionary Robotics* north s
   * `GearTurn` — which way does a meshed gear turn?
 * **Deformable suite (P4):**
   * `ChainDrape` — how high is the free end of a chain draped over a bar?
-* **Baselines:** `physics_oracle` (100% on deterministic scenes), `random`.
+* **Parameter estimation & counterfactual suite (P5):**
+  * `MassOrder` — order three blocks by mass from observed displacements after identical pushes.
+  * `FrictionOrder` — rank three surfaces by slipperiness from tilt threshold.
+  * `CounterfactualMass` — if the top mass of a tower were doubled, would it still stand?
+  * `CounterfactualFriction` — if static friction on an incline were zero, would the block slide?
+  * `BalanceAfterMove` — how far must the support shift after a point mass is moved on a beam?
+* **Baselines:** `physics_oracle` (100% on deterministic scenes), `random`, optional `llm` (requires `anthropic` SDK + `ANTHROPIC_API_KEY`).
 * **CLI:** `pibench list`, `pibench run`, `pibench render`, `pibench view`.
-* **Tests:** 44 passing across engine + all scenes.
+* **Tests:** 55 passing across engine + all scenes.
 
 ### Run it
 
@@ -436,6 +501,7 @@ python -m pibench run --suite dynamics --predictor physics_oracle --n 10
 python -m pibench run --suite contact --predictor physics_oracle --n 10
 python -m pibench run --suite articulated --predictor physics_oracle --n 10
 python -m pibench run --suite deformable --predictor physics_oracle --n 10
+python -m pibench run --suite params --predictor physics_oracle --n 10
 python -m pibench view TowerFall
 python run_all.py
 ```
@@ -444,7 +510,7 @@ Expected output: `Overall accuracy: 100.0%` on every suite. `physics_oracle` top
 
 ### Why this matters
 
-A model that can answer "which tower falls?" or "where does the projectile land?" is being forced to reason about center of mass, support polygon, friction, energy, and projectile motion — the same concepts in Chapters 2 and 3. With the contact suite it must also reason about moment balance, impulse, contact geometry, and Coulomb friction — the concepts in Chapter 4. With the articulated/deformable suite it must reason about constraints, prismatic and revolute joints, tendons, and coarse deformable approximations — the concepts in Chapter 5.
+A model that can answer "which tower falls?" or "where does the projectile land?" is being forced to reason about center of mass, support polygon, friction, energy, and projectile motion — the same concepts in Chapters 2 and 3. With the contact suite it must also reason about moment balance, impulse, contact geometry, and Coulomb friction — the concepts in Chapter 4. With the articulated/deformable suite it must reason about constraints, prismatic and revolute joints, tendons, and coarse deformable approximations — the concepts in Chapter 5. With the parameter-estimation / counterfactual suite it must infer latent physical properties (mass, friction) from observations and answer "what if?" questions — the system-identification and causal-reasoning skills that feed directly into Chapter 6 dynamics and future control.
 
 ---
 
@@ -462,6 +528,17 @@ Each chapter feeds into that stack. Chapter 1 is the foundation (links, joints, 
 ---
 
 ## 📝 Changelog
+
+### 2026-08-20 — Chapter 6 Complete + PIBench Phase 5
+
+* **Chapter 6 — Dynamics:** added `chapter06_dynamics/` with `ArmDynamics` class wrapping `simple_6dof_arm.xml`. Implements mass matrix `M(q)`, Coriolis+gravity bias, gravity-only and Coriolis-only terms, forward dynamics `q̈ = M^{-1}(τ - bias)`, inverse dynamics `τ = Mq̈ + bias`, and a simple Euler integration step. Includes an interactive viewer demo that toggles gravity compensation / free fall every 3 seconds, plus 6 pytest tests.
+* **PIBench Phase 5 (Parameter Estimation & Counterfactuals):** added `MassOrder`, `FrictionOrder`, `CounterfactualMass`, `CounterfactualFriction`, and `BalanceAfterMove` to a new `params` suite.
+* **Counterfactual engine:** added `pibench/core/counterfactual.py` with `CounterfactualBuilder` and `counterfactual(problem, **overrides)` convenience function; problems expose `_counterfactual_params()` to declare re-buildable latent parameters.
+* **LLM predictor stub:** added `pibench/predictors/llm_predictor.py` (optional; requires `anthropic` SDK and `ANTHROPIC_API_KEY`), with local cache fallback and random fallback when no key is available.
+* **CLI:** `pibench run --predictor` now dynamically shows `llm` only when the Anthropic SDK is installed.
+* **Tests:** expanded `pibench/tests/test_core.py` from 43 to 55 passing tests; physics oracle scores 100% across all six suites. `chapter06_dynamics/test_dynamics.py` adds 6 passing tests.
+* **Documentation:** updated `SCENE_CATALOG.md`, `pibench/docs/PLAN.md`, `pibench/README.md`, root `README.md`, and `memory.md`; added `docs/HARDWARE_BOM.md` memo for the sub-$500 hardware stack.
+* Ran full test suite, `run_all.py` baseline, and `showcase.py`; committed and pushed to GitHub.
 
 ### 2026-08-18 — Chapter 5 Complete + PIBench Phase 4
 

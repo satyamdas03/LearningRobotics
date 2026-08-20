@@ -1,4 +1,4 @@
-"""Render a visual showcase of LearningRobotics Chapters 1-5 + PIBench Phases 0-4.
+"""Render a visual showcase of LearningRobotics Chapters 1-6 + PIBench Phases 0-5.
 
 Outputs PNG thumbnails to output/showcase/ with auto-framed cameras.
 """
@@ -12,7 +12,9 @@ import mujoco
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "chapter05_inverse_kinematics"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "chapter06_dynamics"))
 from inverse_kinematics import InverseKinematics  # noqa: E402
+from dynamics import ArmDynamics  # noqa: E402
 
 
 OUTPUT_DIR = Path(__file__).parent / "output" / "showcase"
@@ -110,6 +112,15 @@ def render_arm_ik() -> Path:
     return _render_model(ik.model, ik.data, out)
 
 
+def render_arm_dynamics() -> Path:
+    """Render the 6-DOF arm under gravity compensation at a non-trivial pose."""
+    dyn = ArmDynamics()
+    q = np.array([0.2, -0.3, 0.5, 0.0, 0.2, -0.1])
+    dyn.set_state(q, np.zeros(dyn.model.nq))
+    out = OUTPUT_DIR / "arm_dynamics_pose.png"
+    return _render_model(dyn.model, dyn.data, out)
+
+
 def render_scene(name: str) -> Path | None:
     """Render a PIBench scene with auto-framed camera."""
     out = OUTPUT_DIR / f"{name.lower()}_seed0.png"
@@ -123,6 +134,9 @@ def render_scene(name: str) -> Path | None:
         return None
 
     problem = problem_classes[name](seed=0)
+    if not hasattr(problem, "model") or not hasattr(problem, "data"):
+        print(f"Warning: {name} has no MuJoCo model/data to render")
+        return None
     _render_model(problem.model, problem.data, out)
     return out
 
@@ -137,6 +151,7 @@ def main() -> None:
     images: dict[str, Path] = {}
     images["Chapter 1 — 6-DOF arm default"] = render_arm_default()
     images["Chapter 5 — IK target solution"] = render_arm_ik()
+    images["Chapter 6 — Dynamics pose"] = render_arm_dynamics()
 
     scenes = [
         "TowerFall",
@@ -156,6 +171,11 @@ def main() -> None:
         "RopeTension",
         "GearTurn",
         "ChainDrape",
+        "MassOrder",
+        "FrictionOrder",
+        "CounterfactualMass",
+        "CounterfactualFriction",
+        "BalanceAfterMove",
     ]
     for scene in scenes:
         path = render_scene(scene)

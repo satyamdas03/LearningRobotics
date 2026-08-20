@@ -83,6 +83,19 @@ class Problem(ABC):
         """
         ...
 
+    def _counterfactual_params(self) -> list[str]:
+        """Return the names of attributes that can be overridden for a counterfactual.
+
+        Subclasses may override this to expose a custom list. The default
+        implementation returns the keys of the most recent ``latent_params`` dict,
+        if available.
+        """
+        try:
+            gt = self.ground_truth()
+            return sorted(gt.latent_params.keys())
+        except Exception:
+            return []
+
     def run_simulation(self, steps: int, dt_scale: int = 1) -> None:
         """Convenience helper: step the MuJoCo simulation forward.
 
