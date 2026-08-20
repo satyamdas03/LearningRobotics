@@ -368,7 +368,7 @@ def main() -> None:
           <span class="stat-label">Scenes</span>
         </div>
         <div class="stat">
-          <span class="stat-value">43</span>
+          <span class="stat-value">44</span>
           <span class="stat-label">Tests passing</span>
         </div>
         <div class="stat">

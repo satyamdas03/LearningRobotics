@@ -15,7 +15,7 @@
 | **Mission** | Learn robotics and AI from first principles fast, and build something extraordinary and revolutionary that solves real-world problems. |
 | **Owner** | Satyam Das (@satyamdas03, satyamdas03@gmail.com) |
 | **Start date** | 2026-08-13 |
-| **Current date** | 2026-08-18 |
+| **Current date** | 2026-08-20 |
 
 ---
 
