@@ -871,4 +871,34 @@ If you are resuming this session with no other context, here is the one-paragrap
 
 ---
 
-*Last updated: 2026-08-20*
+## 11. Sister project: RoboCAD
+
+**Started:** 2026-08-21
+
+A new GitHub repository, **RoboCAD** (`https://github.com/satyamdas03/RoboCAD`), was created as the hardware-design companion to `LearningRobotics`.
+
+**Goal:** Build an AI-powered parametric CAD tool that lets robotics designers describe parts in plain language and receive editable, manufacturable `build123d` models.
+
+**Why it exists:**
+- `LearningRobotics` teaches the theory (kinematics, dynamics, control).
+- RoboCAD designs the physical parts without forcing the user to learn traditional CAD UI muscle memory first.
+- Generated parts can later be exported to Onshape, 3D-printed, machined, or imported into MuJoCo simulations in `LearningRobotics`.
+
+**Chosen architecture:**
+- Start with local `build123d` (Python/OpenCASCADE) to validate the AI→parametric-code loop.
+- Add Onshape export/sync in Phase 5, only after the loop is reliable.
+- LLM writes parametric code, not throwaway meshes.
+
+**Current status:**
+- Phase 0 scaffold complete and pushed.
+- Next action: run `validate.py` in `C:\Users\point\projects\RoboCAD` with `ANTHROPIC_API_KEY` set, then iterate on the system prompt/examples until ≥90% pass rate.
+
+**Local path:** `C:\Users\point\projects\RoboCAD`  
+**Branch:** `master`  
+**Remote:** `https://github.com/satyamdas03/RoboCAD.git`
+
+**Memory trigger:** Type `:POINTBREAK` anytime to force a full dossier/memory sync so context is never lost.
+
+---
+
+*Last updated: 2026-08-21*
