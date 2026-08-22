@@ -75,8 +75,7 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | 11 | Imitation Learning | ✅ Complete | Behavior cloning from expert reach demos; teleoperation recorder |
 | **M6** | **Foundation-Model + Physics Verifier** | ✅ Complete | `chapter12_reasoning/`: NL task parser, rule + optional Claude planner, MuJoCo physics verifier, retry loop, 7 tests |
 | 12 | Foundation-Model + Physics Verifier | ✅ Complete | Natural-language task → plan → simulate → verify → retry |
-| 13 | Skill Library + Skill Sharing | ⏳ Planned | Reusable skills, composition, federated sharing |
-| 13 | Skill Library + Skill Sharing | ⏳ Planned | Reusable skills, composition, federated sharing |
+| 13 | Skill Library + Skill Sharing | ✅ Complete | `chapter13_skills/`: reusable skill templates, composition, JSON library |
 | 14 | Self-Improving Virtual Real-Sim-Real Loop | ⏳ Planned | Failure detection, system ID, retuning, A/B improvement |
 | 15 | End-to-End North-Star Demo | ⏳ Planned | NL task → plan → trajectory → execute → validate → calibrate → save skill |
 
@@ -160,6 +159,11 @@ LearningRobotics/
 │   ├── physics_verifier.py        # simulate a plan in MuJoCo and check relations
 │   ├── reasoning_loop.py          # plan → verify → retry with failure feedback
 │   └── test_reasoning.py          # 7 pytest tests
+├── chapter13_skills/              # Chapter 13: reusable skill library + composition
+│   ├── skill.py                   # Skill / SkillInstance / SkillLibrary dataclasses + JSON
+│   ├── skills.py                  # core parameterized skills: reach, push, pick, place, slide
+│   ├── composer.py                # chain skill instances into verified plans
+│   └── test_skills.py             # 7 pytest tests
 └── pibench/                       # Physical Intuition Benchmark (Phases 0-7)
     ├── README.md                  # PIBench overview and quickstart
     ├── requirements.txt           # MuJoCo + benchmark deps
@@ -648,7 +652,7 @@ PIBench is the executable first step toward the *Revolutionary Robotics* north s
 * **CLI:** `pibench list`, `pibench run`, `pibench render`, `pibench view`, `pibench leaderboard`, `pibench validate`.
 * **Phase 6 (complete):** `EvaluationHarness`, static HTML/JSON leaderboard, per-concept and calibration metrics (ECE, Brier, NLL), and optional VLM predictor that renders scenes and asks a vision-language model.
 * **Phase 7 (complete):** `RealRobotValidationHarness` with `ValidationTask`/`ValidationResult` protocol, mock-arm `reach_q` execution, online residual tracker for sim-to-real mismatch, and `pibench validate` CLI command.
-* **Tests:** 163 passing across all chapters (Chapters 2–12), PIBench engine/evaluation/validation suites, and the hardened virtual real-robot bridge.
+* **Tests:** 170 passing across all chapters (Chapters 2–13), PIBench engine/evaluation/validation suites, and the hardened virtual real-robot bridge.
 
 ### Run it
 
@@ -689,7 +693,7 @@ Milestones to the north-star demo:
 4. ✅ **Simulated perception** — MuJoCo camera rendering, object detection, optional VLM scene description.
 5. ✅ **Imitation learning** — record expert trajectories, behavior cloning, optional diffusion/ACT policy.
 6. ✅ **Foundation-model + physics verifier** — LLM/VLM proposes plans, MuJoCo verifies, retry on failure.
-7. **Skill library + sharing** — reusable skills, composition, federated skill aggregation.
+7. ✅ **Skill library + sharing** — reusable parameterized skills (reach/push/pick/place/slide), plan composition, JSON-backed skill library.
 8. **Self-improving virtual real-sim-real loop** — failure detection, online system ID, retuning, A/B improvement.
 9. **End-to-end north-star demo** — natural-language task → plan → trajectory → execute → validate → calibrate → save skill.
 
@@ -698,6 +702,13 @@ When the virtual loop is solid, a physical arm (Forte / AM-ARM) becomes a drop-i
 ---
 
 ## 📝 Changelog
+
+### 2026-08-20 — Milestone 7 Skill Library + Skill Sharing Complete
+
+* **Milestone 7 — Skill Library + Skill Sharing:** added `chapter13_skills/` with `skill.py` (`Skill`, `SkillInstance`, `SkillLibrary` dataclasses + JSON save/load), `skills.py` (parameterized `reach`, `push`, `pick`, `place`, `slide` skills that generate concrete Chapter 12 plans), and `composer.py` (chains skill instances and verifies each sub-plan with the Chapter 12 physics verifier). Added `test_skills.py` (7 tests) covering skill target generation, physics verification, composition chaining, and JSON round-trip.
+* **Tests:** full combined suite now **170 passing**.
+* **Documentation:** updated root `README.md`, `memory.md`, and `learning-robotics.md` memory to mark Milestone 7 complete.
+* Committed and pushed all changes to `origin/master`.
 
 ### 2026-08-20 — Milestone 6 Foundation-Model + Physics Verifier Complete
 

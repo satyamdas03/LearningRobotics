@@ -13,8 +13,8 @@ from typing import Any
 import mujoco
 import numpy as np
 
-from planner import Plan
-from task_parser import SkillName, SpatialRelation, TaskSpec
+from chapter12_reasoning.planner import Plan
+from chapter12_reasoning.task_parser import SkillName, SpatialRelation, TaskSpec
 
 
 @dataclass

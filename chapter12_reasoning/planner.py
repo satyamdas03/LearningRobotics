@@ -16,7 +16,7 @@ from typing import Any
 import mujoco
 import numpy as np
 
-from task_parser import SkillName, SpatialRelation, TaskSpec
+from chapter12_reasoning.task_parser import SkillName, SpatialRelation, TaskSpec
 
 
 @dataclass

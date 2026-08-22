@@ -953,6 +953,38 @@ Continue the simulation-only roadmap: implement Milestone 6 (foundation-model + 
 
 ---
 
+### Session 14 — 2026-08-20 (Milestone 7: Skill Library + Skill Sharing)
+
+#### 14.1 What the user asked
+
+Continue the simulation-only roadmap: implement Milestone 7 (skill library and skill sharing), give a heads-up when it ends, test it, and commit/push changes.
+
+#### 14.2 What we built
+
+1. **Chapter 13 — Skill Library + Skill Sharing**
+   * `chapter13_skills/skill.py` — `Skill`, `SkillInstance`, and `SkillLibrary` dataclasses; JSON save/load for skill instances.
+   * `chapter13_skills/skills.py` — five core parameterized skills (`reach`, `push`, `pick`, `place`, `slide`) that generate concrete Chapter 12 `Plan`s from scene geometry.
+   * `chapter13_skills/composer.py` — `Composer` chains skill instances, delegates each to its registered skill generator, and verifies each sub-plan with the Chapter 12 physics verifier.
+   * `chapter13_skills/test_skills.py` — 7 passing tests: reach target, push left-of, place verification, slide axis, pick two-step plan, composer chain, and skill-library JSON round-trip.
+
+#### 14.3 Validation results
+
+* `python -m pytest chapter13_skills/test_skills.py -q` — **7 passed**.
+* Full combined suite: `python -m pytest -q` — **170 passing**.
+
+#### 14.4 Documentation updates
+
+* Root `README.md`: added Chapter 13 / Milestone 7 to curriculum table, repo structure, and changelog; updated test count to 170.
+* `memory.md`: this section plus updated status snapshot and file index.
+* `.claude/projects/C--Users-point-projects-LearningRobotics/memory/learning-robotics.md`: updated status to Chapters 1–13 + Milestones 1–7, 170 tests.
+* `.claude/projects/C--Users-point-projects-LearningRobotics/plan.md`: marked Milestone 7 complete, Milestone 8 current.
+
+#### 14.5 Final wrap-up
+
+* Git working tree clean; committed and pushed all changes to `origin/master`.
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
@@ -969,8 +1001,9 @@ Continue the simulation-only roadmap: implement Milestone 6 (foundation-model + 
 | Chapter 10 practical | ✅ Complete — `renderer.py` + `perception.py` + simulated camera + object detection + IK-to-controller pipeline + 6 tests |
 | Chapter 11 practical | ✅ Complete — `expert.py` + `behavior_cloning.py` + `teleop.py` + expert demonstrations + behavior-cloning MLP + teleop recorder + 6 tests |
 | Chapter 12 practical | ✅ Complete — `task_parser.py` + `planner.py` + `physics_verifier.py` + `reasoning_loop.py` + NL task parser + rule/LLM planner + MuJoCo verifier + retry loop + 7 tests |
+| Chapter 13 practical | ✅ Complete — `skill.py` + `skills.py` + `composer.py` + reusable parameterized skills (reach/push/pick/place/slide) + plan composition + JSON skill library + 7 tests |
 | GitHub repo | ✅ Live at https://github.com/satyamdas03/LearningRobotics |
-| README | ✅ Complete (includes Chapters 1–12 + PIBench Phases 0–7) |
+| README | ✅ Complete (includes Chapters 1–13 + PIBench Phases 0–7) |
 | Revolutionary manifesto | ✅ Complete and pushed (Concept L now has Phase 0–7 plan) |
 | PIBench Phase 0 | ✅ Complete — engine + `TowerFall` |
 | PIBench Phase 1 | ✅ Complete — statics suite: `SlopeSlide`, `SupportBalance`, `ToppleDirection` |
@@ -988,7 +1021,8 @@ Continue the simulation-only roadmap: implement Milestone 6 (foundation-model + 
 | Milestone 4 | ✅ Complete — `chapter10_perception/` simulated camera stack: RGB/depth renderer, color-based detection, camera projection, IK → position controller, 6 tests |
 | Milestone 5 | ✅ Complete — `chapter11_imitation_learning/`: expert trajectory recorder via IK + cubic splines, NumPy MLP behavior cloning (path residual + one-shot goal reaching), teleoperation recorder, 6 tests |
 | Milestone 6 | ✅ Complete — `chapter12_reasoning/`: NL task parser, rule + optional Claude LLM planner, MuJoCo physics verifier, retry loop with failure feedback, 7 tests |
-| Next implementation work | ⏳ Milestone 7: Skill library + skill sharing (reusable skills, composition, federated sharing) |
+| Milestone 7 | ✅ Complete — `chapter13_skills/`: reusable parameterized skills, plan composition, JSON skill library, 7 tests |
+| Next implementation work | ⏳ Milestone 8: Self-improving virtual real-sim-real loop (failure detection, system ID, retuning, A/B improvement) |
 | Hardware purchase | ⏳ None; project is simulation-only for the foreseeable future |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -1072,6 +1106,10 @@ Continue the simulation-only roadmap: implement Milestone 6 (foundation-model + 
 | `chapter12_reasoning/physics_verifier.py` | MuJoCo plan verifier | Reuse for any spatial-relation task |
 | `chapter12_reasoning/reasoning_loop.py` | Plan → verify → retry loop | Reuse for foundation-model reasoning |
 | `chapter12_reasoning/test_reasoning.py` | Chapter 12 reasoning tests | Run with `pytest` after any reasoning change |
+| `chapter13_skills/skill.py` | Skill / SkillInstance / SkillLibrary dataclasses + JSON | Reuse for any reusable manipulation behavior |
+| `chapter13_skills/skills.py` | Parameterized skill generators (reach/push/pick/place/slide) | Add new skills here |
+| `chapter13_skills/composer.py` | Skill composer that chains and verifies skill plans | Reuse for task-level plan composition |
+| `chapter13_skills/test_skills.py` | Chapter 13 skill library tests | Run with `pytest` after any skill/composer change |
 | `pibench/pibench/core/counterfactual.py` | Counterfactual scene builder | Reuse for any "what if?" scene |
 | `pibench/pibench/evaluation/metrics.py` | Calibration + concept accuracy metrics | Extend when adding new calibration diagnostics |
 | `pibench/pibench/evaluation/leaderboard.py` | Static HTML/JSON leaderboard | Regenerate after each benchmark run |
@@ -1197,7 +1235,7 @@ Note: this repo is independent of the `C:\Users\point` mega-repo. Do not acciden
 
 If you are resuming this session with no other context, here is the one-paragraph summary:
 
-> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–9 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward kinematics, velocity kinematics/Jacobians, inverse kinematics, dynamics, control, motion planning, trajectory generation). **PIBench (Physical Intuition Benchmark) Phases 0–7 are complete:** a runnable MuJoCo-based benchmark engine with statics, dynamics, contact/friction, articulated/deformable, parameter-estimation/counterfactual, model-harness/leaderboard/calibration, and real-robot validation suites; physics-oracle/random/optional-LLM/optional-VLM baselines; a counterfactual builder; a CLI; static HTML showcase and leaderboard; and passing tests. **Milestones 1–3 of the simulation-only north star are complete:** hardened virtual real-robot bridge, trajectory generation, and virtual robot validation at scale. The project remains simulation-only (no physical arm purchase). The next milestone is virtual perception + imitation learning.
+> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–13 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward kinematics, velocity kinematics/Jacobians, inverse kinematics, dynamics, control, motion planning, trajectory generation, simulated perception, imitation learning, foundation-model + physics verifier, and skill library + skill sharing). **PIBench (Physical Intuition Benchmark) Phases 0–7 are complete:** a runnable MuJoCo-based benchmark engine with statics, dynamics, contact/friction, articulated/deformable, parameter-estimation/counterfactual, model-harness/leaderboard/calibration, and real-robot validation suites; physics-oracle/random/optional-LLM/optional-VLM baselines; a counterfactual builder; a CLI; static HTML showcase and leaderboard; and passing tests. **Milestones 1–7 of the simulation-only north star are complete:** hardened virtual real-robot bridge, trajectory generation, virtual validation at scale, simulated perception, imitation learning, foundation-model + physics verifier, and skill library + skill sharing (170 tests passing). The project remains simulation-only (no physical arm purchase). The next milestone is the self-improving virtual real-sim-real loop.
 
 ---
 
@@ -1233,4 +1271,4 @@ A new GitHub repository, **RoboCAD** (`https://github.com/satyamdas03/RoboCAD`),
 
 ---
 
-*Last updated: 2026-08-20 (Session 13 — Milestones 1–6 complete, 163 tests passing)*
+*Last updated: 2026-08-20 (Session 14 — Milestones 1–7 complete, 170 tests passing)*

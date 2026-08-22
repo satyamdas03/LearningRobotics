@@ -6,10 +6,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from planner import LLMPlanner, Plan, RulePlanner
-from physics_verifier import PhysicsVerifier, VerifyResult
-from reasoning_loop import PhysicsGroundedReasoningLoop
-from task_parser import SkillName, SpatialRelation, TaskSpec, parse_task
+from chapter12_reasoning.planner import LLMPlanner, Plan, RulePlanner
+from chapter12_reasoning.physics_verifier import PhysicsVerifier, VerifyResult
+from chapter12_reasoning.reasoning_loop import PhysicsGroundedReasoningLoop
+from chapter12_reasoning.task_parser import SkillName, SpatialRelation, TaskSpec, parse_task
 
 
 HERE = Path(__file__).parent
@@ -68,7 +68,7 @@ def test_verifier_rejects_invalid_plan():
     """A plan that places red right of blue for a left-of task should fail."""
     task = parse_task("push the red block left of the blue block")
     # Build a deliberately wrong plan.
-    from planner import PlanStep
+    from chapter12_reasoning.planner import PlanStep
 
     wrong_plan = Plan(
         steps=[

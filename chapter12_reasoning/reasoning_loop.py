@@ -11,9 +11,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from planner import LLMPlanner, Plan, RulePlanner
-from physics_verifier import PhysicsVerifier, VerifyResult
-from task_parser import TaskSpec
+from chapter12_reasoning.planner import LLMPlanner, Plan, RulePlanner
+from chapter12_reasoning.physics_verifier import PhysicsVerifier, VerifyResult
+from chapter12_reasoning.task_parser import TaskSpec
 
 
 @dataclass
