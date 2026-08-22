@@ -201,6 +201,41 @@ LearningRobotics/
 
 ---
 
+## 🎬 Live Demo — Self-Improving Virtual Real-Sim-Real Loop
+
+This is the best-performing demo so far. The video shows the 6-DOF arm in MuJoCo executing the same joint-space reach task under two controllers, side by side.
+
+<video src="docs/assets/self_improve_baseline_vs_retuned.mp4" controls width="100%" playsinline>
+  Your browser does not support the video tag.
+</video>
+
+| | Baseline controller | Retuned controller |
+|---|---|---|
+| **What it knows** | Nominal MuJoCo dynamics only | Nominal dynamics + learned torque offset |
+| **Injected mismatch** | Unknown per-joint torque bias: `[0.3, -0.2, 0.15, 0, 0, 0]` N·m | Same bias (shared across both runs) |
+| **Mean tracking error** | **0.0336** | **0.0037** (≈ 9× reduction) |
+| **Success rate** | 10/10 | 10/10 |
+| **Final joint error** | 0.0336 | 0.0037 |
+
+### What is happening
+
+1. **Injected, unknown torque bias** — the virtual "real" arm adds a constant offset to every commanded torque. The baseline computed-torque controller has no model of this bias, so it settles with a steady-state joint error.
+2. **Failure detection** — a reach check flags that the arm stopped short of the target.
+3. **Online system ID** — the robot runs a short calibration trajectory and uses the residual tracker (`qddot_actual − qddot_predicted`) to estimate the missing torque. The estimate is `[0.300, −0.200, 0.150, 0, 0, 0]`, matching the true bias to within numerical precision.
+4. **Controller retuning** — a `CompensatedController` is wrapped around the baseline. It subtracts the learned torque offset before sending commands to the virtual arm.
+5. **A/B validation** — the retuned controller is compared against the baseline on 10 independent randomized virtual arms. Mean error drops from 0.0336 to 0.0037, proving the improvement.
+
+### Reproduce it
+
+```bash
+cd chapter14_self_improvement
+python demo_self_improve_recorded.py
+```
+
+The script writes `output/self_improve_baseline_vs_retuned.mp4` and prints the full improvement report. A non-recorded version is also available: `python demo_self_improve.py`.
+
+---
+
 ## ✅ Chapter 1 — Foundations, Configuration Space & DOF
 
 ### Concepts locked in
