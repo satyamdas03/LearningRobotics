@@ -70,8 +70,9 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | **M2** | **Trajectory Generation** | ✅ Complete | Cubic/quintic splines + trapezoidal/S-curve time scaling + path→trajectory, 10 tests |
 | **M3** | **Virtual Robot Validation at Scale** | ✅ Complete | `BatchValidator` sweeps randomized arms, mismatch levels, and controllers; accuracy degrades with mismatch, 3 tests |
 | **M4** | **Perception + Simulated Camera Stack** | ✅ Complete | `chapter10_perception/`: RGB/depth renderer, object detector by color, camera projection, IK → position controller, 6 tests |
-| 10 | Virtual Perception + Imitation Learning | ✅ Complete (Milestone 4) | Sim camera, object detection, controller feed |
-| 11 | Imitation Learning | ⏳ Planned | Behavior cloning / diffusion policy from expert demos |
+| 10 | Virtual Perception / Camera Stack | ✅ Complete | `chapter10_perception/`: simulated RGB/depth, object detection, camera projection, controller feed |
+| **M5** | **Imitation Learning** | ✅ Complete | `chapter11_imitation_learning/`: expert trajectory recorder, NumPy MLP behavior cloning, teleoperation recorder, 6 tests |
+| 11 | Imitation Learning | ✅ Complete | Behavior cloning from expert reach demos; teleoperation recorder |
 | 12 | Foundation-Model + Physics Verifier | ⏳ Planned | LLM/VLM plans, MuJoCo verifies, retry loop |
 | 13 | Skill Library + Skill Sharing | ⏳ Planned | Reusable skills, composition, federated sharing |
 | 14 | Self-Improving Virtual Real-Sim-Real Loop | ⏳ Planned | Failure detection, system ID, retuning, A/B improvement |
@@ -146,6 +147,11 @@ LearningRobotics/
 │   ├── controller.py              # joint-position command controller
 │   ├── demo_perception_controller.py # render → detect → IK → command arm
 │   └── test_perception.py         # 6 pytest tests
+├── chapter11_imitation_learning/  # Chapter 11: learning from demonstration
+│   ├── expert.py                  # generate reach demonstrations via IK + cubic splines
+│   ├── behavior_cloning.py        # NumPy MLP policy + dataset helpers
+│   ├── teleop.py                  # kinesthetic/keyboard demonstration recorder
+│   └── test_imitation.py          # 6 pytest tests
 └── pibench/                       # Physical Intuition Benchmark (Phases 0-7)
     ├── README.md                  # PIBench overview and quickstart
     ├── requirements.txt           # MuJoCo + benchmark deps
@@ -634,7 +640,7 @@ PIBench is the executable first step toward the *Revolutionary Robotics* north s
 * **CLI:** `pibench list`, `pibench run`, `pibench render`, `pibench view`, `pibench leaderboard`, `pibench validate`.
 * **Phase 6 (complete):** `EvaluationHarness`, static HTML/JSON leaderboard, per-concept and calibration metrics (ECE, Brier, NLL), and optional VLM predictor that renders scenes and asks a vision-language model.
 * **Phase 7 (complete):** `RealRobotValidationHarness` with `ValidationTask`/`ValidationResult` protocol, mock-arm `reach_q` execution, online residual tracker for sim-to-real mismatch, and `pibench validate` CLI command.
-* **Tests:** 150 passing across all chapters (Chapters 2–10), PIBench engine/evaluation/validation suites, and the hardened virtual real-robot bridge.
+* **Tests:** 156 passing across all chapters (Chapters 2–11), PIBench engine/evaluation/validation suites, and the hardened virtual real-robot bridge.
 
 ### Run it
 
@@ -672,8 +678,8 @@ Milestones to the north-star demo:
 1. **Harden the virtual real-robot bridge** — realistic actuator/sensor dynamics, noise, latency, domain randomization.
 2. **Trajectory generation** — timed, smooth motion from Chapter 8 paths to Chapter 7 controllers.
 3. **Virtual validation at scale** — run `pibench validate` across randomized agents and injected mismatch.
-4. **Simulated perception** — MuJoCo camera rendering, object detection, optional VLM scene description.
-5. **Imitation learning** — record expert trajectories, behavior cloning, optional diffusion/ACT policy.
+4. ✅ **Simulated perception** — MuJoCo camera rendering, object detection, optional VLM scene description.
+5. ✅ **Imitation learning** — record expert trajectories, behavior cloning, optional diffusion/ACT policy.
 6. **Foundation-model + physics verifier** — LLM/VLM proposes plans, MuJoCo verifies, retry on failure.
 7. **Skill library + sharing** — reusable skills, composition, federated skill aggregation.
 8. **Self-improving virtual real-sim-real loop** — failure detection, online system ID, retuning, A/B improvement.
@@ -684,6 +690,13 @@ When the virtual loop is solid, a physical arm (Forte / AM-ARM) becomes a drop-i
 ---
 
 ## 📝 Changelog
+
+### 2026-08-20 — Milestone 5 Imitation Learning Complete
+
+* **Milestone 5 — Imitation Learning:** added `chapter11_imitation_learning/` with `expert.py` (IK-based reach demonstration generator), `behavior_cloning.py` (NumPy-only MLP with Adam + dataset helpers for path residuals and one-shot goal reaching), `teleop.py` (kinesthetic/keyboard demonstration recorder with JSON save/load), and `test_imitation.py` (6 tests) covering expert trajectory generation, behavior-cloning fitting, goal-policy reaching, and teleop recorder round-trip.
+* **Tests:** full combined suite now **156 passing**.
+* **Documentation:** updated root `README.md`, `memory.md`, and `learning-robotics.md` memory to mark Milestone 5 complete.
+* Committed and pushed all changes to `origin/master`.
 
 ### 2026-08-20 — Milestone 4 Perception + Simulated Camera Stack Complete
 

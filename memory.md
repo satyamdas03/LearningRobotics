@@ -888,6 +888,38 @@ Continue the simulation-only roadmap: implement Milestone 4 (perception + simula
 
 ---
 
+### Session 12 — 2026-08-20 (Milestone 5: Imitation Learning)
+
+#### 12.1 What the user asked
+
+Continue the simulation-only roadmap: implement Milestone 5 (imitation learning), give a heads-up when it ends, test it, and commit/push changes.
+
+#### 12.2 What we built
+
+1. **Chapter 11 — Imitation Learning**
+   * `chapter11_imitation_learning/expert.py` — generates reach demonstrations by solving IK to a sampled goal end-effector position and recording a cubic joint-space trajectory kinematically.
+   * `chapter11_imitation_learning/behavior_cloning.py` — NumPy-only MLP policy trained with Adam.  Supports multiple dataset formats: path residual (`next_q - q`), residual to goal configuration (`goal_q - q`), and one-shot inverse-kinematics (`goal_ee -> goal_q`).  Includes `rollout_policy` (residual integration) and `rollout_goal_policy` (direct goal configuration).
+   * `chapter11_imitation_learning/teleop.py` — `TeleopRecorder` that accepts arbitrary joint-space commands (keyboard, mouse, or external) and serializes demonstrations to JSON.  Includes an optional `keyboard_teleop_loop` using the MuJoCo viewer.
+   * `chapter11_imitation_learning/test_imitation.py` — 6 passing tests: expert trajectory records and reaches goal, dataset generation produces multiple demos, MLP overfits path residuals, one-shot goal policy reaches near a held-out goal, teleop recorder JSON round-trip, and `as_trajectory` format compatibility.
+
+#### 12.3 Validation results
+
+* `python -m pytest chapter11_imitation_learning/test_imitation.py -q` — **6 passed**.
+* Full combined suite: `python -m pytest -q` — **156 passed**.
+
+#### 12.4 Documentation updates
+
+* Root `README.md`: added Chapter 11 / Milestone 5 to curriculum table, repo structure, and changelog; updated test count to 156.
+* `memory.md`: this section plus updated status snapshot and file index.
+* `.claude/projects/C--Users-point-projects-LearningRobotics/memory/learning-robotics.md`: updated status to Chapters 1–11 + Milestones 1–5, 156 tests.
+* `.claude/projects/C--Users-point-projects-LearningRobotics/plan.md`: marked Milestone 5 complete, Milestone 6 current.
+
+#### 12.5 Final wrap-up
+
+* Git working tree clean; committed and pushed all changes to `origin/master`.
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
@@ -902,8 +934,9 @@ Continue the simulation-only roadmap: implement Milestone 4 (perception + simula
 | Chapter 8 practical | ✅ Complete — `collision.py` + `planners.py` + `smoother.py` + viewer + 10 tests |
 | Chapter 9 practical | ✅ Complete — cubic/quintic splines + trapezoidal/S-curve time scaling + path→trajectory + 10 tests |
 | Chapter 10 practical | ✅ Complete — `renderer.py` + `perception.py` + simulated camera + object detection + IK-to-controller pipeline + 6 tests |
+| Chapter 11 practical | ✅ Complete — `expert.py` + `behavior_cloning.py` + `teleop.py` + expert demonstrations + behavior-cloning MLP + teleop recorder + 6 tests |
 | GitHub repo | ✅ Live at https://github.com/satyamdas03/LearningRobotics |
-| README | ✅ Complete (includes Chapters 1–8 + PIBench Phases 0–7) |
+| README | ✅ Complete (includes Chapters 1–11 + PIBench Phases 0–7) |
 | Revolutionary manifesto | ✅ Complete and pushed (Concept L now has Phase 0–7 plan) |
 | PIBench Phase 0 | ✅ Complete — engine + `TowerFall` |
 | PIBench Phase 1 | ✅ Complete — statics suite: `SlopeSlide`, `SupportBalance`, `ToppleDirection` |
@@ -919,7 +952,8 @@ Continue the simulation-only roadmap: implement Milestone 4 (perception + simula
 | Milestone 2 | ✅ Complete — Chapter 9 trajectory generation: cubic/quintic splines + trapezoidal/S-curve time scaling, 10 tests |
 | Milestone 3 | ✅ Complete — `BatchValidator` sweeps randomized arms/mismatch levels/controllers, accuracy degrades with mismatch, 3 new tests |
 | Milestone 4 | ✅ Complete — `chapter10_perception/` simulated camera stack: RGB/depth renderer, color-based detection, camera projection, IK → position controller, 6 tests |
-| Next implementation work | ⏳ Milestone 5: Imitation learning (record expert trajectories, behavior cloning) |
+| Milestone 5 | ✅ Complete — `chapter11_imitation_learning/`: expert trajectory recorder via IK + cubic splines, NumPy MLP behavior cloning (path residual + one-shot goal reaching), teleoperation recorder, 6 tests |
+| Next implementation work | ⏳ Milestone 6: Foundation-model + physics verifier (LLM/VLM plans, MuJoCo verifies, retry loop) |
 | Hardware purchase | ⏳ None; project is simulation-only for the foreseeable future |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -994,6 +1028,10 @@ Continue the simulation-only roadmap: implement Milestone 4 (perception + simula
 | `chapter10_perception/controller.py` | Joint position target output | Reuse as planning-to-control interface |
 | `chapter10_perception/demo_perception_controller.py` | Perception → IK → arm command demo | Run to validate the full stack |
 | `chapter10_perception/test_perception.py` | Chapter 10 perception tests | Run with `pytest` after any perception change |
+| `chapter11_imitation_learning/expert.py` | IK-based expert demo generator | Reuse for any reach-task dataset |
+| `chapter11_imitation_learning/behavior_cloning.py` | NumPy MLP behavior-cloning policy | Extend with PyTorch/JAX for larger policies |
+| `chapter11_imitation_learning/teleop.py` | Kinesthetic/keyboard recorder | Use to collect human demonstrations |
+| `chapter11_imitation_learning/test_imitation.py` | Chapter 11 imitation-learning tests | Run with `pytest` after any BC/teleop change |
 | `pibench/pibench/core/counterfactual.py` | Counterfactual scene builder | Reuse for any "what if?" scene |
 | `pibench/pibench/evaluation/metrics.py` | Calibration + concept accuracy metrics | Extend when adding new calibration diagnostics |
 | `pibench/pibench/evaluation/leaderboard.py` | Static HTML/JSON leaderboard | Regenerate after each benchmark run |
@@ -1155,4 +1193,4 @@ A new GitHub repository, **RoboCAD** (`https://github.com/satyamdas03/RoboCAD`),
 
 ---
 
-*Last updated: 2026-08-20 (Session 10 — Milestones 1–3 complete, 144 tests passing)*
+*Last updated: 2026-08-20 (Session 12 — Milestones 1–5 complete, 156 tests passing)*
