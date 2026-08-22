@@ -43,6 +43,35 @@ def _offset_for_relation(relation: SpatialRelation, offset: float) -> np.ndarray
     return delta
 
 
+def _target_position_for_relation(
+    xml_path: str | Path,
+    target_object: str,
+    ref_pos: np.ndarray,
+    relation: SpatialRelation,
+    offset: float,
+) -> np.ndarray:
+    """Compute a concrete target position for ``target_object`` relative to ``ref_pos``.
+
+    For cardinal relations (left_of, right_of, ...) the offset is applied in the
+    corresponding world axis. For ``near`` the offset is applied along the
+    horizontal direction from the reference to the target's current position,
+    which keeps the target close to the reference without trying to occupy the
+    same space.
+    """
+    if relation != SpatialRelation.NEAR:
+        return ref_pos + _offset_for_relation(relation, offset)
+
+    start_pos = _body_position(xml_path, target_object)
+    horizontal = start_pos - ref_pos
+    horizontal[2] = 0.0
+    norm = float(np.linalg.norm(horizontal))
+    if norm > 1e-6:
+        direction = horizontal / norm
+    else:
+        direction = np.array([1.0, 0.0, 0.0])
+    return ref_pos + direction * offset
+
+
 def _reach_plan(instance: SkillInstance, xml_path: str | Path) -> Plan:
     """Reach the end effector to a target object's current position."""
     target_pos = _body_position(xml_path, instance.target_object)
@@ -67,7 +96,9 @@ def _push_plan(instance: SkillInstance, xml_path: str | Path) -> Plan:
 
     ref_pos = _body_position(xml_path, instance.reference_object)
     relation = SpatialRelation(instance.relation)
-    target_pos = ref_pos + _offset_for_relation(relation, instance.offset)
+    target_pos = _target_position_for_relation(
+        xml_path, instance.target_object, ref_pos, relation, instance.offset
+    )
 
     return Plan(
         steps=[
@@ -125,7 +156,9 @@ def _place_plan(instance: SkillInstance, xml_path: str | Path) -> Plan:
 
     ref_pos = _body_position(xml_path, instance.reference_object)
     relation = SpatialRelation(instance.relation)
-    target_pos = ref_pos + _offset_for_relation(relation, instance.offset)
+    target_pos = _target_position_for_relation(
+        xml_path, instance.target_object, ref_pos, relation, instance.offset
+    )
 
     return Plan(
         steps=[

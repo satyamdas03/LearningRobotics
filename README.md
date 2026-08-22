@@ -80,6 +80,8 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | 14 | Self-Improving Virtual Real-Sim-Real Loop | ✅ Complete | Same as M8 — textbook chapter aligned with the milestone |
 | **M9** | **End-to-End North-Star Demo** | ✅ Complete | `chapter15_north_star/`: NL task → skill plan → IK → trajectory → arm execution → residual tracking → skill library |
 | 15 | End-to-End North-Star Demo | ✅ Complete | Same as M9 — textbook chapter aligned with the milestone |
+| **M10** | **Vision-Based Learning from Ordinary Video** | ✅ Complete | `chapter16_vision_learning/`: synthetic video, heuristic/Claude vision parser, video→`SkillInstance`, physics verifier, replay, 5 tests |
+| 16 | Vision-Based Learning from Ordinary Video | ✅ Complete | Learn manipulation skills by watching ordinary RGB videos of the scene |
 
 ---
 
@@ -197,6 +199,13 @@ LearningRobotics/
     ├── run_all.py                 # Run all suites across all predictors
     ├── showcase.py                # Render framed thumbnails of every scene
     └── build_showcase_artifact.py # Build self-contained HTML gallery
+└── chapter16_vision_learning/     # Chapter 16: learn skills from ordinary video
+    ├── synthetic_video.py         # Render synthetic manipulation videos
+    ├── vision_parser.py           # Heuristic + optional Claude vision parser
+    ├── video_to_skill.py          # Video → SkillInstance + physics verifier
+    ├── demo_vision_learning.py    # End-to-end learn-from-video demo
+    ├── test_vision_learning.py    # 5 pytest tests
+    └── requirements.txt           # chapter-specific deps
 ```
 
 ---
@@ -233,6 +242,33 @@ python demo_self_improve_recorded.py
 ```
 
 The script writes `output/self_improve_baseline_vs_retuned.mp4` and prints the full improvement report. A non-recorded version is also available: `python demo_self_improve.py`.
+
+---
+
+## 📹 Chapter 16 — Vision-Based Learning from Ordinary Video
+
+This milestone closes a key loop in the simulation-only north star: the robot can **watch an ordinary RGB video of a manipulation scene and turn it into a reusable, verified skill**.
+
+What happens end-to-end:
+
+1. **Synthetic video generation** — `chapter16_vision_learning/synthetic_video.py` renders a short MP4 of the red block being pushed toward the blue block. No labels, no simulation state, just pixels.
+2. **Vision parsing** — `vision_parser.py` offers two backends:
+   * `HeuristicVisionParser`: fast color segmentation + centroid tracking, zero API cost.
+   * `AnthropicVisionParser`: optional Claude vision backend for real-world videos; falls back to the heuristic parser if no `ANTHROPIC_API_KEY` is set.
+3. **Video → SkillInstance** — `video_to_skill.py` maps the parsed description (`push red_block near blue_block`) onto a Chapter 13 skill template.
+4. **Physics verification** — the Chapter 12 verifier simulates the inferred plan and accepts it only if the final spatial relation holds.
+5. **Replay + library** — the learned `SkillInstance` can be replayed and saved to a JSON skill library for sharing.
+
+### Reproduce it
+
+```powershell
+cd chapter16_vision_learning
+. .venv\Scripts\Activate.ps1
+python -m chapter16_vision_learning.demo_vision_learning
+python -m pytest test_vision_learning.py -v
+```
+
+Expected output: the demo prints `Verifier success: True` and `Replay success: True`, and the test suite reports **5 passed**.
 
 ---
 

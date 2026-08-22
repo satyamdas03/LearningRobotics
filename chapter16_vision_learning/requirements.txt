@@ -1,0 +1,8 @@
+mujoco>=3.11.0
+numpy>=1.24.0
+pytest>=7.4.0
+pillow>=10.0.0
+imageio>=2.34.0
+imageio-ffmpeg>=0.4.9
+# Optional: uncomment to enable the live Claude vision parser.
+# anthropic>=0.30.0
