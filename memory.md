@@ -1024,6 +1024,47 @@ Continue the simulation-only roadmap: implement Milestone 8 (self-improving virt
 
 ---
 
+### Session 16 — 2026-08-22 (Milestone 9: End-to-End North-Star Demo)
+
+#### 16.1 What the user asked
+
+Continue the simulation-only roadmap: scaffold Milestone 9 (end-to-end north-star demo), keep testing, commit/push, and update documentation.
+
+#### 16.2 What we built
+
+1. **Chapter 15 — End-to-End North-Star Demo**
+   * `chapter15_north_star/north_star.py` — `NorthStarDemo` wires the full autonomy loop:
+     * Parse a natural-language task (`chapter12_reasoning.task_parser`).
+     * Convert it to a skill instance and compose/verify a plan (`chapter13_skills.composer`).
+     * Map the plan target position to a joint-space goal via IK (`chapter05_inverse_kinematics`).
+     * Build a smooth timed trajectory (`chapter08_motion_planning` + `chapter09_trajectory_generation`).
+     * Execute the trajectory on `MockRealArm` with an inertia-scaled PID controller (`chapter07_control`).
+     * Log model-mismatch residuals with the PIBench `ResidualTracker` (`pibench/pibench/realrobot/calibration.py`).
+     * Save the executed skill instance to a JSON skill library.
+   * `chapter15_north_star/demo_north_star.py` — runs "reach the red block" and "push the red block left of the blue block" end-to-end.
+   * `chapter15_north_star/test_north_star.py` — 6 passing tests covering parsing, plan verification, IK accuracy, arm reaching, and skill-library serialization.
+
+2. **Environment update**
+   * Added `pydantic>=2.0` to `chapter07_control/requirements.txt` so the shared chapter7 venv can import `pibench.realrobot.calibration` (the residual tracker) without needing a separate PIBench venv.
+
+#### 16.3 Validation results
+
+* `python -m pytest chapter15_north_star/test_north_star.py -q` — **6 passed**.
+* Full combined suite across all chapter venvs + PIBench venv — **182 passing** (28 chapters 2–6, 10 chapter 8, 70 chapters 7 + 9–15, 74 PIBench).
+
+#### 16.4 Documentation updates
+
+* Root `README.md`: marked M9 / Chapter 15 complete and added `chapter15_north_star/` to the repo-structure tree.
+* `memory.md`: this section plus updated status snapshot, file index, and test count (182).
+* `.claude/projects/C--Users-point-projects-LearningRobotics/memory/learning-robotics.md`: updated status to Chapters 1–15 + Milestones 1–9, 182 tests.
+* `.claude/projects/C--Users-point-projects-LearningRobotics/plan.md`: marked Milestone 9 complete.
+
+#### 16.5 Final wrap-up
+
+* Git working tree clean; committed and pushed all changes to `origin/master`.
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
@@ -1062,7 +1103,8 @@ Continue the simulation-only roadmap: implement Milestone 8 (self-improving virt
 | Milestone 6 | ✅ Complete — `chapter12_reasoning/`: NL task parser, rule + optional Claude LLM planner, MuJoCo physics verifier, retry loop with failure feedback, 7 tests |
 | Milestone 7 | ✅ Complete — `chapter13_skills/`: reusable parameterized skills, plan composition, JSON skill library, 7 tests |
 | Milestone 8 | ✅ Complete — `chapter14_self_improvement/`: failure detector, online system ID, retuner, A/B experiment, self-improvement loop, 6 tests |
-| Next implementation work | 🚧 Milestone 9: End-to-end north-star demo (NL task → plan → trajectory → execute → validate → calibrate → save skill) |
+| Milestone 9 | ✅ Complete — `chapter15_north_star/`: NL task → skill plan → IK → trajectory → arm execution → residual tracking → skill library, 6 tests |
+| Next implementation work | ✅ All simulation-only milestones complete (M1–M9). Consider next: PIBench Phase 8 dashboard deploy, Isaac Lab RL chapter, or optional real-arm adapter. |
 | Hardware purchase | ⏳ None; project is simulation-only for the foreseeable future |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -1157,6 +1199,9 @@ Continue the simulation-only roadmap: implement Milestone 8 (self-improving virt
 | `chapter14_self_improvement/self_improvement_loop.py` | Detect → identify → retune → validate loop | Wire into the north-star demo |
 | `chapter14_self_improvement/demo_self_improve.py` | Constant torque bias demo script | Run to show baseline 0.0336 → retuned 0.0037 |
 | `chapter14_self_improvement/test_self_improvement.py` | Chapter 14 self-improvement tests | Run with `pytest` after any self-improvement change |
+| `chapter15_north_star/north_star.py` | End-to-end autonomy loop orchestrator | Extend for new tasks or real-arm adapter |
+| `chapter15_north_star/demo_north_star.py` | Demo script for reach + push tasks | Run to show the full stack |
+| `chapter15_north_star/test_north_star.py` | Chapter 15 north-star tests | Run with `pytest` after any orchestrator change |
 | `pibench/pibench/core/counterfactual.py` | Counterfactual scene builder | Reuse for any "what if?" scene |
 | `pibench/pibench/evaluation/metrics.py` | Calibration + concept accuracy metrics | Extend when adding new calibration diagnostics |
 | `pibench/pibench/evaluation/leaderboard.py` | Static HTML/JSON leaderboard | Regenerate after each benchmark run |
@@ -1318,4 +1363,4 @@ A new GitHub repository, **RoboCAD** (`https://github.com/satyamdas03/RoboCAD`),
 
 ---
 
-*Last updated: 2026-08-22 (Session 15 — Milestones 1–8 complete, 176 tests passing)*
+*Last updated: 2026-08-22 (Session 16 — Milestones 1–9 complete, 182 tests passing)*

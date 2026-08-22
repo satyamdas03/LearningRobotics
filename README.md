@@ -78,8 +78,8 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | 13 | Skill Library + Skill Sharing | ✅ Complete | `chapter13_skills/`: reusable skill templates, composition, JSON library |
 | **M8** | **Self-Improving Virtual Real-Sim-Real Loop** | ✅ Complete | `chapter14_self_improvement/`: failure detector, online system ID, retuner, A/B experiment, self-improvement loop; 6 tests |
 | 14 | Self-Improving Virtual Real-Sim-Real Loop | ✅ Complete | Same as M8 — textbook chapter aligned with the milestone |
-| **M9** | **End-to-End North-Star Demo** | 🚧 Current | NL task → plan → trajectory → execute → validate → calibrate → save skill |
-| 15 | End-to-End North-Star Demo | 🚧 Current | Same as M9 — textbook chapter aligned with the milestone |
+| **M9** | **End-to-End North-Star Demo** | ✅ Complete | `chapter15_north_star/`: NL task → skill plan → IK → trajectory → arm execution → residual tracking → skill library |
+| 15 | End-to-End North-Star Demo | ✅ Complete | Same as M9 — textbook chapter aligned with the milestone |
 
 ---
 
