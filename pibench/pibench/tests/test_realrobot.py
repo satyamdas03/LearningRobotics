@@ -125,3 +125,86 @@ def test_residual_tracker_detects_torque_noise():
     # larger accelerations there.  A generous upper bound avoids flaky RNG draws.
     assert np.any(mean > 1e-3)
     assert np.all(mean <= 5000.0)
+
+
+def test_residual_tracker_detects_gear_mismatch():
+    """A gear-ratio mismatch should create larger residuals than a perfect model."""
+    from real_hardware import MockRealArm
+
+    perfect_arm = MockRealArm(dt=0.01)
+    mismatched_arm = MockRealArm(dt=0.01, gear_ratio=np.full(perfect_arm.nq(), 1.3))
+    for arm in (perfect_arm, mismatched_arm):
+        tracker = ResidualTracker()
+        q_path = [np.zeros(arm.nq()), np.array([0.0, 0.3, 0.0, 0.0, 0.0, 0.0])]
+        tracker.run_calibration_episode(arm, q_path, _stable_controller(), dt=0.01)
+        arm.residual_norm = float(np.linalg.norm(tracker.mean_residual()))
+        arm.close()
+
+    assert mismatched_arm.residual_norm > perfect_arm.residual_norm
+    assert mismatched_arm.residual_norm > 0.1
+
+
+def test_batch_validator_reports_accuracy_vs_mismatch():
+    """Prediction accuracy should degrade as the sim-to-sim mismatch grows."""
+    from pibench.realrobot.batch import BatchValidator
+
+    tasks = [
+        ValidationTask(
+            task_id="near",
+            predicted_answer="yes",
+            action_type="reach_q",
+            action_params={
+                "target_q": [0.0, 0.25, 0.0, 0.0, 0.0, 0.0],
+                "duration": 1.0,
+                "tolerance": 0.12,
+            },
+        ),
+        ValidationTask(
+            task_id="far",
+            predicted_answer="yes",
+            action_type="reach_q",
+            action_params={
+                "target_q": [0.0, 0.7, 0.0, 0.0, 0.0, 0.0],
+                "duration": 1.5,
+                "tolerance": 0.12,
+            },
+        ),
+    ]
+    validator = BatchValidator(
+        tasks=tasks,
+        mismatch_levels=[0.0, 1.0],
+        seeds=[0, 1],
+        controller_names=["pid"],
+        dt=0.01,
+    )
+    report = validator.run()
+    assert report.summary["n_runs"] == 4
+    by_level = report.accuracy_by_mismatch()
+    assert by_level[0.0] >= by_level[1.0]
+    assert by_level[0.0] == pytest.approx(1.0, abs=0.05)
+
+
+def test_computed_torque_controller_on_virtual_arm():
+    """The computed-torque controller should execute a validation task."""
+    from pibench.realrobot.batch import BatchValidator
+
+    task = ValidationTask(
+        task_id="near",
+        predicted_answer="yes",
+        action_type="reach_q",
+        action_params={
+            "target_q": [0.0, 0.25, 0.0, 0.0, 0.0, 0.0],
+            "duration": 1.0,
+            "tolerance": 0.15,
+        },
+    )
+    validator = BatchValidator(
+        tasks=[task],
+        mismatch_levels=[0.0],
+        seeds=[0],
+        controller_names=["computed_torque"],
+        dt=0.01,
+    )
+    report = validator.run()
+    assert report.summary["n_runs"] == 1
+    assert all(r["n_tasks"] == 1 for r in report.records)

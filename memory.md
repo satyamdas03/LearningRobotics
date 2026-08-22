@@ -15,7 +15,7 @@
 | **Mission** | Learn robotics and AI from first principles fast, and build something extraordinary and revolutionary that solves real-world problems. |
 | **Owner** | Satyam Das (@satyamdas03, satyamdas03@gmail.com) |
 | **Start date** | 2026-08-13 |
-| **Current date** | 2026-08-22 |
+| **Current date** | 2026-08-20 |
 
 ---
 
@@ -814,6 +814,45 @@ Continue without further questions: finish all pending Phase 5 + Chapter 6 wrap-
 
 ---
 
+### Session 10 — 2026-08-20 (Milestones 1–3: Simulation-Only North Star)
+
+#### 10.1 What the user asked
+
+User confirmed the simulation-only strategy: no physical robot arm purchase. Instead, build and validate the full autonomy loop in realistic MuJoCo simulations. Execute the 9-milestone simulation-only roadmap end-to-end, give a heads-up when each milestone ends, test before moving to the next, and commit/push changes.
+
+#### 10.2 What we built
+
+1. **Milestone 1 — Hardened Virtual Real-Robot Bridge**
+   * Extended `chapter07_control/real_hardware.py` `MockRealArm` with three control modes (torque/velocity/position), gear ratios, smooth Coulomb + viscous friction, first-order actuator lag, command/feedback delays, sensor noise/bias/drift/quantization, and torque/velocity/position saturation.
+   * Added `VirtualArmFactory` for domain-randomized arm variants.
+   * Added `chapter07_control/test_virtual_arm.py` (13 passing tests) proving the virtual arm diverges from the controller's assumed model.
+
+2. **Milestone 2 — Trajectory Generation (Chapter 9)**
+   * Added `chapter09_trajectory_generation/` with `trajectory.py` (cubic/quintic joint-space splines), `time_scaling.py` (trapezoidal and S-curve profiles), `path_to_trajectory.py` (Chapter 8 path → timed trajectory), `demo_trajectory_viewer.py` (RRT* plan → trajectory → PID playback), and `test_trajectory_generation.py` (10 passing tests).
+
+3. **Milestone 3 — Virtual Robot Validation at Scale**
+   * Added `pibench/pibench/realrobot/batch.py` with `BatchValidator` and `BatchValidationReport`. Sweeps randomized `MockRealArm` instances across mismatch levels (0.0–1.0), seeds, and controller variants (PID and computed torque), and reports per-level mean accuracy.
+   * Added 3 new real-robot validation tests in `pibench/pibench/tests/test_realrobot.py`: gear-mismatch residual detection, accuracy degradation with mismatch, and computed-torque controller on a virtual arm.
+   * `pibench/pibench/tests/test_realrobot.py` now has 8 passing tests.
+
+#### 10.3 Validation results
+
+* `python -m pytest chapter07_control chapter09_trajectory_generation pibench/pibench/tests/test_realrobot.py -q` — **40 passed**.
+* Full combined suite: `python -m pytest -q` — **144 passed**.
+
+#### 10.4 Documentation updates
+
+* Root `README.md`: added Milestones 1–3 to curriculum table and changelog; updated test count to 144.
+* `memory.md`: this section plus updated status snapshot, file index, commands, and fast-restart summary.
+* `.claude/projects/C--Users-point-projects-LearningRobotics/memory/learning-robotics.md`: updated status to Chapters 1–9 + Milestones 1–3, 144 tests.
+* `.claude/projects/C--Users-point-projects-LearningRobotics/plan.md`: marked Milestones 1–3 complete, Milestone 4 current.
+
+#### 10.5 Final wrap-up
+
+* Git working tree clean; committed and pushed all changes to `origin/master`.
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
@@ -838,9 +877,12 @@ Continue without further questions: finish all pending Phase 5 + Chapter 6 wrap-
 | PIBench Phase 5 | ✅ Complete — params suite: `MassOrder`, `FrictionOrder`, `CounterfactualMass`, `CounterfactualFriction`, `BalanceAfterMove`; counterfactual engine; optional LLM predictor |
 | Chapter 7 practical | ✅ Complete — controller family + uncertainty-aware wrapper + `MockRealArm` sim-to-real bridge; 9 tests passing |
 | PIBench Phase 6 | ✅ Complete — `EvaluationHarness`, per-suite/per-concept accuracy, ECE/Brier/NLL calibration, static HTML leaderboard, VLM predictor, 11 evaluation tests passing |
-| PIBench Phase 7 | ✅ Complete — `RealRobotValidationHarness`, `ValidationTask`/`ValidationResult`, mock-arm `reach_q`, residual tracker, `pibench validate`, 5 validation tests passing |
-| Next implementation work | ⏳ Chapter 9 Reinforcement Learning (Isaac Lab) or real-hardware purchase + sim-to-real experiments |
-| Hardware purchase | ⏳ None yet; `docs/HARDWARE_BOM.md` recommends Forte starter ($~285) or AM-ARM full config ($~480) |
+| PIBench Phase 7 | ✅ Complete — `RealRobotValidationHarness`, `ValidationTask`/`ValidationResult`, mock-arm `reach_q`, residual tracker, `pibench validate`, 8 validation tests passing |
+| Milestone 1 | ✅ Complete — Hardened `MockRealArm` with actuator/sensor dynamics + `VirtualArmFactory`, 13 tests |
+| Milestone 2 | ✅ Complete — Chapter 9 trajectory generation: cubic/quintic splines + trapezoidal/S-curve time scaling, 10 tests |
+| Milestone 3 | ✅ Complete — `BatchValidator` sweeps randomized arms/mismatch levels/controllers, accuracy degrades with mismatch, 3 new tests |
+| Next implementation work | ⏳ Milestone 4: Virtual perception + imitation learning (sim camera + behavior cloning) |
+| Hardware purchase | ⏳ None; project is simulation-only for the foreseeable future |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
 ---
@@ -900,7 +942,13 @@ Continue without further questions: finish all pending Phase 5 + Chapter 6 wrap-
 | `pibench/pibench/realrobot/protocol.py` | Validation task/result models | Reuse for any real-robot validation experiment |
 | `pibench/pibench/realrobot/harness.py` | `RealRobotValidationHarness` + mock arm | Run `pibench validate` before real-hardware experiments |
 | `pibench/pibench/realrobot/calibration.py` | Online residual tracker | Use for sim-to-real mismatch calibration |
+| `pibench/pibench/realrobot/batch.py` | `BatchValidator` for scale sweeps | Run after changing mismatch model or controller variants |
 | `pibench/pibench/tests/test_realrobot.py` | Phase 7 validation tests | Run with `pytest` after any realrobot change |
+| `chapter07_control/test_virtual_arm.py` | Virtual arm mismatch tests | Run with `pytest` after any `MockRealArm` dynamics change |
+| `chapter09_trajectory_generation/trajectory.py` | Cubic/quintic joint-space splines | Reuse for any timed joint trajectory |
+| `chapter09_trajectory_generation/time_scaling.py` | Trapezoidal and S-curve time scaling | Reuse after path planning to assign timing |
+| `chapter09_trajectory_generation/path_to_trajectory.py` | Path → timed trajectory converter | Bridge between Chapter 8 planners and Chapter 7 controllers |
+| `chapter09_trajectory_generation/test_trajectory_generation.py` | Chapter 9 tests | Run with `pytest` after any trajectory change |
 | `pibench/pibench/core/counterfactual.py` | Counterfactual scene builder | Reuse for any "what if?" scene |
 | `pibench/pibench/evaluation/metrics.py` | Calibration + concept accuracy metrics | Extend when adding new calibration diagnostics |
 | `pibench/pibench/evaluation/leaderboard.py` | Static HTML/JSON leaderboard | Regenerate after each benchmark run |
@@ -1026,7 +1074,7 @@ Note: this repo is independent of the `C:\Users\point` mega-repo. Do not acciden
 
 If you are resuming this session with no other context, here is the one-paragraph summary:
 
-> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–8 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward kinematics, velocity kinematics/Jacobians, inverse kinematics, dynamics, control, motion planning). **PIBench (Physical Intuition Benchmark) Phases 0–7 are complete:** a runnable MuJoCo-based benchmark engine with statics, dynamics, contact/friction, articulated/deformable, parameter-estimation/counterfactual, model-harness/leaderboard/calibration, and real-robot validation suites; physics-oracle/random/optional-LLM/optional-VLM baselines; a counterfactual builder; a CLI; static HTML showcase and leaderboard; and passing tests. We wrote a manifesto with 12 revolutionary project ideas targeting real-world blockers like data scarcity, sim-to-real, long-horizon planning, and cheap hardware. The long-term north star is a sub-$500 robot that learns from video, reasons with physics, executes safely, and shares skills with other robots. A hardware BOM memo recommends starter and full-stack configurations.
+> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–9 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward kinematics, velocity kinematics/Jacobians, inverse kinematics, dynamics, control, motion planning, trajectory generation). **PIBench (Physical Intuition Benchmark) Phases 0–7 are complete:** a runnable MuJoCo-based benchmark engine with statics, dynamics, contact/friction, articulated/deformable, parameter-estimation/counterfactual, model-harness/leaderboard/calibration, and real-robot validation suites; physics-oracle/random/optional-LLM/optional-VLM baselines; a counterfactual builder; a CLI; static HTML showcase and leaderboard; and passing tests. **Milestones 1–3 of the simulation-only north star are complete:** hardened virtual real-robot bridge, trajectory generation, and virtual robot validation at scale. The project remains simulation-only (no physical arm purchase). The next milestone is virtual perception + imitation learning.
 
 ---
 
@@ -1062,4 +1110,4 @@ A new GitHub repository, **RoboCAD** (`https://github.com/satyamdas03/RoboCAD`),
 
 ---
 
-*Last updated: 2026-08-20 (Session 9 — Chapter 8 + Phase 7 complete)*
+*Last updated: 2026-08-20 (Session 10 — Milestones 1–3 complete, 144 tests passing)*

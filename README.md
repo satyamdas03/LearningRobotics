@@ -64,9 +64,11 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | 7 | Control | ✅ Complete | Controller family (gravity comp, PID, computed torque, operational space), uncertainty-aware safety wrapper, `MockRealArm` sim-to-real bridge |
 | **P6** | **PIBench — Model Harness, Leaderboard & Calibration** | ✅ Complete | `EvaluationHarness`, per-suite/per-concept accuracy, ECE/Brier/NLL calibration, static HTML leaderboard, VLM predictor |
 | 8 | Motion Planning | ✅ Complete | `chapter08_motion_planning/`: collision checking, PRM/RRT/RRT*/APF planners, shortcut smoothing, viewer demo, 10 tests |
-| **P7** | **PIBench — Real-Robot Validation Harness** | ✅ Complete | `ValidationTask`/`ValidationResult`, mock-arm `reach_q` execution, residual tracker, `pibench validate` CLI, 5 tests |
+| **P7** | **PIBench — Real-Robot Validation Harness** | ✅ Complete | `ValidationTask`/`ValidationResult`, mock-arm `reach_q` execution, residual tracker, `pibench validate` CLI, 8 tests |
 | 9 | Trajectory Generation | ✅ Complete | `chapter09_trajectory_generation/`: cubic/quintic splines, trapezoidal/S-curve time scaling, path→trajectory, tracked by Chapter 7 controller, 10 tests |
 | **M1** | **Hardened Virtual Real-Robot Bridge** | ✅ Complete | `MockRealArm` actuator/sensor dynamics + `VirtualArmFactory` domain randomization, 13 tests |
+| **M2** | **Trajectory Generation** | ✅ Complete | Cubic/quintic splines + trapezoidal/S-curve time scaling + path→trajectory, 10 tests |
+| **M3** | **Virtual Robot Validation at Scale** | ✅ Complete | `BatchValidator` sweeps randomized arms, mismatch levels, and controllers; accuracy degrades with mismatch, 3 tests |
 | 10 | Virtual Perception + Imitation Learning | ⏳ Planned | Sim camera, object detection, behavior cloning |
 | 11 | Foundation-Model + Physics Verifier | ⏳ Planned | LLM/VLM plans, MuJoCo verifies, retry loop |
 | 12 | Skill Library + Skill Sharing | ⏳ Planned | Reusable skills, composition, federated sharing |
@@ -622,7 +624,7 @@ PIBench is the executable first step toward the *Revolutionary Robotics* north s
 * **CLI:** `pibench list`, `pibench run`, `pibench render`, `pibench view`, `pibench leaderboard`, `pibench validate`.
 * **Phase 6 (complete):** `EvaluationHarness`, static HTML/JSON leaderboard, per-concept and calibration metrics (ECE, Brier, NLL), and optional VLM predictor that renders scenes and asks a vision-language model.
 * **Phase 7 (complete):** `RealRobotValidationHarness` with `ValidationTask`/`ValidationResult` protocol, mock-arm `reach_q` execution, online residual tracker for sim-to-real mismatch, and `pibench validate` CLI command.
-* **Tests:** 141 passing across all chapters (Chapters 2–9), PIBench engine/evaluation/validation suites, and the hardened virtual real-robot bridge.
+* **Tests:** 144 passing across all chapters (Chapters 2–9), PIBench engine/evaluation/validation suites, and the hardened virtual real-robot bridge.
 
 ### Run it
 
@@ -672,6 +674,13 @@ When the virtual loop is solid, a physical arm (Forte / AM-ARM) becomes a drop-i
 ---
 
 ## 📝 Changelog
+
+### 2026-08-20 — Milestone 3 Virtual Robot Validation at Scale Complete
+
+* **Milestone 3 — Virtual Robot Validation at Scale:** added `pibench/pibench/realrobot/batch.py` with `BatchValidator` and `BatchValidationReport`. The validator sweeps randomized `MockRealArm` instances across mismatch levels (`0.0–1.0`), random seeds, and controller variants (PID and computed torque), then reports per-level mean accuracy. Residual tracker tests now prove that gear-ratio mismatches inflate residuals, and batch results show accuracy degrades as mismatch grows.
+* **Tests:** added 3 new real-robot validation tests (`test_residual_tracker_detects_gear_mismatch`, `test_batch_validator_reports_accuracy_vs_mismatch`, `test_computed_torque_controller_on_virtual_arm`). Full combined suite now **144 passing**.
+* **Documentation:** updated root `README.md`, `memory.md`, and `learning-robotics.md` memory to mark Milestones 2 and 3 complete.
+* Committed and pushed all changes to `origin/master`.
 
 ### 2026-08-20 — Milestone 1 Virtual Bridge + Chapter 9 Trajectory Generation Complete
 
