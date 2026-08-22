@@ -86,10 +86,19 @@ LearningRobotics/
 │   ├── utils.py                         # pose error, rotation matrix, clip helpers
 │   ├── demo_control_viewer.py           # interactive controller selector demo
 │   └── test_control.py                  # pytest suite (9 tests)
-└── pibench/                             # Physical Intuition Benchmark (Phases 0-6)
+├── chapter08_motion_planning/             # Chapter 8 deliverables
+│   ├── requirements.txt                 # mujoco + numpy + pytest
+│   ├── collision.py                     # ArmPlanningEnv + obstacle injection + collision/segment checks
+│   ├── planners.py                      # PRM, RRT, RRT*, potential-field planners
+│   ├── smoother.py                      # shortcut smoothing + cubic B-spline interpolation
+│   ├── demo_motion_planning_viewer.py   # RRT* obstacle demo with MuJoCo viewer playback
+│   └── test_motion_planning.py          # pytest suite (10 tests)
+└── pibench/                             # Physical Intuition Benchmark (Phases 0-7)
     ├── pibench/                         # Engine + scenes
+    │   ├── cli.py                       # run/list/render/view/leaderboard/validate commands
     │   ├── core/                        # Problem, Suite, Runner, Evaluator, Registry, CounterfactualBuilder
     │   ├── evaluation/                  # Phase 6: per-concept accuracy, calibration metrics, leaderboard generation
+    │   ├── realrobot/                   # Phase 7: validation protocol + harness + residual tracker
     │   ├── scenes/statics/            # TowerFall, SlopeSlide, SupportBalance, ToppleDirection
     │   ├── scenes/dynamics/             # PendulumSwing, CollisionBounce, ProjectileHit
     │   ├── scenes/contact/            # PushTipVsSlide, StackStability, WedgeInsert, FrictionPile, SlipGrip
@@ -103,12 +112,9 @@ LearningRobotics/
     ├── docs/SCENE_CATALOG.md            # Scene coverage map
     ├── docs/PLAN.md                     # PIBench phase plan
     ├── docs/HARDWARE_BOM.md             # Sub-$500 hardware recommendation memo
-    └── run_all.py                       # Multi-suite baseline runner + leaderboard builder
-
-Planned future structure (not yet created):
-├── ...
-├── chapter08_motion_planning/
-├── REVOLUTIONARY_ROBOTICS_IDEAS.md        # Already exists at root; see Section 7
+    ├── run_all.py                       # Multi-suite baseline runner + leaderboard builder
+    ├── showcase.py                      # Render framed thumbnails of every scene
+    └── build_showcase_artifact.py       # Build self-contained HTML gallery
 ```
 
 ---
@@ -745,6 +751,61 @@ Continue from the prior session and finish all pending Phase 5 + Chapter 6 work 
 * `memory.md`: this section + updated repo layout, status snapshot, open decisions, file index, and fast-restart summary.
 * `pibench/README.md`, `pibench/docs/PLAN.md`, `pibench/docs/SCENE_CATALOG.md` — updated Phase 6 status and references.
 
+#### 8.4 Final validation / wrap-up
+
+* Regenerated showcase thumbnails with Chapter 7 controller images (`python pibench/showcase.py` → 27 images; `python pibench/build_showcase_artifact.py` → `output/showcase/index.html`).
+* Full combined test suite: **48 passing** across Chapters 2–7 (6+4+8+4+6+9) and PIBench evaluation tests (11).
+* `python pibench/run_all.py` — physics oracle **100.0%**, random **38.6%**; leaderboard artifacts regenerated.
+* Git tree clean and in sync with `origin/master` (commit `5511223`).
+
+---
+
+### Session 9 — 2026-08-20 (continued)
+
+#### 9.1 What the user asked
+
+Continue without further questions: finish all pending Phase 5 + Chapter 6 wrap-up, then take the next steps toward the north star by implementing Chapter 8 (Motion Planning) and PIBench Phase 7 (real-robot validation harness) end-to-end.
+
+#### 9.2 What we built
+
+1. **Chapter 8 — Motion Planning**
+   * `chapter08_motion_planning/requirements.txt` — MuJoCo + NumPy + pytest.
+   * `chapter08_motion_planning/collision.py` — `ArmPlanningEnv` reads the 6-DOF arm XML, injects static obstacle bodies, and provides `is_collision`, `is_segment_free`, and `sample_collision_free`.
+   * `chapter08_motion_planning/planners.py` — `PRMPlanner` (A* on k-NN roadmap), `RRTPlanner`, `RRTStarPlanner` with neighbor rewiring, and `PotentialFieldPlanner`.
+   * `chapter08_motion_planning/smoother.py` — `shortcut_smooth` and `cubic_bspline_interpolate`.
+   * `chapter08_motion_planning/demo_motion_planning_viewer.py` — RRT* plans around obstacles and plays back the path in the MuJoCo passive viewer.
+   * `chapter08_motion_planning/test_motion_planning.py` — 10 passing tests covering joint-limit penalty, obstacle detection, segment checks, planner validity, smoothing, RRT* vs RRT length, and potential-field behavior.
+
+2. **PIBench Phase 7 — Real-Robot Validation Harness**
+   * `pibench/pibench/realrobot/__init__.py` — re-exports harness and protocol models.
+   * `pibench/pibench/realrobot/protocol.py` — `ValidationTask` and `ValidationResult` Pydantic models with `ConfigDict(extra="allow")`.
+   * `pibench/pibench/realrobot/harness.py` — `RealRobotValidationHarness` with mock-arm creation, default inertia-scaled PID controller, and `_run_reach_q` for executing `reach_q` tasks and comparing predicted vs actual outcomes.
+   * `pibench/pibench/realrobot/calibration.py` — `ResidualTracker` with `observe`, `mean_residual`, `torque_offset`, and `run_calibration_episode` for online sim-to-real mismatch calibration.
+   * `pibench/pibench/tests/test_realrobot.py` — 5 passing tests: reach success, reach failure, batch accuracy, zero-mismatch residuals, and noise detection.
+   * `pibench/pibench/cli.py` — added `cmd_validate` and `validate` subcommand; uses ASCII `[OK]`/`[FAIL]` markers to avoid Windows cp1252 encoding issues.
+
+3. **Showcase refresh for Chapter 8**
+   * Added `render_arm_motion_planning()` to `pibench/showcase.py` (RRT* goal configuration among three box obstacles).
+   * Updated `pibench/build_showcase_artifact.py` caption for `arm_motion_planning.png` and added captions for the four Phase 5 parameter/counterfactual scenes (`massorder`, `frictionorder`, `counterfactualmass`, `counterfactualfriction`).
+   * Added a new "PIBench — Parameter Estimation" gallery group so the new scenes appear in the HTML output.
+   * Regenerated all 29 thumbnails and rebuilt `output/showcase/index.html`.
+
+4. **Validation results**
+   * Full combined suite: `python -m pytest chapter01_foundation chapter02_rigid_body_motions chapter03_forward_kinematics chapter04_velocity_kinematics chapter05_inverse_kinematics chapter06_dynamics chapter07_control chapter08_motion_planning pibench -q` — **118 passed**.
+   * `python pibench/run_all.py` — physics oracle **100.0% (220/220)**, random **38.6% (85/220)**.
+   * `PYTHONPATH=pibench python pibench/pibench/cli.py validate --output output/validate_dummy.json` — validation accuracy **100.0% (3/3)**.
+
+#### 9.3 Documentation updates
+
+* Root `README.md`: marked Chapter 8 and PIBench Phase 7 complete; added Chapter 8 section; updated repo layout, PIBench section, run commands, showcase stats, and changelog.
+* `memory.md`: this section plus updated repo layout, status snapshot, file index, commands, and fast-restart summary.
+* `pibench/README.md`, `pibench/docs/PLAN.md`, `pibench/docs/SCENE_CATALOG.md`: marked Phase 7 complete, added `realrobot/` layout, updated test counts and CLI commands.
+
+#### 9.4 Final wrap-up
+
+* Regenerated `output/showcase/index.html` and leaderboard artifacts.
+* Git working tree clean; committed and pushed all changes to `origin/master`.
+
 ---
 
 ## 5. Current Status Snapshot
@@ -758,8 +819,9 @@ Continue from the prior session and finish all pending Phase 5 + Chapter 6 work 
 | Chapter 5 practical | ✅ Complete — `inverse_kinematics.py` + null-space redundancy + analytic 2R + 4 tests |
 | Chapter 6 practical | ✅ Complete — `dynamics.py` + mass matrix / bias / forward / inverse dynamics + 6 tests |
 | Chapter 7 practical | ✅ Complete — `control.py` + PID, computed torque, task/operational-space, uncertainty wrapper, mock real arm + 9 tests |
+| Chapter 8 practical | ✅ Complete — `collision.py` + `planners.py` + `smoother.py` + viewer + 10 tests |
 | GitHub repo | ✅ Live at https://github.com/satyamdas03/LearningRobotics |
-| README | ✅ Complete (includes Chapters 1–7 + PIBench Phases 0–6 scaffold) |
+| README | ✅ Complete (includes Chapters 1–8 + PIBench Phases 0–7) |
 | Revolutionary manifesto | ✅ Complete and pushed (Concept L now has Phase 0–7 plan) |
 | PIBench Phase 0 | ✅ Complete — engine + `TowerFall` |
 | PIBench Phase 1 | ✅ Complete — statics suite: `SlopeSlide`, `SupportBalance`, `ToppleDirection` |
@@ -770,7 +832,8 @@ Continue from the prior session and finish all pending Phase 5 + Chapter 6 work 
 | PIBench Phase 5 | ✅ Complete — params suite: `MassOrder`, `FrictionOrder`, `CounterfactualMass`, `CounterfactualFriction`, `BalanceAfterMove`; counterfactual engine; optional LLM predictor |
 | Chapter 7 practical | ✅ Complete — controller family + uncertainty-aware wrapper + `MockRealArm` sim-to-real bridge; 9 tests passing |
 | PIBench Phase 6 | ✅ Complete — `EvaluationHarness`, per-suite/per-concept accuracy, ECE/Brier/NLL calibration, static HTML leaderboard, VLM predictor, 11 evaluation tests passing |
-| Next implementation work | ⏳ Chapter 8 Motion Planning + PIBench Phase 7 (real-robot validation harness) |
+| PIBench Phase 7 | ✅ Complete — `RealRobotValidationHarness`, `ValidationTask`/`ValidationResult`, mock-arm `reach_q`, residual tracker, `pibench validate`, 5 validation tests passing |
+| Next implementation work | ⏳ Chapter 9 Reinforcement Learning (Isaac Lab) or real-hardware purchase + sim-to-real experiments |
 | Hardware purchase | ⏳ None yet; `docs/HARDWARE_BOM.md` recommends Forte starter ($~285) or AM-ARM full config ($~480) |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -778,7 +841,7 @@ Continue from the prior session and finish all pending Phase 5 + Chapter 6 work 
 
 ## 6. Open Decisions / Questions
 
-1. Which chapter next? Continue *Modern Robotics* Chapter 8 (Motion Planning) and PIBench Phase 7 (real-robot validation harness / sim-to-real bridge).
+1. Which chapter next? Continue *Modern Robotics* Chapter 9 (Trajectory Generation) / Chapter 10 (Motion Planning cont.) or begin Isaac Lab reinforcement-learning chapter. Real-robot validation protocol is in place; hardware purchase is the next gate.
 2. Which cheap robot arm should be the long-term hardware target? Decision documented in `docs/HARDWARE_BOM.md`: **Forte starter stack (~$285)** for first real-robot validation; **AM-ARM full stack (~$480-540)** for higher payload/reach if budget allows; **U-ARM glove (~$50)** for teleop-only data collection.
 3. Should the README or manifesto be converted into a polished website / artifact for sharing? The static HTML leaderboard at `output/leaderboard.html` is the first public-facing page; consider publishing it via GitHub Pages.
 4. Should we install Isaac Sim in headless pip mode now to verify it runs on the RTX 5060, or wait until needed? Continue waiting until RL chapters (Chapter 9) or Phase 7 real-robot validation requires GPU-parallel envs.
@@ -824,6 +887,14 @@ Continue from the prior session and finish all pending Phase 5 + Chapter 6 work 
 | `chapter07_control/real_hardware.py` | `RealArm` interface + `MockRealArm` | Sim-to-real bridge; implement `ForteAMArmAdapter` when hardware arrives |
 | `chapter07_control/demo_control_viewer.py` | Interactive controller selector demo | Run to watch gravity/PID/computed-torque/operational-space tracking |
 | `chapter07_control/test_control.py` | Chapter 7 tests | Run with `pytest` after any control change |
+| `chapter08_motion_planning/collision.py` | Planning environment + obstacle collision checks | Reuse for any C-space planning on the 6-DOF arm |
+| `chapter08_motion_planning/planners.py` | PRM / RRT / RRT* / APF planners | Reference for sampling-based motion planning |
+| `chapter08_motion_planning/smoother.py` | Path shortcut + B-spline smoothing | Reuse after any planner to improve path quality |
+| `chapter08_motion_planning/test_motion_planning.py` | Chapter 8 tests | Run with `pytest` after any planner change |
+| `pibench/pibench/realrobot/protocol.py` | Validation task/result models | Reuse for any real-robot validation experiment |
+| `pibench/pibench/realrobot/harness.py` | `RealRobotValidationHarness` + mock arm | Run `pibench validate` before real-hardware experiments |
+| `pibench/pibench/realrobot/calibration.py` | Online residual tracker | Use for sim-to-real mismatch calibration |
+| `pibench/pibench/tests/test_realrobot.py` | Phase 7 validation tests | Run with `pytest` after any realrobot change |
 | `pibench/pibench/core/counterfactual.py` | Counterfactual scene builder | Reuse for any "what if?" scene |
 | `pibench/pibench/evaluation/metrics.py` | Calibration + concept accuracy metrics | Extend when adding new calibration diagnostics |
 | `pibench/pibench/evaluation/leaderboard.py` | Static HTML/JSON leaderboard | Regenerate after each benchmark run |
@@ -890,6 +961,15 @@ python -m pip install -r requirements.txt
 python -m pytest test_dynamics.py -v
 ```
 
+### Run Chapter 8 tests
+
+```powershell
+cd C:\Users\point\projects\LearningRobotics\chapter08_motion_planning
+. .venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m pytest test_motion_planning.py -v
+```
+
 ### Run PIBench
 
 ```powershell
@@ -906,6 +986,10 @@ python -m pibench run --suite deformable --predictor physics_oracle --n 10
 python -m pibench run --suite params --predictor physics_oracle --n 10
 python -m pibench render TowerFall --seed 0 --output output/tower_fall_seed0.png
 python run_all.py
+
+# Phase 7 real-robot validation demo (uses mocked arm)
+$env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
+python pibench/pibench/cli.py validate --output output/validate_dummy.json
 ```
 
 ### Commit and push future changes
@@ -936,7 +1020,7 @@ Note: this repo is independent of the `C:\Users\point` mega-repo. Do not acciden
 
 If you are resuming this session with no other context, here is the one-paragraph summary:
 
-> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–7 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward kinematics, velocity kinematics/Jacobians, inverse kinematics, dynamics, control). **PIBench (Physical Intuition Benchmark) Phases 0–6 are complete:** a runnable MuJoCo-based benchmark engine with statics, dynamics, contact/friction, articulated/deformable, parameter-estimation/counterfactual, and model-harness/leaderboard/calibration suites; physics-oracle/random/optional-LLM/optional-VLM baselines; a counterfactual builder; a CLI; a static HTML leaderboard; and passing tests. We wrote a manifesto with 12 revolutionary project ideas targeting real-world blockers like data scarcity, sim-to-real, long-horizon planning, and cheap hardware. The long-term north star is a sub-$500 robot that learns from video, reasons with physics, executes safely, and shares skills with other robots. A hardware BOM memo recommends starter and full-stack configurations.
+> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–8 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward kinematics, velocity kinematics/Jacobians, inverse kinematics, dynamics, control, motion planning). **PIBench (Physical Intuition Benchmark) Phases 0–7 are complete:** a runnable MuJoCo-based benchmark engine with statics, dynamics, contact/friction, articulated/deformable, parameter-estimation/counterfactual, model-harness/leaderboard/calibration, and real-robot validation suites; physics-oracle/random/optional-LLM/optional-VLM baselines; a counterfactual builder; a CLI; static HTML showcase and leaderboard; and passing tests. We wrote a manifesto with 12 revolutionary project ideas targeting real-world blockers like data scarcity, sim-to-real, long-horizon planning, and cheap hardware. The long-term north star is a sub-$500 robot that learns from video, reasons with physics, executes safely, and shares skills with other robots. A hardware BOM memo recommends starter and full-stack configurations.
 
 ---
 
@@ -972,4 +1056,4 @@ A new GitHub repository, **RoboCAD** (`https://github.com/satyamdas03/RoboCAD`),
 
 ---
 
-*Last updated: 2026-08-20*
+*Last updated: 2026-08-20 (Session 9 — Chapter 8 + Phase 7 complete)*

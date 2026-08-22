@@ -1,4 +1,4 @@
-"""Render a visual showcase of LearningRobotics Chapters 1-6 + PIBench Phases 0-5.
+"""Render a visual showcase of LearningRobotics Chapters 1-8 + PIBench Phases 0-7.
 
 Outputs PNG thumbnails to output/showcase/ with auto-framed cameras.
 """
@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "chapter05_inverse_kinemat
 sys.path.insert(0, str(Path(__file__).parent.parent / "chapter06_dynamics"))
 sys.path.insert(0, str(Path(__file__).parent.parent / "chapter04_velocity_kinematics"))
 sys.path.insert(0, str(Path(__file__).parent.parent / "chapter07_control"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "chapter08_motion_planning"))
 from inverse_kinematics import InverseKinematics  # noqa: E402
 from dynamics import ArmDynamics  # noqa: E402
 from jacobian import ArmJacobian  # noqa: E402
@@ -24,6 +25,8 @@ from control import (  # noqa: E402
     JointSpacePIDController,
     OperationalSpaceController,
 )
+from collision import ArmPlanningEnv  # noqa: E402
+from planners import RRTStarPlanner  # noqa: E402
 
 
 OUTPUT_DIR = Path(__file__).parent / "output" / "showcase"
@@ -233,6 +236,29 @@ def render_arm_operational_space() -> Path:
     return _render_model(dyn.model, dyn.data, out)
 
 
+def render_arm_motion_planning() -> Path:
+    """Render a collision-free RRT* goal configuration among obstacles."""
+    obstacles = [
+        {"name": "wall", "type": "box", "pos": [0.78, 0.0, 0.35], "size": [0.05, 0.25, 0.15]},
+        {"name": "shelf", "type": "box", "pos": [0.78, 0.25, 0.5], "size": [0.05, 0.1, 0.05]},
+        {"name": "floor_obstacle", "type": "box", "pos": [0.78, -0.25, 0.15], "size": [0.05, 0.1, 0.05]},
+    ]
+    env = ArmPlanningEnv(obstacles=obstacles)
+    start = np.zeros(6)
+    rng = np.random.default_rng(7)
+    q_goal = env.sample_collision_free(rng)
+    if q_goal is None:
+        q_goal = np.array([0.5, -0.4, 0.7, 0.0, 0.0, 0.0])
+    planner = RRTStarPlanner(max_iters=800, seed=7)
+    path = planner.plan(start, q_goal, env)
+    if path is not None:
+        env.set_state(path[-1])
+    else:
+        env.set_state(q_goal)
+    out = OUTPUT_DIR / "arm_motion_planning.png"
+    return _render_model(env.model, env.data, out)
+
+
 def render_scene(name: str) -> Path | None:
     """Render a PIBench scene with auto-framed camera."""
     out = OUTPUT_DIR / f"{name.lower()}_seed0.png"
@@ -268,6 +294,7 @@ def main() -> None:
     images["Chapter 7 — Joint-space PID"] = render_arm_pid()
     images["Chapter 7 — Computed torque"] = render_arm_computed_torque()
     images["Chapter 7 — Operational space"] = render_arm_operational_space()
+    images["Chapter 8 — Motion planning"] = render_arm_motion_planning()
 
     scenes = [
         "TowerFall",

@@ -18,6 +18,7 @@ CAPTIONS: dict[str, str] = {
     "arm_pid.png": "Chapter 7 — Joint-space PID. Independent-joint PD plus gravity feedforward drives the arm back to a desired set point.",
     "arm_computed_torque.png": "Chapter 7 — Computed torque. Inverse-dynamics linearization cancels nonlinear dynamics and enforces linear error dynamics.",
     "arm_operational_space.png": "Chapter 7 — Operational space. Resolved-acceleration control tracks an end-effector pose via the Jacobian pseudoinverse.",
+    "arm_motion_planning.png": "Chapter 8 — Motion planning. RRT* finds a collision-free joint-space path around static obstacles.",
     "towerfall_seed0.png": "TowerFall — two towers on a tilting platform. The narrow tower is the one that will fall first.",
     "slopeslide_seed0.png": "SlopeSlide — a block on an incline. The answer depends on whether tan(θ) exceeds the static-friction coefficient.",
     "supportbalance_seed0.png": "SupportBalance — a loaded beam. The support must sit at the weighted center of mass for zero net torque.",
@@ -35,6 +36,10 @@ CAPTIONS: dict[str, str] = {
     "ropetension_seed0.png": "RopeTension — two masses linked by a spatial tendon over a pulley. The heavier side descends.",
     "gearturn_seed0.png": "GearTurn — externally meshed gears. Gear A turns counter-clockwise, so gear B turns clockwise.",
     "chaindrape_seed0.png": "ChainDrape — coarse deformable capsule chain draped over a bar. The free-end height is the numeric answer.",
+    "massorder_seed0.png": "MassOrder — three pushed blocks on a frictionless surface. The slowest accelerater is the heaviest (F = m a).",
+    "frictionorder_seed0.png": "FrictionOrder — three blocks on a tilting platform. The first to slide has the lowest static-friction coefficient.",
+    "counterfactualmass_seed0.png": "CounterfactualMass — a tower on a tilted platform. Doubling the top-block mass can shift the combined CoM outside the base.",
+    "counterfactualfriction_seed0.png": "CounterfactualFriction — a block at rest on a ramp. If friction were zero, gravity would make it slide down the incline.",
 }
 
 
@@ -58,6 +63,7 @@ def classify_cards(cards: list[dict]) -> dict[str, list[dict]]:
         "PIBench — Contact & Friction": [],
         "PIBench — Articulated": [],
         "PIBench — Deformable": [],
+        "PIBench — Parameter Estimation": [],
     }
     for card in cards:
         fn = card["filename"]
@@ -93,6 +99,13 @@ def classify_cards(cards: list[dict]) -> dict[str, list[dict]]:
             groups["PIBench — Articulated"].append(card)
         elif fn == "chaindrape_seed0.png":
             groups["PIBench — Deformable"].append(card)
+        elif fn in {
+            "massorder_seed0.png",
+            "frictionorder_seed0.png",
+            "counterfactualmass_seed0.png",
+            "counterfactualfriction_seed0.png",
+        }:
+            groups["PIBench — Parameter Estimation"].append(card)
     return groups
 
 
@@ -356,24 +369,24 @@ def main() -> None:
       <span class="eyebrow">LearningRobotics</span>
       <h1>What we've built so far</h1>
       <p class="lead">
-        A visual tour of the MuJoCo simulations behind Chapters 1–7 and the
-        PIBench physical-intuition benchmark (Phases 0–6).
+        A visual tour of the MuJoCo simulations behind Chapters 1–8 and the
+        PIBench physical-intuition benchmark (Phases 0–7).
       </p>
       <div class="stats">
         <div class="stat">
-          <span class="stat-value">7</span>
+          <span class="stat-value">8</span>
           <span class="stat-label">Chapters</span>
         </div>
         <div class="stat">
-          <span class="stat-value">5</span>
+          <span class="stat-value">6</span>
           <span class="stat-label">PIBench suites</span>
         </div>
         <div class="stat">
-          <span class="stat-value">22</span>
+          <span class="stat-value">29</span>
           <span class="stat-label">Scenes</span>
         </div>
         <div class="stat">
-          <span class="stat-value">48</span>
+          <span class="stat-value">63</span>
           <span class="stat-label">Tests passing</span>
         </div>
         <div class="stat">

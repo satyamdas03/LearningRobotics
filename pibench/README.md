@@ -115,10 +115,17 @@ pibench/
 │   │   ├── physics_oracle.py
 │   │   ├── llm_predictor.py   # Optional Anthropic API text predictor (cache + random fallback)
 │   │   └── vlm_predictor.py   # Optional Anthropic vision predictor (renders scene + image prompt)
-│   ├── evaluation/             # Phase 6: leaderboard + metrics + calibration
+)│   ├── evaluation/             # Phase 6: leaderboard + metrics + calibration
 │   │   ├── metrics.py
 │   │   ├── leaderboard.py
 │   │   └── __init__.py
+│   ├── realrobot/              # Phase 7: real-robot validation protocol + harness
+│   │   ├── __init__.py
+│   │   ├── protocol.py         # ValidationTask / ValidationResult models
+│   │   ├── harness.py          # RealRobotValidationHarness + mock arm
+│   │   ├── calibration.py      # ResidualTracker for online sim-to-real mismatch
+│   │   └── tests/
+│   │       └── test_realrobot.py # 5 tests for validation harness
 │   ├── harness.py              # Phase 6: EvaluationHarness wrapper
 │   ├── tests/                  # Phase 6 evaluation tests
 │   │   └── test_evaluation.py  # 11 tests for metrics + leaderboard plumbing
@@ -183,6 +190,10 @@ python build_showcase_artifact.py  # writes output/showcase/index.html
 
 # Run all baselines across all suites
 python run_all.py
+
+# Phase 7 real-robot validation demo (uses mocked arm)
+$env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
+python pibench/pibench/cli.py validate --output output/validate_dummy.json
 ```
 
 ---
@@ -319,7 +330,7 @@ python -m pytest tests -q                              # engine + scenes
 python -m pytest pibench/tests/test_evaluation.py -q   # Phase 6 metrics + leaderboard
 ```
 
-Current status: **55 core tests passed**, **11 evaluation tests passed**.
+Current status: **55 core tests passed**, **11 evaluation tests passed**, **5 real-robot validation tests passed**. Combined with Chapter 2–8 tests the full suite is **118 passing**.
 
 ---
 
@@ -334,7 +345,7 @@ Current status: **55 core tests passed**, **11 evaluation tests passed**.
 | **4** | Articulated & deformable | Chapter 5 (IK / constraints) | ✅ 5 scenes |
 | **5** | Parameter estimation & counterfactuals | Consolidation + system ID | ✅ 5 scenes |
 | **6** | Model harness + leaderboard | — | ✅ `EvaluationHarness`, static leaderboard, VLM predictor, concept/calibration metrics |
-| **7** | Real-robot validation subset | — | Protocol for AM-ARM / Forte |
+| **7** | Real-robot validation subset | — | ✅ `RealRobotValidationHarness`, mock-arm `reach_q`, residual tracker, `pibench validate` CLI |
 
 ---
 

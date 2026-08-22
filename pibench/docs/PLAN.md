@@ -327,20 +327,24 @@ Files: `pibench/scenes/params/{mass_order,friction_order,counterfactual_mass,cou
 
 ---
 
-### Phase 7 — Real-Robot Validation Subset
+### Phase 7 — Real-Robot Validation Subset ✅
 
-**Goal:** Define a small subset of PIBench questions that can be reproduced on a cheap real arm (AM-ARM / Forte).
+**Goal:** Define a validation protocol and harness that can run on a mocked arm today and transfer to a cheap real arm (AM-ARM / Forte) tomorrow.
 
 **Deliverables:**
-1. `pibench/real/` protocol document.
-2. Hardware scene counterparts for 5 sim questions.
-3. Data-logging format for real-vs-sim comparison.
-4. Sim-to-real gap report template.
+1. `pibench/pibench/realrobot/protocol.py` — `ValidationTask`/`ValidationResult` Pydantic models.
+2. `pibench/pibench/realrobot/harness.py` — `RealRobotValidationHarness` with mock-arm creation and `reach_q` execution.
+3. `pibench/pibench/realrobot/calibration.py` — `ResidualTracker` for online sim-to-real mismatch calibration.
+4. `pibench/pibench/tests/test_realrobot.py` — 5 validation harness tests.
+5. `pibench/pibench/cli.py` — `pibench validate` command with ASCII `[OK]`/`[FAIL]` markers.
 
 **Success criteria:**
-* Document exists.
-* At least one scene has a real-hardware experimental protocol.
-* No hardware purchase required in this phase.
+* Validation protocol exists and runs on a mock arm. ✅
+* `reach_q` tasks compare predicted vs actual outcomes. ✅
+* Residual tracker detects sim-to-real torque mismatch and noise. ✅
+* No hardware purchase required in this phase. ✅
+
+**Status:** completed 2026-08-20.
 
 ---
 
@@ -434,7 +438,7 @@ GitHub Pages deploy (manual or Actions)
 
 After all phases are complete:
 
-* **≥25 unique scenes** across 5 suites, each with a MuJoCo ground-truth answer.
+* **≥25 unique scenes** across 6 suites, each with a MuJoCo ground-truth answer.
 * **≥3 predictor baselines** (random, physics oracle, human, VLM stub).
 * **100% physics-oracle accuracy** on deterministic scenes (validates engine).
 * **Static leaderboard/dashboard** auto-generated and shareable.

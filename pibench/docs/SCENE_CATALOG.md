@@ -411,4 +411,27 @@ Output artifacts live in `pibench/output/`:
 
 ---
 
+## Real-Robot Validation
+
+PIBench Phase 7 adds a real-robot validation protocol and harness so sim results can be checked against a (mocked, then real) robot arm.
+
+| Component | Path | What it does |
+|---|---|---|
+| Protocol models | `pibench/pibench/realrobot/protocol.py` | `ValidationTask` and `ValidationResult` Pydantic models |
+| Harness | `pibench/pibench/realrobot/harness.py` | `RealRobotValidationHarness` creates a mock arm and runs `reach_q` tasks |
+| Calibration | `pibench/pibench/realrobot/calibration.py` | `ResidualTracker` observes sim-vs-real torque mismatch and computes mean offset |
+| Tests | `pibench/pibench/tests/test_realrobot.py` | 5 pytest tests covering success/failure, batch accuracy, zero residuals, and noise detection |
+| CLI | `pibench/pibench/cli.py` | `python pibench/pibench/cli.py validate --output output/validate_dummy.json` |
+
+**Run the validation demo:**
+
+```powershell
+$env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
+python pibench/pibench/cli.py validate --output output/validate_dummy.json
+```
+
+Expected output: validation accuracy 100.0% (3/3) with `[OK]` markers.
+
+---
+
 *Last updated: 2026-08-20*

@@ -157,6 +157,62 @@ def cmd_leaderboard(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_validate(args: argparse.Namespace) -> int:
+    """Phase 7 demo: run reachability validation tasks on a mocked real arm."""
+    from pibench.realrobot.harness import RealRobotValidationHarness
+    from pibench.realrobot.protocol import ValidationTask
+
+    arm = RealRobotValidationHarness.create_mock_arm(dt=args.dt)
+    harness = RealRobotValidationHarness(arm, dt=args.dt)
+
+    tasks = [
+        ValidationTask(
+            task_id="reach_home",
+            description="Return to the home configuration",
+            predicted_answer="yes",
+            action_type="reach_q",
+            action_params={"target_q": [0.0] * arm.nq(), "duration": 0.8, "tolerance": 0.05},
+        ),
+        ValidationTask(
+            task_id="reach_forward",
+            description="Bend shoulder forward",
+            predicted_answer="yes",
+            action_type="reach_q",
+            action_params={
+                "target_q": [0.0, 0.5, 0.0, 0.0, 0.0, 0.0],
+                "duration": 1.5,
+                "tolerance": 0.12,
+            },
+        ),
+        ValidationTask(
+            task_id="reach_extreme",
+            description="Try to reach the joint limit (should miss in the given time)",
+            predicted_answer="no",
+            action_type="reach_q",
+            action_params={
+                "target_q": [0.0, 1.5, 0.0, 0.0, 0.0, 0.0],
+                "duration": 0.05,
+                "tolerance": 0.03,
+            },
+        ),
+    ]
+
+    results = harness.run_tasks(tasks)
+    accuracy = sum(r.match for r in results) / len(results)
+    print(f"Validation accuracy: {accuracy:.1%} ({sum(r.match for r in results)}/{len(results)})")
+    for r in results:
+        status = "[OK]" if r.match else "[FAIL]"
+        print(f"  {status} {r.task_id}: predicted={r.predicted}, actual={r.actual}, error={r.metrics.get('final_error', float('nan')):.4f}")
+
+    if args.output:
+        out_path = Path(args.output)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump([r.model_dump() for r in results], f, indent=2)
+        print(f"\nValidation results written to {out_path}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="pibench", description="Physical Intuition Benchmark")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -195,6 +251,11 @@ def main(argv: list[str] | None = None) -> int:
         "--output-dir", default="output", help="Directory containing results_*.json"
     )
     lb_parser.set_defaults(func=cmd_leaderboard)
+
+    val_parser = subparsers.add_parser("validate", help="Phase 7: run real-robot validation tasks on a mock arm")
+    val_parser.add_argument("--dt", type=float, default=0.01, help="Control timestep")
+    val_parser.add_argument("--output", default=None, help="Path to write validation results JSON")
+    val_parser.set_defaults(func=cmd_validate)
 
     args = parser.parse_args(argv)
     return args.func(args)

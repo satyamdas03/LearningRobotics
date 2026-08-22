@@ -61,7 +61,8 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | **P5** | **PIBench — Parameter Estimation & Counterfactuals** | ✅ Complete | `MassOrder`, `FrictionOrder`, `CounterfactualMass`, `CounterfactualFriction`, `BalanceAfterMove` |
 | 7 | Control | ✅ Complete | Controller family (gravity comp, PID, computed torque, operational space), uncertainty-aware safety wrapper, `MockRealArm` sim-to-real bridge |
 | **P6** | **PIBench — Model Harness, Leaderboard & Calibration** | ✅ Complete | `EvaluationHarness`, per-suite/per-concept accuracy, ECE/Brier/NLL calibration, static HTML leaderboard, VLM predictor |
-| 8 | Motion Planning | ⏳ Planned | TBD |
+| 8 | Motion Planning | ✅ Complete | `chapter08_motion_planning/`: collision checking, PRM/RRT/RRT*/APF planners, shortcut smoothing, viewer demo, 10 tests |
+| **P7** | **PIBench — Real-Robot Validation Harness** | ✅ Complete | `ValidationTask`/`ValidationResult`, mock-arm `reach_q` execution, residual tracker, `pibench validate` CLI, 5 tests |
 | 9 | Reinforcement Learning with Isaac Lab | ⏳ Planned | TBD |
 | 10 | Real-world embodiment / integration | ⏳ Planned | TBD |
 
@@ -113,10 +114,18 @@ LearningRobotics/
 │   ├── utils.py                   # pose_error, clip_vector, rotation helpers
 │   ├── demo_control_viewer.py     # interactive controller selector demo
 │   └── test_control.py            # pytest suite
-└── pibench/                       # Physical Intuition Benchmark (Phases 0-6)
+├── chapter08_motion_planning/     # Chapter 8: motion planning
+│   ├── requirements.txt           # mujoco + numpy + pytest
+│   ├── collision.py               # `ArmPlanningEnv`: obstacles, collision/segment checks
+│   ├── planners.py                # PRM, RRT, RRT*, artificial potential fields
+│   ├── smoother.py                # shortcut smoothing + cubic B-spline interpolation
+│   ├── demo_motion_planning_viewer.py # RRT* obstacle demo with MuJoCo viewer playback
+│   └── test_motion_planning.py    # 10 pytest tests
+└── pibench/                       # Physical Intuition Benchmark (Phases 0-7)
     ├── README.md                  # PIBench overview and quickstart
     ├── requirements.txt           # MuJoCo + benchmark deps
     ├── pibench/                   # Python package
+    │   ├── cli.py                 # run/list/render/view/leaderboard/validate commands
     │   ├── core/                  # Engine + counterfactual builder
     │   ├── scenes/statics/        # TowerFall, SlopeSlide, SupportBalance, ToppleDirection
     │   ├── scenes/dynamics/       # PendulumSwing, CollisionBounce, ProjectileHit
@@ -127,12 +136,14 @@ LearningRobotics/
     │   ├── utils/                 # MJCF + contact + articulated helpers
     │   ├── predictors/            # baselines: random, physics_oracle, llm, vlm
     │   ├── evaluation/            # Phase 6: leaderboard + metrics + calibration
+    │   ├── realrobot/             # Phase 7: validation protocol + harness + residual tracker
     │   ├── tests/                 # Phase 6 evaluation/leaderboard tests
     │   └── harness.py             # Phase 6: EvaluationHarness wrapper
     ├── tests/                     # pytest suite (engine + all scenes)
     ├── docs/                      # PIBench documentation
     ├── run_all.py                 # Run all suites across all predictors
-    └── showcase.py                # Render framed thumbnails of every scene
+    ├── showcase.py                # Render framed thumbnails of every scene
+    └── build_showcase_artifact.py # Build self-contained HTML gallery
 ```
 
 ---
@@ -372,6 +383,35 @@ The chapter recommended installing Isaac Sim. I chose MuJoCo for the first pract
 
 ---
 
+## ✅ Chapter 8 — Motion Planning
+
+### Concepts locked in
+
+* **C-space obstacles** — configurations that cause collision become forbidden regions in joint space.
+* **Collision checking** — probe the arm at a configuration and check MuJoCo contacts against obstacle geoms.
+* **Sampling-based planners** — PRM, RRT, and RRT* build collision-free graphs/trees in high-dimensional C-space.
+* **Probabilistic completeness** — given enough samples, sampling-based methods find a feasible path if one exists.
+* **Path smoothing** — shortcut smoothing and B-spline interpolation shorten and soften raw planner output.
+* **Artificial potential fields** — gradient-based planner that can get stuck in local minima; included as a contrast.
+
+### Files
+
+| File | Purpose |
+|---|---|
+| `collision.py` | `ArmPlanningEnv`: MuJoCo model with injected obstacle bodies, joint-limit checks, collision and segment-free queries |
+| `planners.py` | `PRMPlanner` (A* on k-NN roadmap), `RRTPlanner`, `RRTStarPlanner` with rewiring, `PotentialFieldPlanner` |
+| `smoother.py` | `shortcut_smooth` and `cubic_bspline_interpolate` for post-processing planner paths |
+| `demo_motion_planning_viewer.py` | RRT* plans around obstacles and plays back the path in the MuJoCo passive viewer |
+| `test_motion_planning.py` | 10 pytest tests: limits, obstacle detection, segment checks, planner validity, smoothing, RRT* optimality, potential-field optional behavior |
+
+### Validation
+
+* `python -m pytest test_motion_planning.py -q` — **10 passed**.
+* RRT* consistently finds a collision-free path between two configurations in an empty environment and around simple obstacle sets.
+* Shortcut smoothing reduces C-space path length while preserving collision-free validity.
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Clone the repo
@@ -501,9 +541,9 @@ Expected output: `Overall accuracy: 100.0%` on every suite. Physics-oracle shoul
 
 ---
 
-## 🧱 PIBench — First Revolutionary Deliverable (Phases 0–6)
+## 🧱 PIBench — First Revolutionary Deliverable (Phases 0–7)
 
-PIBench is the executable first step toward the *Revolutionary Robotics* north star. It evaluates whether a model truly understands physical common sense across statics, dynamics, contact/friction, articulated constraints, deformable bodies, parameter estimation / counterfactual reasoning, and now model evaluation/leaderboards.
+PIBench is the executable first step toward the *Revolutionary Robotics* north star. It evaluates whether a model truly understands physical common sense across statics, dynamics, contact/friction, articulated constraints, deformable bodies, parameter estimation / counterfactual reasoning, model evaluation/leaderboards, and a real-robot validation protocol.
 
 ### What works now
 
@@ -537,9 +577,10 @@ PIBench is the executable first step toward the *Revolutionary Robotics* north s
   * `CounterfactualFriction` — if static friction on an incline were zero, would the block slide?
   * `BalanceAfterMove` — how far must the support shift after a point mass is moved on a beam?
 * **Baselines:** `physics_oracle` (100% on deterministic scenes), `random`, optional `llm` (requires `anthropic` SDK + `ANTHROPIC_API_KEY`), optional `vlm` (renders scene + multimodal prompt).
-* **CLI:** `pibench list`, `pibench run`, `pibench render`, `pibench view`, `pibench leaderboard`.
+* **CLI:** `pibench list`, `pibench run`, `pibench render`, `pibench view`, `pibench leaderboard`, `pibench validate`.
 * **Phase 6 (complete):** `EvaluationHarness`, static HTML/JSON leaderboard, per-concept and calibration metrics (ECE, Brier, NLL), and optional VLM predictor that renders scenes and asks a vision-language model.
-* **Tests:** 66 passing across engine, all scenes, and evaluation/leaderboard plumbing (55 in `tests/test_core.py`, 11 in `pibench/tests/test_evaluation.py`).
+* **Phase 7 (complete):** `RealRobotValidationHarness` with `ValidationTask`/`ValidationResult` protocol, mock-arm `reach_q` execution, online residual tracker for sim-to-real mismatch, and `pibench validate` CLI command.
+* **Tests:** 118 passing across all chapters (Chapters 2–8) and PIBench engine/evaluation/validation suites.
 
 ### Run it
 
@@ -555,6 +596,9 @@ python -m pibench run --suite deformable --predictor physics_oracle --n 10
 python -m pibench run --suite params --predictor physics_oracle --n 10
 python -m pibench view TowerFall
 python run_all.py
+
+# Phase 7 real-robot validation demo (uses mocked arm)
+python -m pibench.cli validate --output output/validate_dummy.json
 ```
 
 Expected output: `Overall accuracy: 100.0%` on every suite. `physics_oracle` tops the leaderboard.
@@ -579,6 +623,15 @@ Each chapter feeds into that stack. Chapter 1 is the foundation (links, joints, 
 ---
 
 ## 📝 Changelog
+
+### 2026-08-20 — Chapter 8 Motion Planning + PIBench Phase 7 Real-Robot Validation Complete
+
+* **Chapter 8 — Motion Planning:** added `chapter08_motion_planning/` with `collision.py` (`ArmPlanningEnv` + obstacle injection), `planners.py` (PRM, RRT, RRT*, artificial-potential-field), `smoother.py` (shortcut smoothing + cubic B-spline), `demo_motion_planning_viewer.py` (RRT* playback), and `test_motion_planning.py` (10 passing tests).
+* **PIBench Phase 7 — Real-Robot Validation Harness:** added `pibench/pibench/realrobot/` with `protocol.py` (`ValidationTask`/`ValidationResult`), `harness.py` (`RealRobotValidationHarness` with mock-arm `reach_q` execution), `calibration.py` (`ResidualTracker` for online sim-to-real mismatch), and `tests/test_realrobot.py` (5 passing tests). Added `pibench validate` CLI command with ASCII `[OK]`/`[FAIL]` status markers.
+* **Showcase:** regenerated 29 framed thumbnails including a new Chapter 8 motion-planning card; updated `build_showcase_artifact.py` captions and stats (8 chapters, 6 suites, 29 scenes, 118 tests passing).
+* **Tests:** full combined suite now **118 passing** across Chapters 2–8 and PIBench engine/evaluation/validation. `python pibench/run_all.py` reports physics oracle 100.0% (220/220), random 38.6% (85/220). `pibench validate` demo reports 100.0% (3/3).
+* **Documentation:** updated root `README.md`, `memory.md`, `pibench/README.md`, `pibench/docs/PLAN.md`, and `pibench/docs/SCENE_CATALOG.md` to mark Chapter 8 and Phase 7 complete and refresh file indexes.
+* Committed and pushed all changes to `origin/master`.
 
 ### 2026-08-22 — Chapter 7 Control + PIBench Phase 6 Scaffold + RoboCAD Phase 0 Complete
 
