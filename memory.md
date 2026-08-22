@@ -1082,8 +1082,10 @@ Continue the simulation-only roadmap: scaffold Milestone 9 (end-to-end north-sta
 | Chapter 11 practical | ✅ Complete — `expert.py` + `behavior_cloning.py` + `teleop.py` + expert demonstrations + behavior-cloning MLP + teleop recorder + 6 tests |
 | Chapter 12 practical | ✅ Complete — `task_parser.py` + `planner.py` + `physics_verifier.py` + `reasoning_loop.py` + NL task parser + rule/LLM planner + MuJoCo verifier + retry loop + 7 tests |
 | Chapter 13 practical | ✅ Complete — `skill.py` + `skills.py` + `composer.py` + reusable parameterized skills (reach/push/pick/place/slide) + plan composition + JSON skill library + 7 tests |
+| Chapter 14 practical | ✅ Complete — `chapter14_self_improvement/`: failure detector, online system ID, retuner, A/B experiment, self-improvement loop, 6 tests |
+| Chapter 15 practical | ✅ Complete — `chapter15_north_star/`: end-to-end NL task → plan → execute → validate → save loop, 6 tests |
 | GitHub repo | ✅ Live at https://github.com/satyamdas03/LearningRobotics |
-| README | ✅ Complete (includes Chapters 1–13 + PIBench Phases 0–7) |
+| README | ✅ Complete (includes Chapters 1–15 + PIBench Phases 0–7 + Milestones 1–9, 182 tests) |
 | Revolutionary manifesto | ✅ Complete and pushed (Concept L now has Phase 0–7 plan) |
 | PIBench Phase 0 | ✅ Complete — engine + `TowerFall` |
 | PIBench Phase 1 | ✅ Complete — statics suite: `SlopeSlide`, `SupportBalance`, `ToppleDirection` |
@@ -1112,11 +1114,14 @@ Continue the simulation-only roadmap: scaffold Milestone 9 (end-to-end north-sta
 
 ## 6. Open Decisions / Questions
 
-1. Which chapter next? Continue *Modern Robotics* Chapter 9 (Trajectory Generation) / Chapter 10 (Motion Planning cont.) or begin Isaac Lab reinforcement-learning chapter. Real-robot validation protocol is in place; hardware purchase is the next gate.
-2. Which cheap robot arm should be the long-term hardware target? Decision documented in `docs/HARDWARE_BOM.md`: **Forte starter stack (~$285)** for first real-robot validation; **AM-ARM full stack (~$480-540)** for higher payload/reach if budget allows; **U-ARM glove (~$50)** for teleop-only data collection.
-3. Should the README or manifesto be converted into a polished website / artifact for sharing? The static HTML leaderboard at `output/leaderboard.html` is the first public-facing page; consider publishing it via GitHub Pages.
-4. Should we install Isaac Sim in headless pip mode now to verify it runs on the RTX 5060, or wait until needed? Continue waiting until RL chapters (Chapter 9) or Phase 7 real-robot validation requires GPU-parallel envs.
-5. Which dashboard technology should PIBench use? Static generated HTML (current) is sufficient for GitHub Pages; reassess if live interactivity is needed later.
+1. **What is the next major goal?** All simulation-only milestones (M1–M9) are complete. Options:
+   - Publish the PIBench static leaderboard (`output/leaderboard.html`) to GitHub Pages.
+   - Add an Isaac Lab / RL chapter for policy learning at scale.
+   - Build an optional real-arm adapter (`ForteAMArmAdapter`) when budget allows.
+2. **Hardware target:** Documented in `pibench/docs/HARDWARE_BOM.md` — **Forte starter stack (~$285)** or **AM-ARM full stack (~$480-540)**. Purchase is paused; simulation-first remains the strategy.
+3. **Public website:** Consider publishing `README.md` and the PIBench leaderboard via GitHub Pages to make the project shareable.
+4. **Isaac Sim:** Not installed. Revisit when a specific milestone (massive RL parallelization) requires it.
+5. **Dashboard technology:** Static HTML (current) is sufficient for GitHub Pages; reassess if live interactivity is needed later.
 
 ---
 
