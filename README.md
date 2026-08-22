@@ -203,11 +203,11 @@ LearningRobotics/
 
 ## 🎬 Live Demo — Self-Improving Virtual Real-Sim-Real Loop
 
-This is the best-performing demo so far. The video shows the 6-DOF arm in MuJoCo executing the same joint-space reach task under two controllers, side by side.
+This is the best-performing demo so far. The animation shows the 6-DOF arm in MuJoCo executing the same joint-space reach task under two controllers, side by side.
 
-<video src="docs/assets/self_improve_baseline_vs_retuned.mp4" controls width="100%" playsinline>
-  Your browser does not support the video tag.
-</video>
+![Self-improvement demo: baseline vs retuned controller](docs/assets/self_improve_baseline_vs_retuned.gif)
+
+*Higher-quality MP4 with audio-free playback controls: [`docs/assets/self_improve_baseline_vs_retuned.mp4`](docs/assets/self_improve_baseline_vs_retuned.mp4)*
 
 | | Baseline controller | Retuned controller |
 |---|---|---|
