@@ -93,6 +93,12 @@ LearningRobotics/
 │   ├── smoother.py                      # shortcut smoothing + cubic B-spline interpolation
 │   ├── demo_motion_planning_viewer.py   # RRT* obstacle demo with MuJoCo viewer playback
 │   └── test_motion_planning.py          # pytest suite (10 tests)
+├── chapter09_trajectory_generation/       # Chapter 9 deliverables
+│   ├── trajectory.py                    # cubic/quintic joint-space splines
+│   ├── time_scaling.py                  # trapezoidal and S-curve time scaling
+│   ├── path_to_trajectory.py            # convert Chapter 8 path to timed trajectory
+│   ├── demo_trajectory_viewer.py        # plan → trajectory → controller playback
+│   └── test_trajectory_generation.py    # pytest suite (10 tests)
 └── pibench/                             # Physical Intuition Benchmark (Phases 0-7)
     ├── pibench/                         # Engine + scenes
     │   ├── cli.py                       # run/list/render/view/leaderboard/validate commands

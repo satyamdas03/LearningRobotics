@@ -65,7 +65,8 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | **P6** | **PIBench — Model Harness, Leaderboard & Calibration** | ✅ Complete | `EvaluationHarness`, per-suite/per-concept accuracy, ECE/Brier/NLL calibration, static HTML leaderboard, VLM predictor |
 | 8 | Motion Planning | ✅ Complete | `chapter08_motion_planning/`: collision checking, PRM/RRT/RRT*/APF planners, shortcut smoothing, viewer demo, 10 tests |
 | **P7** | **PIBench — Real-Robot Validation Harness** | ✅ Complete | `ValidationTask`/`ValidationResult`, mock-arm `reach_q` execution, residual tracker, `pibench validate` CLI, 5 tests |
-| 9 | Trajectory Generation | ⏳ Planned | Timed motion between planned configurations |
+| 9 | Trajectory Generation | ✅ Complete | `chapter09_trajectory_generation/`: cubic/quintic splines, trapezoidal/S-curve time scaling, path→trajectory, tracked by Chapter 7 controller, 10 tests |
+| **M1** | **Hardened Virtual Real-Robot Bridge** | ✅ Complete | `MockRealArm` actuator/sensor dynamics + `VirtualArmFactory` domain randomization, 13 tests |
 | 10 | Virtual Perception + Imitation Learning | ⏳ Planned | Sim camera, object detection, behavior cloning |
 | 11 | Foundation-Model + Physics Verifier | ⏳ Planned | LLM/VLM plans, MuJoCo verifies, retry loop |
 | 12 | Skill Library + Skill Sharing | ⏳ Planned | Reusable skills, composition, federated sharing |
@@ -127,6 +128,12 @@ LearningRobotics/
 │   ├── smoother.py                # shortcut smoothing + cubic B-spline interpolation
 │   ├── demo_motion_planning_viewer.py # RRT* obstacle demo with MuJoCo viewer playback
 │   └── test_motion_planning.py    # 10 pytest tests
+├── chapter09_trajectory_generation/ # Chapter 9: trajectory generation
+│   ├── trajectory.py              # cubic/quintic joint-space splines
+│   ├── time_scaling.py            # trapezoidal and S-curve time scaling
+│   ├── path_to_trajectory.py      # convert Chapter 8 path to timed trajectory
+│   ├── demo_trajectory_viewer.py  # plan → trajectory → controller playback
+│   └── test_trajectory_generation.py # 10 pytest tests
 └── pibench/                       # Physical Intuition Benchmark (Phases 0-7)
     ├── README.md                  # PIBench overview and quickstart
     ├── requirements.txt           # MuJoCo + benchmark deps
@@ -418,6 +425,35 @@ The chapter recommended installing Isaac Sim. I chose MuJoCo for the first pract
 
 ---
 
+## ✅ Chapter 9 — Trajectory Generation
+
+### Concepts locked in
+
+* **Geometric path vs. timed trajectory** — a path is a sequence of configurations; a trajectory assigns a time to each configuration.
+* **Polynomial interpolation** — cubic splines match position/velocity at waypoints; quintic splines also match acceleration, giving smoother torque commands.
+* **Time scaling** — a normalized path parameter ``s(t)`` can be shaped independently of the path geometry to respect velocity/acceleration/jerk limits.
+* **Trapezoidal profile** — bang-bang acceleration with a velocity cruise; simple and time-optimal for bounded velocity/acceleration.
+* **S-curve profile** — jerk-limited trapezoid with continuous acceleration; reduces mechanical stress and controller excitation.
+* **Path → trajectory → controller** — Chapter 8 paths can be converted to timed Chapter 9 trajectories and tracked by Chapter 7 controllers.
+
+### Files
+
+| File | Purpose |
+|---|---|
+| `trajectory.py` | `Trajectory` class + cubic/quintic polynomial interpolation with analytical velocity/acceleration |
+| `time_scaling.py` | `trapezoidal_time_scaling` and `scurve_time_scaling` with bounded velocity/acceleration/jerk |
+| `path_to_trajectory.py` | `path_to_trajectory` and `plan_to_timed_trajectory` converters |
+| `demo_trajectory_viewer.py` | RRT* plan → quintic trajectory → joint-space PID playback in MuJoCo viewer |
+| `test_trajectory_generation.py` | 10 pytest tests: waypoint hits, boundary velocities/accelerations, profile bounds, monotonic time |
+
+### Validation
+
+* `python -m pytest test_trajectory_generation.py -q` — **10 passed**.
+* Cubic and quintic splines pass through all waypoints and respect zero start/end boundary conditions by default.
+* Trapezoidal and S-curve profiles traverse ``s=0`` to ``s=1`` within their declared limits; S-curve acceleration is continuous.
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Clone the repo
@@ -586,7 +622,7 @@ PIBench is the executable first step toward the *Revolutionary Robotics* north s
 * **CLI:** `pibench list`, `pibench run`, `pibench render`, `pibench view`, `pibench leaderboard`, `pibench validate`.
 * **Phase 6 (complete):** `EvaluationHarness`, static HTML/JSON leaderboard, per-concept and calibration metrics (ECE, Brier, NLL), and optional VLM predictor that renders scenes and asks a vision-language model.
 * **Phase 7 (complete):** `RealRobotValidationHarness` with `ValidationTask`/`ValidationResult` protocol, mock-arm `reach_q` execution, online residual tracker for sim-to-real mismatch, and `pibench validate` CLI command.
-* **Tests:** 118 passing across all chapters (Chapters 2–8) and PIBench engine/evaluation/validation suites.
+* **Tests:** 141 passing across all chapters (Chapters 2–9), PIBench engine/evaluation/validation suites, and the hardened virtual real-robot bridge.
 
 ### Run it
 
@@ -636,6 +672,14 @@ When the virtual loop is solid, a physical arm (Forte / AM-ARM) becomes a drop-i
 ---
 
 ## 📝 Changelog
+
+### 2026-08-20 — Milestone 1 Virtual Bridge + Chapter 9 Trajectory Generation Complete
+
+* **Milestone 1 — Hardened Virtual Real-Robot Bridge:** extended `chapter07_control/real_hardware.py` `MockRealArm` with torque/velocity/position control modes, gear ratios, smooth Coulomb + viscous friction, first-order actuator lag, command delay, sensor noise/bias/drift/quantization, feedback delay, and torque/velocity/position saturation. Added `VirtualArmFactory` for domain-randomized arm variants. Added `chapter07_control/test_virtual_arm.py` (13 passing tests) proving the virtual arm diverges from the controller's assumed model.
+* **Chapter 9 — Trajectory Generation:** added `chapter09_trajectory_generation/` with `trajectory.py` (cubic/quintic joint-space splines), `time_scaling.py` (trapezoidal and S-curve profiles), `path_to_trajectory.py` (Chapter 8 path → timed trajectory), `demo_trajectory_viewer.py` (RRT* plan → trajectory → PID playback), and `test_trajectory_generation.py` (10 passing tests).
+* **Tests:** full combined suite now **141 passing**. Hardened bridge tests + trajectory tests added; fixed flaky pibench residual threshold for light wrist joints.
+* **Documentation:** updated root `README.md`, `memory.md`, and `learning-robotics.md` memory to mark Milestone 1 and Chapter 9 complete.
+* Committed and pushed all changes to `origin/master`.
 
 ### 2026-08-20 — Chapter 8 Motion Planning + PIBench Phase 7 Real-Robot Validation Complete
 
