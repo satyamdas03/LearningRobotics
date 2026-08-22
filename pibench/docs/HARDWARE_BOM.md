@@ -1,6 +1,6 @@
 # Hardware BOM Decision Memo — Sub-$500 Robot Stack
 
-> **Context:** We need a real robot platform that can eventually validate the "learn from video, reason with physics, execute safely" north star without blowing the sub-$500 budget. This memo records the decision after surveying low-cost open hardware.
+> **Context:** This memo originally surveyed low-cost robot arms for a future real-robot validation phase. The project has since shifted to a **simulation-first strategy**: all autonomy loops will be built and proven inside realistic virtual arms first, with zero hardware spend. The arms below remain documented as **optional future extensions** once the virtual stack is solid.
 
 ---
 
@@ -65,9 +65,10 @@
 
 ## Decision
 
-1. **Default purchase target:** Option A — Forte starter stack (~$285). It keeps budget headroom for sensors/gripper upgrades and is the cheapest way to start real-robot validation.
-2. **Upgrade path:** If Forte experiments succeed and more payload/reach is needed, sell/donate Forte and move to AM-ARM (Option B).
-3. **Data-collection shortcut:** If we want imitation-learning data before buying any arm, add a U-ARM glove (Option C) for ~$50 and map glove poses to the simulated arm.
+1. **Current default:** No hardware purchase. The validation, calibration, imitation-learning, and skill-sharing loops will run on a realistic virtual arm inside MuJoCo/Isaac Lab.
+2. **Optional future hardware:** Option A — Forte starter stack (~$285) — only after the virtual loop is proven and a real arm is needed for sim-to-real transfer.
+3. **Upgrade path:** If Forte experiments succeed and more payload/reach is needed, move to AM-ARM (Option B).
+4. **Data-collection shortcut:** U-ARM glove (Option C) remains a cheap teleop option, but the project will first collect demonstrations inside simulation.
 
 ---
 

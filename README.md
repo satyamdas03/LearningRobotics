@@ -28,6 +28,8 @@ This repo is a public learning journal. Every chapter is documented, every exper
 | CUDA Version | 13.2 |
 | OS | Windows 11 Home |
 
+**Hardware strategy:** The project is simulation-only for the foreseeable future. No physical robot arm will be purchased. We will build and validate the full autonomy loop — planning, control, perception, imitation learning, foundation-model reasoning, skill sharing, and self-improvement — inside realistic MuJoCo/Isaac Lab simulations first. A real arm becomes an optional future extension once the virtual stack is proven.
+
 ---
 
 ## 🛠️ Tooling
@@ -63,8 +65,12 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | **P6** | **PIBench — Model Harness, Leaderboard & Calibration** | ✅ Complete | `EvaluationHarness`, per-suite/per-concept accuracy, ECE/Brier/NLL calibration, static HTML leaderboard, VLM predictor |
 | 8 | Motion Planning | ✅ Complete | `chapter08_motion_planning/`: collision checking, PRM/RRT/RRT*/APF planners, shortcut smoothing, viewer demo, 10 tests |
 | **P7** | **PIBench — Real-Robot Validation Harness** | ✅ Complete | `ValidationTask`/`ValidationResult`, mock-arm `reach_q` execution, residual tracker, `pibench validate` CLI, 5 tests |
-| 9 | Reinforcement Learning with Isaac Lab | ⏳ Planned | TBD |
-| 10 | Real-world embodiment / integration | ⏳ Planned | TBD |
+| 9 | Trajectory Generation | ⏳ Planned | Timed motion between planned configurations |
+| 10 | Virtual Perception + Imitation Learning | ⏳ Planned | Sim camera, object detection, behavior cloning |
+| 11 | Foundation-Model + Physics Verifier | ⏳ Planned | LLM/VLM plans, MuJoCo verifies, retry loop |
+| 12 | Skill Library + Skill Sharing | ⏳ Planned | Reusable skills, composition, federated sharing |
+| 13 | Self-Improving Virtual Real-Sim-Real Loop | ⏳ Planned | Failure detection, system ID, retuning, A/B improvement |
+| 14 | End-to-End North-Star Demo | ⏳ Planned | NL task → plan → trajectory → execute → validate → calibrate → save skill |
 
 ---
 
@@ -609,16 +615,23 @@ A model that can answer "which tower falls?" or "where does the projectile land?
 
 ---
 
-## 🗺️ Roadmap to "Extraordinary & Revolutionary"
+## 🗺️ Roadmap to "Extraordinary & Revolutionary" — Simulation-First Edition
 
-The end goal is not just to understand robotics, but to build an AI-driven robotic system that does something genuinely novel. Possible north stars:
+The end goal is an AI-driven robot that learns physical skills, reasons with physics, executes safely, and shares what it learns — and we are reaching it **inside simulation first**, with no required hardware purchase. The virtual stack is designed so that only the low-level `RealArm` adapter changes when a physical robot is added later.
 
-* A **self-improving manipulator** that learns from few demonstrations using RL + world models.
-* A **skill library** stored as reusable motion primitives in C-space.
-* A **sim-to-real pipeline** that transfers policies from MuJoCo/Isaac Sim to an affordable real robot arm.
-* A **foundation-model robot brain** that interprets natural-language tasks and synthesizes motion plans + control policies.
+Milestones to the north-star demo:
 
-Each chapter feeds into that stack. Chapter 1 is the foundation (links, joints, DOF, C-space). Chapters 2 and 3 add the math of rigid-body motion and the geometry of forward kinematics needed for any real manipulator.
+1. **Harden the virtual real-robot bridge** — realistic actuator/sensor dynamics, noise, latency, domain randomization.
+2. **Trajectory generation** — timed, smooth motion from Chapter 8 paths to Chapter 7 controllers.
+3. **Virtual validation at scale** — run `pibench validate` across randomized agents and injected mismatch.
+4. **Simulated perception** — MuJoCo camera rendering, object detection, optional VLM scene description.
+5. **Imitation learning** — record expert trajectories, behavior cloning, optional diffusion/ACT policy.
+6. **Foundation-model + physics verifier** — LLM/VLM proposes plans, MuJoCo verifies, retry on failure.
+7. **Skill library + sharing** — reusable skills, composition, federated skill aggregation.
+8. **Self-improving virtual real-sim-real loop** — failure detection, online system ID, retuning, A/B improvement.
+9. **End-to-end north-star demo** — natural-language task → plan → trajectory → execute → validate → calibrate → save skill.
+
+When the virtual loop is solid, a physical arm (Forte / AM-ARM) becomes a drop-in `RealArm` adapter swap — not a rewrite.
 
 ---
 

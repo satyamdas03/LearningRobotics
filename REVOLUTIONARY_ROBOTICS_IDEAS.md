@@ -202,9 +202,9 @@ The robot can then **interpolate** to new objects and **extrapolate** by adjusti
 
 ---
 
-### Concept D: Self-Improving Real-Sim-Real Loop
+### Concept D: Self-Improving Virtual Real-Sim-Real Loop
 
-**The problem:** Sim-to-real is usually a one-way street: build sim, train, deploy, hope it works. When it fails, you don't know why.
+**The problem:** Sim-to-real is usually a one-way street: build sim, train, deploy, hope it works. When it fails, you don't know why. We solve it first in simulation by building a virtual arm whose internal physics model can differ from the controller's assumed model, then closing the loop to identify and correct that mismatch.
 
 **The idea:** A closed loop where the real robot identifies its own failures, updates the simulator's parameters *and structure*, retrains, and tries again — autonomously.
 
@@ -428,7 +428,7 @@ It asks for help or slows down when uncertainty is high.
 | **4** | Articulated & deformable | Joints, constraints, ropes, cloth, gears |
 | **5** | Parameter estimation & counterfactuals | Mass/friction ordering, "what if mass doubled?" |
 | **6** | Model evaluation harness + leaderboard | VLM stub, calibration metrics, static HTML leaderboard |
-| **7** | Real-robot validation subset | Protocols for AM-ARM / Forte real-world counterparts |
+| **7** | Real-robot validation subset | Validation protocol + harness proven on a realistic virtual arm; AM-ARM / Forte adapters are optional future work |
 
 **Why revolutionary:** Standardization accelerates the field, but *causal* standardization redirects research toward the actual concepts robots are missing. PIBench also proves that a single developer on a laptop can ship a credible benchmark.
 
@@ -481,10 +481,11 @@ Given our current setup — **MuJoCo, RTX 5060, Chapter 2 next** — here is a p
 * Train affordance maps from internet video or synthetic data (Concept E prototype).
 * Build the wearable teleop glove if budget allows (Concept K).
 
-### Phase 3: Real-Sim-Real Loop
-* Buy a cheap arm (AM-ARM ~$380 or Forte ~$215).
-* Implement self-improving calibration loop (Concept D).
-* Publish real-world results and open-source everything.
+### Phase 3: Virtual Real-Sim-Real Loop
+* Build a realistic virtual arm with configurable actuator/sensor dynamics and domain randomization.
+* Implement self-improving calibration loop (Concept D) entirely in simulation.
+* Publish reproducible simulation results and open-source everything.
+* Optional future step: swap in a real AM-ARM / Forte adapter and rerun the same loop.
 
 ### Phase 4: Foundation-Model Integration
 * Add LLM/VLM planning with physics verification (Concept B).
@@ -495,7 +496,7 @@ Given our current setup — **MuJoCo, RTX 5060, Chapter 2 next** — here is a p
 
 ## 7. The One-Line North Star
 
-> **Build a robot that learns physical skills from ordinary video, reasons about them with a physics engine, executes them with provable safety, and shares what it learns with other robots — for less than $500 in hardware.**
+> **Build a robot that learns physical skills from ordinary video, reasons about them with a physics engine, executes them with provable safety, and shares what it learns with other robots — for effectively $0 in hardware by proving the full loop in simulation first, with an optional sub-$500 physical arm as a future extension.**
 
 That is extraordinary, revolutionary, and technically possible from where we stand.
 
