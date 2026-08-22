@@ -76,8 +76,10 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | **M6** | **Foundation-Model + Physics Verifier** | ✅ Complete | `chapter12_reasoning/`: NL task parser, rule + optional Claude planner, MuJoCo physics verifier, retry loop, 7 tests |
 | 12 | Foundation-Model + Physics Verifier | ✅ Complete | Natural-language task → plan → simulate → verify → retry |
 | 13 | Skill Library + Skill Sharing | ✅ Complete | `chapter13_skills/`: reusable skill templates, composition, JSON library |
-| 14 | Self-Improving Virtual Real-Sim-Real Loop | ⏳ Planned | Failure detection, system ID, retuning, A/B improvement |
-| 15 | End-to-End North-Star Demo | ⏳ Planned | NL task → plan → trajectory → execute → validate → calibrate → save skill |
+| **M8** | **Self-Improving Virtual Real-Sim-Real Loop** | ✅ Complete | `chapter14_self_improvement/`: failure detector, online system ID, retuner, A/B experiment, self-improvement loop; 6 tests |
+| 14 | Self-Improving Virtual Real-Sim-Real Loop | ✅ Complete | Same as M8 — textbook chapter aligned with the milestone |
+| **M9** | **End-to-End North-Star Demo** | 🚧 Current | NL task → plan → trajectory → execute → validate → calibrate → save skill |
+| 15 | End-to-End North-Star Demo | 🚧 Current | Same as M9 — textbook chapter aligned with the milestone |
 
 ---
 
@@ -164,6 +166,14 @@ LearningRobotics/
 │   ├── skills.py                  # core parameterized skills: reach, push, pick, place, slide
 │   ├── composer.py                # chain skill instances into verified plans
 │   └── test_skills.py             # 7 pytest tests
+├── chapter14_self_improvement/    # Milestone 8 / Chapter 14
+│   ├── failure_detector.py        # Detect reach failures and validation regressions
+│   ├── system_id.py               # Online system ID from residual tracker
+│   ├── retuner.py                 # Retune a controller with estimated bias/gear compensation
+│   ├── ab_experiment.py           # A/B comparison of baseline vs retuned controller
+│   ├── self_improvement_loop.py   # Full loop: detect → identify → retune → validate
+│   ├── demo_self_improve.py       # Constant torque bias demo: baseline 0.0336 → retuned 0.0037
+│   └── test_self_improvement.py   # 6 pytest tests
 └── pibench/                       # Physical Intuition Benchmark (Phases 0-7)
     ├── README.md                  # PIBench overview and quickstart
     ├── requirements.txt           # MuJoCo + benchmark deps

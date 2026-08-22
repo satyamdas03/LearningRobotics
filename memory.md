@@ -15,7 +15,7 @@
 | **Mission** | Learn robotics and AI from first principles fast, and build something extraordinary and revolutionary that solves real-world problems. |
 | **Owner** | Satyam Das (@satyamdas03, satyamdas03@gmail.com) |
 | **Start date** | 2026-08-13 |
-| **Current date** | 2026-08-20 |
+| **Current date** | 2026-08-22 |
 
 ---
 
@@ -985,6 +985,45 @@ Continue the simulation-only roadmap: implement Milestone 7 (skill library and s
 
 ---
 
+### Session 15 — 2026-08-22 (Milestone 8: Self-Improving Virtual Real-Sim-Real Loop)
+
+#### 15.1 What the user asked
+
+Continue the simulation-only roadmap: implement Milestone 8 (self-improving virtual real-sim-real loop), fix the PIBench regression caused by the controller-interface change, keep testing, then commit/push and update documentation.
+
+#### 15.2 What we built
+
+1. **Chapter 14 — Self-Improving Virtual Real-Sim-Real Loop**
+   * `chapter14_self_improvement/failure_detector.py` — `FailureDetector` flags reach failures and validation-result regressions.
+   * `chapter14_self_improvement/system_id.py` — `OnlineSystemID.calibrate_on_trajectory()` estimates constant torque offsets and per-joint gear ratios from residual-tracker data; records calibration history.
+   * `chapter14_self_improvement/retuner.py` — `Retuner.retune()` subtracts the estimated torque offset and applies inverse-gear compensation to a controller.
+   * `chapter14_self_improvement/ab_experiment.py` — A/B controller comparison that resets controllers supporting `reset()`.
+   * `chapter14_self_improvement/self_improvement_loop.py` — `SelfImprovementLoop` wires detect → identify → retune → validate and exposes `retune_kwargs`.
+   * `chapter14_self_improvement/demo_self_improve.py` — `BiasedMockRealArm` injects a constant torque bias; baseline mean error 0.0336 → retuned mean error 0.0037; both 10/10 success.
+   * `chapter14_self_improvement/test_self_improvement.py` — 6 passing tests covering failure detection, system ID, retuner, A/B, and full loop.
+
+2. **PIBench backward-compatibility fix**
+   * `pibench/pibench/realrobot/calibration.py` now detects the controller interface and calls either `controller.compute(state.q, state.qdot, q_des=q_target, dt=dt)` or `controller(state, q_target)`, supporting both Chapter 14 `.compute()` controllers and existing function-style PIBench controllers.
+
+#### 15.3 Validation results
+
+* `python -m pytest chapter14_self_improvement/test_self_improvement.py -q` — **6 passed**.
+* Full combined suite across all chapter venvs + PIBench venv — **176 passing** (28 chapters 2–6, 10 chapter 8, 22 chapter 7, 42 chapters 9–14, 74 PIBench).
+* `python chapter14_self_improvement/demo_self_improve.py` — bias estimate error ≈ 0.0000, A/B `improved=True`, retuned error 9× lower than baseline.
+
+#### 15.4 Documentation updates
+
+* Root `README.md`: added M8 / Chapter 14 to curriculum table and repo-structure tree; marked M9 / Chapter 15 as current.
+* `memory.md`: this section plus updated status snapshot, file index, and test count (176).
+* `.claude/projects/C--Users-point-projects-LearningRobotics/memory/learning-robotics.md`: updated status to Chapters 1–14 + Milestones 1–8, 176 tests.
+* `.claude/projects/C--Users-point-projects-LearningRobotics/plan.md`: marked Milestone 8 complete, Milestone 9 current.
+
+#### 15.5 Final wrap-up
+
+* Git working tree clean; committed and pushed all changes to `origin/master`.
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
@@ -1022,7 +1061,8 @@ Continue the simulation-only roadmap: implement Milestone 7 (skill library and s
 | Milestone 5 | ✅ Complete — `chapter11_imitation_learning/`: expert trajectory recorder via IK + cubic splines, NumPy MLP behavior cloning (path residual + one-shot goal reaching), teleoperation recorder, 6 tests |
 | Milestone 6 | ✅ Complete — `chapter12_reasoning/`: NL task parser, rule + optional Claude LLM planner, MuJoCo physics verifier, retry loop with failure feedback, 7 tests |
 | Milestone 7 | ✅ Complete — `chapter13_skills/`: reusable parameterized skills, plan composition, JSON skill library, 7 tests |
-| Next implementation work | ⏳ Milestone 8: Self-improving virtual real-sim-real loop (failure detection, system ID, retuning, A/B improvement) |
+| Milestone 8 | ✅ Complete — `chapter14_self_improvement/`: failure detector, online system ID, retuner, A/B experiment, self-improvement loop, 6 tests |
+| Next implementation work | 🚧 Milestone 9: End-to-end north-star demo (NL task → plan → trajectory → execute → validate → calibrate → save skill) |
 | Hardware purchase | ⏳ None; project is simulation-only for the foreseeable future |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -1110,6 +1150,13 @@ Continue the simulation-only roadmap: implement Milestone 7 (skill library and s
 | `chapter13_skills/skills.py` | Parameterized skill generators (reach/push/pick/place/slide) | Add new skills here |
 | `chapter13_skills/composer.py` | Skill composer that chains and verifies skill plans | Reuse for task-level plan composition |
 | `chapter13_skills/test_skills.py` | Chapter 13 skill library tests | Run with `pytest` after any skill/composer change |
+| `chapter14_self_improvement/failure_detector.py` | Failure detection from reach results and validation regressions | Extend when adding new failure modes |
+| `chapter14_self_improvement/system_id.py` | Online system ID: torque offset + gear ratio from residuals | Reuse for any sim-to-real calibration loop |
+| `chapter14_self_improvement/retuner.py` | Controller retuning with bias subtraction and gear compensation | Apply after calibration before retrying a task |
+| `chapter14_self_improvement/ab_experiment.py` | A/B controller comparison with optional `reset()` | Use to prove retuning improves tracking |
+| `chapter14_self_improvement/self_improvement_loop.py` | Detect → identify → retune → validate loop | Wire into the north-star demo |
+| `chapter14_self_improvement/demo_self_improve.py` | Constant torque bias demo script | Run to show baseline 0.0336 → retuned 0.0037 |
+| `chapter14_self_improvement/test_self_improvement.py` | Chapter 14 self-improvement tests | Run with `pytest` after any self-improvement change |
 | `pibench/pibench/core/counterfactual.py` | Counterfactual scene builder | Reuse for any "what if?" scene |
 | `pibench/pibench/evaluation/metrics.py` | Calibration + concept accuracy metrics | Extend when adding new calibration diagnostics |
 | `pibench/pibench/evaluation/leaderboard.py` | Static HTML/JSON leaderboard | Regenerate after each benchmark run |
@@ -1271,4 +1318,4 @@ A new GitHub repository, **RoboCAD** (`https://github.com/satyamdas03/RoboCAD`),
 
 ---
 
-*Last updated: 2026-08-20 (Session 14 — Milestones 1–7 complete, 170 tests passing)*
+*Last updated: 2026-08-22 (Session 15 — Milestones 1–8 complete, 176 tests passing)*

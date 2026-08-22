@@ -475,3 +475,22 @@ After all phases are complete:
 * This plan intentionally keeps Phase 0 small so we can push a working benchmark in one session.
 * Every later phase can be paused and resumed while the user continues reading textbook chapters.
 * The manifesto concept L is the parent idea; PIBench is the executable first step.
+
+---
+
+### Phase 8 — Self-Improving Validation Loop (integration with LearningRobotics Milestone 8) ✅
+
+**Goal:** Close the real-sim-real loop so the virtual arm can detect its own failures, identify the mismatch, retune the controller, and validate the improvement.
+
+**Integration:**
+* `pibench/pibench/realrobot/calibration.py` `ResidualTracker` feeds `chapter14_self_improvement/system_id.py`.
+* `chapter14_self_improvement/retuner.py` converts calibration into controller feed-forward compensation.
+* `chapter14_self_improvement/ab_experiment.py` proves retuning improves tracking on the same injected mismatch.
+* `chapter14_self_improvement/self_improvement_loop.py` orchestrates detect → identify → retune → validate.
+
+**Deliverables:**
+* `chapter14_self_improvement/` package with 6 passing tests.
+* Backward-compatible `calibration.py` controller interface (`controller.compute(...)` or `controller(state, q_target)`).
+* Constant torque bias demo: baseline error 0.0336 → retuned error 0.0037.
+
+**Status:** complete — `chapter14_self_improvement/test_self_improvement.py` (6 tests) passing; project-wide test count 176.
