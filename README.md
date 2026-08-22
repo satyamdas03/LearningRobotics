@@ -662,6 +662,8 @@ Expected output: `Overall accuracy: 100.0%` on every suite. Physics-oracle shoul
 
 PIBench is the executable first step toward the *Revolutionary Robotics* north star. It evaluates whether a model truly understands physical common sense across statics, dynamics, contact/friction, articulated constraints, deformable bodies, parameter estimation / counterfactual reasoning, model evaluation/leaderboards, and a real-robot validation protocol.
 
+**📊 Live leaderboard:** [satyamdas03.github.io/LearningRobotics/pibench_leaderboard.html](https://satyamdas03.github.io/LearningRobotics/pibench_leaderboard.html)
+
 ### What works now
 
 * **Engine scaffold:** `Problem`, `Suite`, `Runner`, `Evaluator`, `Registry`, and model-agnostic `Predictor` interface.

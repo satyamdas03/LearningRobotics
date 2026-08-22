@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LearningRobotics — Simulation-First Robotics Lab</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #1a1a1a;
+      --muted: #555555;
+      --border: #dddddd;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --fg: #e2e8f0;
+        --muted: #94a3b8;
+        --border: #334155;
+        --accent: #60a5fa;
+        --accent-soft: #1e293b;
+      }
+    }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: var(--accent);
+      margin-bottom: 0.25rem;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 1.1rem;
+      margin-top: 0;
+    }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      background: var(--accent-soft);
+    }
+    .card h2 {
+      margin-top: 0;
+      color: var(--accent);
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .button {
+      display: inline-block;
+      padding: 0.6rem 1rem;
+      border-radius: 0.375rem;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+    .button:hover {
+      text-decoration: none;
+      opacity: 0.9;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    ul {
+      padding-left: 1.25rem;
+    }
+    li {
+      margin: 0.35rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 LearningRobotics</h1>
+    <p class="subtitle">A public simulation-first robotics + AI learning journal.</p>
+
+    <div class="card">
+      <h2>📊 PIBench Live Leaderboard</h2>
+      <p>
+        PIBench is the MuJoCo-based physical-intuition benchmark built alongside the textbook curriculum.
+        The leaderboard below is regenerated from the latest saved results and served straight from this repo.
+      </p>
+      <p class="meta">Current baseline: physics_oracle vs random across statics, dynamics, contact, articulated, deformable, and parameter-estimation suites.</p>
+      <a class="button" href="pibench_leaderboard.html">Open the leaderboard</a>
+    </div>
+
+    <div class="card">
+      <h2>🚀 Project Links</h2>
+      <ul>
+        <li><a href="https://github.com/satyamdas03/LearningRobotics">GitHub repository</a></li>
+        <li><a href="https://github.com/satyamdas03/LearningRobotics#readme">Project README / curriculum log</a></li>
+        <li><a href="https://github.com/satyamdas03/LearningRobotics/tree/master/pibench">PIBench source</a></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🎬 Latest Demo</h2>
+      <p>Self-improving virtual real-sim-real loop — baseline vs retuned controller:</p>
+      <img src="https://raw.githubusercontent.com/satyamdas03/LearningRobotics/master/docs/assets/self_improve_baseline_vs_retuned.gif" alt="Self-improvement demo" style="max-width:100%; border-radius:0.375rem;">
+    </div>
+
+    <p class="meta">Built by Satyam Das · <a href="https://github.com/satyamdas03/LearningRobotics">@satyamdas03</a></p>
+  </div>
+</body>
+</html>

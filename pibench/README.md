@@ -18,6 +18,12 @@ PIBench is the first concrete deliverable from the *Revolutionary Robotics* mani
 
 ---
 
+## 📊 Live leaderboard
+
+The latest PIBench leaderboard is published automatically from this repo at:
+
+**[satyamdas03.github.io/LearningRobotics/pibench_leaderboard.html](https://satyamdas03.github.io/LearningRobotics/pibench_leaderboard.html)**
+
 ## 🚀 Quick start
 
 On Windows (PowerShell):
