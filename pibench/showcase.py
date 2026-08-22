@@ -13,8 +13,17 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "chapter05_inverse_kinematics"))
 sys.path.insert(0, str(Path(__file__).parent.parent / "chapter06_dynamics"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "chapter04_velocity_kinematics"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "chapter07_control"))
 from inverse_kinematics import InverseKinematics  # noqa: E402
 from dynamics import ArmDynamics  # noqa: E402
+from jacobian import ArmJacobian  # noqa: E402
+from control import (  # noqa: E402
+    ComputedTorqueController,
+    GravityCompensationController,
+    JointSpacePIDController,
+    OperationalSpaceController,
+)
 
 
 OUTPUT_DIR = Path(__file__).parent / "output" / "showcase"
@@ -121,6 +130,109 @@ def render_arm_dynamics() -> Path:
     return _render_model(dyn.model, dyn.data, out)
 
 
+def _make_arm() -> ArmDynamics:
+    """Return an ArmDynamics instance with gravity and generous torque limits."""
+    dyn = ArmDynamics()
+    dyn.model.opt.gravity[:] = np.array([0.0, 0.0, -9.81])
+    dyn.model.actuator_ctrlrange[:, 0] = -200.0
+    dyn.model.actuator_ctrlrange[:, 1] = 200.0
+    return dyn
+
+
+def _inertia_scaled_gains(arm: ArmDynamics, omega: float) -> tuple[np.ndarray, np.ndarray]:
+    """Return joint-space PD gains scaled by the home-configuration inertia."""
+    M_diag = np.diag(arm.mass_matrix(np.zeros(arm.model.nq)))
+    Kp = omega**2 * M_diag
+    Kd = 2.0 * np.sqrt(Kp * M_diag)
+    return Kp, Kd
+
+
+def _ik_target() -> tuple[np.ndarray, np.ndarray]:
+    """Solve for a joint configuration that reaches a visually interesting pose."""
+    ik = InverseKinematics()
+    p_target = np.array([0.55, 0.10, 0.45])
+    R_target = np.eye(3)
+    q0 = np.array([0.1, -0.2, 0.3, 0.0, 0.1, -0.1])
+    q, _info = ik.ik_numeric(q0, R_target, p_target, max_iters=500)
+    return q, ik
+
+
+def render_arm_gravity_comp() -> Path:
+    """Render the arm held in place by gravity-compensation torques."""
+    dyn = _make_arm()
+    q = np.array([0.3, -0.4, 0.5, 0.0, 0.2, -0.1])
+    dyn.set_state(q, np.zeros(dyn.model.nq))
+    dyn.data.ctrl[:] = GravityCompensationController(dyn).compute(q)
+    mujoco.mj_step(dyn.model, dyn.data)
+    out = OUTPUT_DIR / "arm_gravity_comp.png"
+    return _render_model(dyn.model, dyn.data, out)
+
+
+def _simulate_to_pose(
+    dyn: ArmDynamics,
+    controller,
+    q: np.ndarray,
+    qdot: np.ndarray,
+    dt: float = 0.01,
+    steps: int = 1200,
+    **kwargs,
+) -> None:
+    """Run a controller for a fixed number of steps and leave dyn at the final state."""
+    for _ in range(steps):
+        tau = controller.compute(q, qdot, **kwargs)
+        dyn.set_state(q, qdot)
+        dyn.data.ctrl[:] = tau
+        mujoco.mj_step(dyn.model, dyn.data)
+        q = dyn.data.qpos.copy()
+        qdot = dyn.data.qvel.copy()
+    dyn.set_state(q, qdot)
+
+
+def render_arm_pid() -> Path:
+    """Render the arm at a set-point reached by joint-space PID + gravity."""
+    dyn = _make_arm()
+    q_des, _ik = _ik_target()
+    q = np.zeros(dyn.model.nq)
+    qdot = np.zeros(dyn.model.nq)
+    Kp, Kd = _inertia_scaled_gains(dyn, omega=8.0)
+    ctrl = JointSpacePIDController(dyn, Kp=Kp, Kd=Kd, gravity_comp=True)
+    _simulate_to_pose(dyn, ctrl, q, qdot, q_des=q_des, dt=0.01, steps=1500)
+    out = OUTPUT_DIR / "arm_pid.png"
+    return _render_model(dyn.model, dyn.data, out)
+
+
+def render_arm_computed_torque() -> Path:
+    """Render the arm tracking a static pose via computed-torque linearization."""
+    dyn = _make_arm()
+    q_des, _ik = _ik_target()
+    q = np.zeros(dyn.model.nq)
+    qdot = np.zeros(dyn.model.nq)
+    Kp = np.full(dyn.model.nq, 80.0)
+    Kd = np.full(dyn.model.nq, 18.0)
+    ctrl = ComputedTorqueController(dyn, Kp=Kp, Kd=Kd)
+    _simulate_to_pose(dyn, ctrl, q, qdot, q_des=q_des, qdot_des=np.zeros(dyn.model.nq), dt=0.01, steps=1200)
+    out = OUTPUT_DIR / "arm_computed_torque.png"
+    return _render_model(dyn.model, dyn.data, out)
+
+
+def render_arm_operational_space() -> Path:
+    """Render the arm reaching a target pose via resolved-acceleration control."""
+    dyn = _make_arm()
+    jac = ArmJacobian()
+    q0 = np.zeros(dyn.model.nq)
+    qdot0 = np.zeros(dyn.model.nq)
+    dyn.set_state(q0, qdot0)
+    jac.set_q(q0)
+    p_target = np.array([0.55, 0.10, 0.45])
+    R_target = np.eye(3)
+    Kp_task = np.array([60.0, 60.0, 60.0, 30.0, 30.0, 30.0])
+    Kd_task = np.array([14.0, 14.0, 14.0, 8.0, 8.0, 8.0])
+    ctrl = OperationalSpaceController(dyn, jac, Kp=Kp_task, Kd=Kd_task, k_null=0.2)
+    _simulate_to_pose(dyn, ctrl, q0, qdot0, R_des=R_target, p_des=p_target, dt=0.01, steps=1200)
+    out = OUTPUT_DIR / "arm_operational_space.png"
+    return _render_model(dyn.model, dyn.data, out)
+
+
 def render_scene(name: str) -> Path | None:
     """Render a PIBench scene with auto-framed camera."""
     out = OUTPUT_DIR / f"{name.lower()}_seed0.png"
@@ -152,6 +264,10 @@ def main() -> None:
     images["Chapter 1 — 6-DOF arm default"] = render_arm_default()
     images["Chapter 5 — IK target solution"] = render_arm_ik()
     images["Chapter 6 — Dynamics pose"] = render_arm_dynamics()
+    images["Chapter 7 — Gravity compensation"] = render_arm_gravity_comp()
+    images["Chapter 7 — Joint-space PID"] = render_arm_pid()
+    images["Chapter 7 — Computed torque"] = render_arm_computed_torque()
+    images["Chapter 7 — Operational space"] = render_arm_operational_space()
 
     scenes = [
         "TowerFall",

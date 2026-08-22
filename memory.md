@@ -79,25 +79,35 @@ LearningRobotics/
 │   ├── dynamics.py                      # mass matrix, bias forces, forward/inverse dynamics
 │   ├── demo_dynamics_viewer.py          # gravity compensation / free-fall toggle demo
 │   └── test_dynamics.py                 # pytest suite
-└── pibench/                             # Physical Intuition Benchmark
+├── chapter07_control/                   # Chapter 7 deliverables
+│   ├── requirements.txt                 # mujoco + numpy + pytest
+│   ├── control.py                       # gravity comp, PID, computed torque, operational-space, uncertainty wrapper
+│   ├── real_hardware.py                 # RealArm ABC + MockRealArm + ForteAM stub
+│   ├── utils.py                         # pose error, rotation matrix, clip helpers
+│   ├── demo_control_viewer.py           # interactive controller selector demo
+│   └── test_control.py                  # pytest suite (9 tests)
+└── pibench/                             # Physical Intuition Benchmark (Phases 0-6)
     ├── pibench/                         # Engine + scenes
     │   ├── core/                        # Problem, Suite, Runner, Evaluator, Registry, CounterfactualBuilder
+    │   ├── evaluation/                  # Phase 6: per-concept accuracy, calibration metrics, leaderboard generation
     │   ├── scenes/statics/            # TowerFall, SlopeSlide, SupportBalance, ToppleDirection
     │   ├── scenes/dynamics/             # PendulumSwing, CollisionBounce, ProjectileHit
     │   ├── scenes/contact/            # PushTipVsSlide, StackStability, WedgeInsert, FrictionPile, SlipGrip
     │   ├── scenes/articulated/        # DrawerPull, DoorSwing, RopeTension, GearTurn
     │   ├── scenes/deformable/         # ChainDrape
     │   ├── scenes/params/             # MassOrder, FrictionOrder, CounterfactualMass, CounterfactualFriction, BalanceAfterMove
+    │   ├── predictors/                  # random, physics_oracle, llm, vlm
+    │   ├── tests/                       # Phase 6 evaluation/leaderboard tests (11 tests)
     │   └── utils/                     # MJCF helpers + contact + articulated utilities
-    ├── tests/                           # pytest suite (55 tests)
+    ├── tests/                           # pytest suite (55 engine/scene tests)
     ├── docs/SCENE_CATALOG.md            # Scene coverage map
     ├── docs/PLAN.md                     # PIBench phase plan
     ├── docs/HARDWARE_BOM.md             # Sub-$500 hardware recommendation memo
-    └── run_all.py                       # Multi-suite baseline runner
+    └── run_all.py                       # Multi-suite baseline runner + leaderboard builder
 
 Planned future structure (not yet created):
 ├── ...
-├── chapter07_control/
+├── chapter08_motion_planning/
 ├── REVOLUTIONARY_ROBOTICS_IDEAS.md        # Already exists at root; see Section 7
 ```
 
@@ -691,6 +701,52 @@ Tradeoffs and recommended next-step purchase order are documented in the memo.
 
 ---
 
+### Session 8 — 2026-08-20 (continued)
+
+#### 8.1 What the user asked
+
+Continue from the prior session and finish all pending Phase 5 + Chapter 6 work end-to-end, then take the next steps toward the north star: Chapter 7 Control + PIBench Phase 6 (model harness / leaderboard / calibration).
+
+#### 8.2 What we built
+
+1. **Chapter 7 Control scaffolding**
+   * `chapter07_control/requirements.txt` — MuJoCo + NumPy + pytest.
+   * `chapter07_control/utils.py` — `clip_vector`, `pose_error`, `axis_angle_from_matrix`, `rotation_matrix`.
+   * `chapter07_control/real_hardware.py` — abstract `RealArm`, `ArmState`, `MockRealArm` with optional actuator/velocity noise, torque delay, and saturation; stub `ForteAMArmAdapter`.
+   * `chapter07_control/control.py` — controller family:
+     * `GravityCompensationController`
+     * `JointSpacePIDController` with gravity feedforward, per-joint saturation, and anti-windup integrator freezing
+     * `ComputedTorqueController`
+     * `TaskSpaceController` (Jacobian-transpose PD)
+     * `OperationalSpaceController` (resolved acceleration via pseudoinverse + inverse dynamics)
+     * `UncertaintyAwareControlWrapper` — monitors model-mismatch residuals and clamps torque in conservative mode
+   * `chapter07_control/test_control.py` — 9 passing tests covering gravity compensation, PID convergence, computed-torque tracking, operational-space reaching, saturation, anti-windup, uncertainty clamping, and mock-arm roundtrip.
+   * `chapter07_control/demo_control_viewer.py` — interactive viewer with `--controller {gravity,pid,computed_torque,operational_space}`.
+
+2. **PIBench Phase 6 — evaluation harness, leaderboard, and calibration**
+   * Added `confidence` field to `Prediction`; `physics_oracle`, `RandomPredictor`, and `LLMPredictor` now populate it.
+   * Added `concept_tags()` to `Problem` and `concepts`/`predicted_confidence` to `ProblemResult`; `Runner` now records both.
+   * `pibench/evaluation/metrics.py` — per-concept accuracy, ECE, Brier score, and NLL calibration metrics.
+   * `pibench/evaluation/leaderboard.py` — `build_leaderboard()` loads `results_*.json` and writes `leaderboard.json` + self-contained `leaderboard.html`.
+   * `pibench/harness.py` — `EvaluationHarness` wraps a predictor, runs suites, saves results/metrics, and builds the leaderboard.
+   * `pibench/predictors/vlm_predictor.py` — optional Anthropic vision predictor that renders the MuJoCo scene and sends image + text.
+   * `pibench/pibench/tests/test_evaluation.py` — 11 passing tests for metrics and leaderboard plumbing.
+   * `pibench run` now supports `vlm` when Anthropic is available; new `pibench leaderboard` command generates the static leaderboard.
+   * `pibench/run_all.py` now builds the leaderboard after running baseline predictors.
+
+3. **Validation results**
+   * `pytest chapter07_control/ -q` — **9 passed**.
+   * `pytest pibench/pibench/tests/test_evaluation.py -q` — **11 passed**.
+   * `python pibench/run_all.py` — physics oracle **100.0%** (220/220), random **38.6%** (85/220); generated `output/leaderboard.json` and `output/leaderboard.html`.
+
+#### 8.3 Documentation updates
+
+* `README.md`: marked Chapter 7 and PIBench Phase 6 complete; refined structure tree.
+* `memory.md`: this section + updated repo layout, status snapshot, open decisions, file index, and fast-restart summary.
+* `pibench/README.md`, `pibench/docs/PLAN.md`, `pibench/docs/SCENE_CATALOG.md` — updated Phase 6 status and references.
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
@@ -701,8 +757,9 @@ Tradeoffs and recommended next-step purchase order are documented in the memo.
 | Chapter 4 practical | ✅ Complete — `jacobian.py` + `velocity_kinematics.py` + viewer + 8 tests |
 | Chapter 5 practical | ✅ Complete — `inverse_kinematics.py` + null-space redundancy + analytic 2R + 4 tests |
 | Chapter 6 practical | ✅ Complete — `dynamics.py` + mass matrix / bias / forward / inverse dynamics + 6 tests |
+| Chapter 7 practical | ✅ Complete — `control.py` + PID, computed torque, task/operational-space, uncertainty wrapper, mock real arm + 9 tests |
 | GitHub repo | ✅ Live at https://github.com/satyamdas03/LearningRobotics |
-| README | ✅ Complete (includes Chapters 1–6 + PIBench Phases 0–5) |
+| README | ✅ Complete (includes Chapters 1–7 + PIBench Phases 0–6 scaffold) |
 | Revolutionary manifesto | ✅ Complete and pushed (Concept L now has Phase 0–7 plan) |
 | PIBench Phase 0 | ✅ Complete — engine + `TowerFall` |
 | PIBench Phase 1 | ✅ Complete — statics suite: `SlopeSlide`, `SupportBalance`, `ToppleDirection` |
@@ -711,7 +768,9 @@ Tradeoffs and recommended next-step purchase order are documented in the memo.
 | PIBench Phase 4 (Articulated) | ✅ Complete — `DrawerPull`, `DoorSwing`, `RopeTension`, `GearTurn` |
 | PIBench Phase 4 (Deformable) | ✅ Complete — `ChainDrape` (coarse capsule-chain approximation) |
 | PIBench Phase 5 | ✅ Complete — params suite: `MassOrder`, `FrictionOrder`, `CounterfactualMass`, `CounterfactualFriction`, `BalanceAfterMove`; counterfactual engine; optional LLM predictor |
-| Next implementation work | ⏳ Chapter 7 Control + PIBench Phase 6 (model harness / leaderboard) |
+| Chapter 7 practical | ✅ Complete — controller family + uncertainty-aware wrapper + `MockRealArm` sim-to-real bridge; 9 tests passing |
+| PIBench Phase 6 | ✅ Complete — `EvaluationHarness`, per-suite/per-concept accuracy, ECE/Brier/NLL calibration, static HTML leaderboard, VLM predictor, 11 evaluation tests passing |
+| Next implementation work | ⏳ Chapter 8 Motion Planning + PIBench Phase 7 (real-robot validation harness) |
 | Hardware purchase | ⏳ None yet; `docs/HARDWARE_BOM.md` recommends Forte starter ($~285) or AM-ARM full config ($~480) |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -719,11 +778,11 @@ Tradeoffs and recommended next-step purchase order are documented in the memo.
 
 ## 6. Open Decisions / Questions
 
-1. Which chapter next? Continue *Modern Robotics* Chapter 7 (Control) and PIBench Phase 6 (model harness / static leaderboard).
+1. Which chapter next? Continue *Modern Robotics* Chapter 8 (Motion Planning) and PIBench Phase 7 (real-robot validation harness / sim-to-real bridge).
 2. Which cheap robot arm should be the long-term hardware target? Decision documented in `docs/HARDWARE_BOM.md`: **Forte starter stack (~$285)** for first real-robot validation; **AM-ARM full stack (~$480-540)** for higher payload/reach if budget allows; **U-ARM glove (~$50)** for teleop-only data collection.
-3. Should the README or manifesto be converted into a polished website / artifact for sharing? PIBench Phase 6 will generate a static HTML leaderboard; consider making that the first public-facing page.
+3. Should the README or manifesto be converted into a polished website / artifact for sharing? The static HTML leaderboard at `output/leaderboard.html` is the first public-facing page; consider publishing it via GitHub Pages.
 4. Should we install Isaac Sim in headless pip mode now to verify it runs on the RTX 5060, or wait until needed? Continue waiting until RL chapters (Chapter 9) or Phase 7 real-robot validation requires GPU-parallel envs.
-5. Which dashboard technology should PIBench Phase 6 use? Static Jinja2 generated HTML (current plan) is simplest for GitHub Pages; reassess only if interactivity is needed.
+5. Which dashboard technology should PIBench use? Static generated HTML (current) is sufficient for GitHub Pages; reassess if live interactivity is needed later.
 
 ---
 
@@ -740,6 +799,7 @@ Tradeoffs and recommended next-step purchase order are documented in the memo.
 | `pibench/pibench/scenes/` | All PIBench scene implementations | Add one file per new scene |
 | `pibench/pibench/utils/mjcf.py` | MJCF composition helpers | Reuse for all MuJoCo scene building |
 | `pibench/tests/test_core.py` | PIBench engine tests | Add a test for every new scene |
+| `pibench/pibench/tests/test_evaluation.py` | Phase 6 metrics + leaderboard tests | Run after any evaluation/leaderboard change |
 | `pibench/run_all.py` | Convenience runner across baselines | Run before pushing PIBench updates |
 | `pibench/showcase.py` | Render framed thumbnails of every scene | Run after adding new scenes to update visuals |
 | `pibench/build_showcase_artifact.py` | Build self-contained HTML gallery | Generates `output/showcase/index.html` |
@@ -760,8 +820,17 @@ Tradeoffs and recommended next-step purchase order are documented in the memo.
 | `chapter06_dynamics/dynamics.py` | Mass matrix + forward/inverse dynamics | Reference for Chapter 6 dynamics and future controllers |
 | `chapter06_dynamics/demo_dynamics_viewer.py` | Interactive gravity/free-fall toggle demo | Run to visualize dynamics |
 | `chapter06_dynamics/test_dynamics.py` | Chapter 6 tests | Run with `pytest` after any dynamics change |
+| `chapter07_control/control.py` | Controller family + uncertainty-aware wrapper | Reference for Chapter 7 and future real-arm code |
+| `chapter07_control/real_hardware.py` | `RealArm` interface + `MockRealArm` | Sim-to-real bridge; implement `ForteAMArmAdapter` when hardware arrives |
+| `chapter07_control/demo_control_viewer.py` | Interactive controller selector demo | Run to watch gravity/PID/computed-torque/operational-space tracking |
+| `chapter07_control/test_control.py` | Chapter 7 tests | Run with `pytest` after any control change |
 | `pibench/pibench/core/counterfactual.py` | Counterfactual scene builder | Reuse for any "what if?" scene |
-| `pibench/pibench/predictors/llm_predictor.py` | Optional Anthropic LLM predictor | Extend for other API-backed predictors |
+| `pibench/pibench/evaluation/metrics.py` | Calibration + concept accuracy metrics | Extend when adding new calibration diagnostics |
+| `pibench/pibench/evaluation/leaderboard.py` | Static HTML/JSON leaderboard | Regenerate after each benchmark run |
+| `pibench/pibench/harness.py` | Model-agnostic evaluation harness | Use to evaluate any new predictor |
+| `pibench/pibench/predictors/llm_predictor.py` | Optional Anthropic text predictor | Extend for other API-backed predictors |
+| `pibench/pibench/predictors/vlm_predictor.py` | Optional Anthropic vision predictor | Use when scene images help answer |
+| `pibench/pibench/cli.py` | PIBench CLI | Add `leaderboard` command in Phase 6; extend for new predictors |
 | `pibench/pibench/utils/articulated.py` | Articulated/deformable MJCF helpers | Reuse for joints, tendons, capsule chains |
 | `pibench/pibench/scenes/articulated/` | PIBench Phase 4 articulated scenes | Add one file per new articulated problem |
 | `pibench/pibench/scenes/deformable/` | PIBench Phase 4 deformable scenes | Add one file per new deformable problem |
@@ -867,7 +936,7 @@ Note: this repo is independent of the `C:\Users\point` mega-repo. Do not acciden
 
 If you are resuming this session with no other context, here is the one-paragraph summary:
 
-> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–6 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward kinematics, velocity kinematics/Jacobians, inverse kinematics, dynamics). **PIBench (Physical Intuition Benchmark) Phases 0–5 are complete:** a runnable MuJoCo-based benchmark engine with statics (`TowerFall`, `SlopeSlide`, `SupportBalance`, `ToppleDirection`), dynamics (`PendulumSwing`, `CollisionBounce`, `ProjectileHit`), contact/friction (`PushTipVsSlide`, `StackStability`, `WedgeInsert`, `FrictionPile`, `SlipGrip`), articulated (`DrawerPull`, `DoorSwing`, `RopeTension`, `GearTurn`), deformable (`ChainDrape`), and parameter estimation / counterfactual (`MassOrder`, `FrictionOrder`, `CounterfactualMass`, `CounterfactualFriction`, `BalanceAfterMove`) suites, physics-oracle/random/optional-LLM baselines, a counterfactual builder, a CLI, and 55 passing tests. We wrote a manifesto with 12 revolutionary project ideas targeting real-world blockers like data scarcity, sim-to-real, long-horizon planning, and cheap hardware. The long-term north star is a sub-$500 robot that learns from video, reasons with physics, executes safely, and shares skills with other robots. A hardware BOM memo recommends starter and full-stack configurations.
+> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–7 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward kinematics, velocity kinematics/Jacobians, inverse kinematics, dynamics, control). **PIBench (Physical Intuition Benchmark) Phases 0–6 are complete:** a runnable MuJoCo-based benchmark engine with statics, dynamics, contact/friction, articulated/deformable, parameter-estimation/counterfactual, and model-harness/leaderboard/calibration suites; physics-oracle/random/optional-LLM/optional-VLM baselines; a counterfactual builder; a CLI; a static HTML leaderboard; and passing tests. We wrote a manifesto with 12 revolutionary project ideas targeting real-world blockers like data scarcity, sim-to-real, long-horizon planning, and cheap hardware. The long-term north star is a sub-$500 robot that learns from video, reasons with physics, executes safely, and shares skills with other robots. A hardware BOM memo recommends starter and full-stack configurations.
 
 ---
 
@@ -903,4 +972,4 @@ A new GitHub repository, **RoboCAD** (`https://github.com/satyamdas03/RoboCAD`),
 
 ---
 
-*Last updated: 2026-08-22*
+*Last updated: 2026-08-20*

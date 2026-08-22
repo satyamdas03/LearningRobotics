@@ -18,9 +18,11 @@ class ProblemResult(BaseModel):
     question_text: str
     predicted: Any
     predicted_reasoning: str | None
+    predicted_confidence: float | None = None
     ground_truth: Any
     gt_explanation: str | None
     latent_params: dict[str, Any]
+    concepts: list[str] = Field(default_factory=list)
     score: float
 
 
@@ -71,9 +73,11 @@ class Runner:
                         question_text=question.text,
                         predicted=prediction.answer,
                         predicted_reasoning=prediction.reasoning,
+                        predicted_confidence=prediction.confidence,
                         ground_truth=gt.answer,
                         gt_explanation=gt.explanation,
                         latent_params=gt.latent_params,
+                        concepts=problem.concept_tags(),
                         score=score,
                     )
                 )

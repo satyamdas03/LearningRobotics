@@ -9,6 +9,7 @@ from pathlib import Path
 from pibench.core.registry import list_problems, list_suites
 from pibench.core.suite import Suite
 from pibench.core.evaluator import Evaluator
+from pibench.harness import EvaluationHarness
 
 
 def _get_predictor(name: str):
@@ -21,6 +22,9 @@ def _get_predictor(name: str):
     if name == "llm":
         from pibench.predictors.llm_predictor import LLMPredictor
         return LLMPredictor()
+    if name == "vlm":
+        from pibench.predictors.vlm_predictor import VLMPredictor
+        return VLMPredictor()
     raise ValueError(f"Unknown predictor: {name}")
 
 
@@ -28,7 +32,7 @@ def _available_predictor_choices() -> list[str]:
     choices = ["random", "physics_oracle"]
     try:
         import anthropic  # noqa: F401
-        choices.append("llm")
+        choices.extend(["llm", "vlm"])
     except ImportError:
         pass
     return choices
@@ -138,6 +142,21 @@ def cmd_view(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_leaderboard(args: argparse.Namespace) -> int:
+    leaderboard = EvaluationHarness.build_leaderboard(
+        output_dir=args.output_dir,
+        results_glob="results_*.json",
+    )
+    json_path, html_path = EvaluationHarness.write_leaderboard(
+        leaderboard,
+        output_dir=args.output_dir,
+    )
+    print(f"Leaderboard written to {json_path}")
+    if html_path:
+        print(f"HTML leaderboard written to {html_path}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="pibench", description="Physical Intuition Benchmark")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -170,6 +189,12 @@ def main(argv: list[str] | None = None) -> int:
     view_parser.add_argument("--seed", type=int, default=0)
     view_parser.add_argument("--simulate", action="store_true", help="Step physics while viewing")
     view_parser.set_defaults(func=cmd_view)
+
+    lb_parser = subparsers.add_parser("leaderboard", help="Build the leaderboard from saved results")
+    lb_parser.add_argument(
+        "--output-dir", default="output", help="Directory containing results_*.json"
+    )
+    lb_parser.set_defaults(func=cmd_leaderboard)
 
     args = parser.parse_args(argv)
     return args.func(args)

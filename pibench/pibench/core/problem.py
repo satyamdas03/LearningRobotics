@@ -33,8 +33,11 @@ class GroundTruth(BaseModel):
 
 class Prediction(BaseModel):
     """A predictor's answer to a problem."""
+
     answer: Any
     reasoning: Optional[str] = None
+    # Optional model confidence in [0, 1]; used for calibration analysis.
+    confidence: Optional[float] = None
 
 
 class Problem(ABC):
@@ -82,6 +85,25 @@ class Problem(ABC):
         fractional value for partial credit.
         """
         ...
+
+    def concept_tags(self) -> list[str]:
+        """Return concept labels for this problem.
+
+        Defaults to the suite name plus the keys of the ground-truth latent
+        parameters. Subclasses can override by setting ``_concepts``.
+        """
+        tags: list[str] = []
+        suite = getattr(self, "_suite", None)
+        if suite:
+            tags.append(suite)
+        try:
+            gt = self.ground_truth()
+            tags.extend(str(k) for k in gt.latent_params.keys())
+        except Exception:
+            pass
+        extra = getattr(self, "_concepts", [])
+        tags.extend(str(t) for t in extra)
+        return sorted(set(tags))
 
     def _counterfactual_params(self) -> list[str]:
         """Return the names of attributes that can be overridden for a counterfactual.

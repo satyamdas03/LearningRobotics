@@ -14,7 +14,7 @@ PIBench is the first concrete deliverable from the *Revolutionary Robotics* mani
 | **Causal / diagnostic** | Every scene exposes latent physical parameters (mass, friction, CoM, shape) so failures can be traced to a concept. |
 | **Curriculum-aligned** | Suites map to textbook chapters: statics → dynamics → contact → articulated/deformable → parameter estimation. |
 | **Pure MuJoCo + Python** | No rendering farm, no proprietary sim, no massive assets. |
-| **Reproducible by default** | Deterministic seeds, pinned dependencies, and a static leaderboard generator. |
+| **Static leaderboard** | Compare predictors by overall accuracy, per-suite, per-concept, and calibration metrics. |
 
 ---
 
@@ -69,7 +69,7 @@ source .venv/bin/activate  # Windows: .venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 ```
 
-Dependencies: `mujoco>=3.11.0`, `numpy`, `pydantic`, `pillow`, `pytest`. Optional: `anthropic>=0.30.0` for the LLM predictor.
+Dependencies: `mujoco>=3.11.0`, `numpy`, `pydantic`, `pillow`, `pytest`. Optional: `anthropic>=0.30.0` for the LLM/VLM predictors.
 
 ---
 
@@ -113,7 +113,15 @@ pibench/
 │   │   ├── base.py
 │   │   ├── random_predictor.py
 │   │   ├── physics_oracle.py
-│   │   └── llm_predictor.py   # Optional Anthropic API predictor (cache + random fallback)
+│   │   ├── llm_predictor.py   # Optional Anthropic API text predictor (cache + random fallback)
+│   │   └── vlm_predictor.py   # Optional Anthropic vision predictor (renders scene + image prompt)
+│   ├── evaluation/             # Phase 6: leaderboard + metrics + calibration
+│   │   ├── metrics.py
+│   │   ├── leaderboard.py
+│   │   └── __init__.py
+│   ├── harness.py              # Phase 6: EvaluationHarness wrapper
+│   ├── tests/                  # Phase 6 evaluation tests
+│   │   └── test_evaluation.py  # 11 tests for metrics + leaderboard plumbing
 │   └── utils/
 │       ├── mjcf.py             # Programmatic MJCF helpers
 │       ├── contact.py          # Contact-event and pusher helpers
@@ -152,6 +160,9 @@ python -m pibench run --suite params --predictor llm --n 5
 # Save results to JSON
 python -m pibench run --suite contact --predictor physics_oracle --n 20 --output output/results_oracle.json
 
+# Build a static leaderboard from saved results
+python -m pibench leaderboard --output-dir output
+
 # Render a scene thumbnail
 python -m pibench render TowerFall --seed 0 --output output/tower_fall_seed0.png
 python -m pibench render PushTipVsSlide --seed 0 --output output/push_tip_vs_slide_seed0.png
@@ -162,6 +173,9 @@ python -m pibench render DrawerPull --seed 0 --output output/drawer_pull_seed0.p
 python -m pibench view TowerFall            # static inspection
 python -m pibench view PendulumSwing --simulate  # watch it run live
 python -m pibench view DrawerPull --simulate
+
+# Optional vision-language baseline (requires anthropic SDK + ANTHROPIC_API_KEY)
+python -m pibench run --suite statics --predictor vlm --n 3
 
 # Render a full visual showcase of every chapter + PIBench scene
 python showcase.py                 # writes output/showcase/*.png
@@ -301,10 +315,11 @@ class MyScene(Problem):
 
 ```powershell
 $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
-python -m pytest tests -q
+python -m pytest tests -q                              # engine + scenes
+python -m pytest pibench/tests/test_evaluation.py -q   # Phase 6 metrics + leaderboard
 ```
 
-Current status: **55 passed**.
+Current status: **55 core tests passed**, **11 evaluation tests passed**.
 
 ---
 
@@ -318,7 +333,7 @@ Current status: **55 passed**.
 | **3** | Contact & friction | Chapter 4 (velocity kinematics / contacts) | ✅ 5 scenes |
 | **4** | Articulated & deformable | Chapter 5 (IK / constraints) | ✅ 5 scenes |
 | **5** | Parameter estimation & counterfactuals | Consolidation + system ID | ✅ 5 scenes |
-| **6** | Model harness + leaderboard | — | VLM/LLM harness, static leaderboard |
+| **6** | Model harness + leaderboard | — | ✅ `EvaluationHarness`, static leaderboard, VLM predictor, concept/calibration metrics |
 | **7** | Real-robot validation subset | — | Protocol for AM-ARM / Forte |
 
 ---

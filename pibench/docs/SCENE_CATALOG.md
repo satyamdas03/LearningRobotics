@@ -375,4 +375,40 @@ The platform tilts to a random angle. MuJoCo rolls the simulation forward until 
 
 ---
 
+## Evaluation & Leaderboard
+
+PIBench Phase 6 adds a model-agnostic evaluation harness, calibration metrics, and a static leaderboard generator.
+
+| Component | Path | What it does |
+|---|---|---|
+| Evaluation harness | `pibench/pibench/harness.py` | Runs predictors across suites and writes `results_{name}.json` + `metrics_{name}.json` |
+| Metrics | `pibench/pibench/evaluation/metrics.py` | Suite/concept accuracy, ECE, Brier score, negative log-likelihood |
+| Leaderboard builder | `pibench/pibench/evaluation/leaderboard.py` | Aggregates all `results_*.json` into per-suite and per-concept accuracy plus calibration |
+| VLM predictor | `pibench/pibench/predictors/vlm_predictor.py` | Optional vision/text LLM predictor with random fallback |
+| CLI | `pibench/pibench/cli.py` | `python -m pibench leaderboard` builds `leaderboard.json` / `leaderboard.html` |
+
+**Concept tags:** every `Problem` now reports `concept_tags()` (suite name + latent-parameter keys). Results are grouped by concept so you can see exactly which physical ideas a predictor understands and which it confuses.
+
+**Calibration:** every prediction carries a `confidence` score. The leaderboard reports ECE (expected calibration error), Brier score, and NLL so high-accuracy predictors cannot hide random guessing behind overconfident scores.
+
+**Run everything:**
+
+```bash
+python pibench/run_all.py
+# or manually:
+python -m pibench run --suite statics --predictor physics_oracle --n 5
+python -m pibench leaderboard
+```
+
+Output artifacts live in `pibench/output/`:
+
+- `results_physics_oracle.json`
+- `metrics_physics_oracle.json`
+- `results_random_predictor.json`
+- `metrics_random_predictor.json`
+- `leaderboard.json`
+- `leaderboard.html`
+
+---
+
 *Last updated: 2026-08-20*

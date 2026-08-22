@@ -13,6 +13,11 @@ OUTPUT_HTML = Path(__file__).parent / "output" / "showcase" / "index.html"
 CAPTIONS: dict[str, str] = {
     "arm_default.png": "6-DOF spatial arm in its home configuration. Six revolute joints give the end-effector full 3D position + orientation control.",
     "arm_ik_solution.png": "Chapter 5 numeric IK drives the arm to a reachable target pose using the damped Jacobian pseudoinverse.",
+    "arm_dynamics_pose.png": "Chapter 6 — Dynamics pose. The arm's mass matrix, Coriolis forces, and gravity vector govern how it responds to torques.",
+    "arm_gravity_comp.png": "Chapter 7 — Gravity compensation. The controller cancels gravity so the arm stays at the commanded configuration without sagging.",
+    "arm_pid.png": "Chapter 7 — Joint-space PID. Independent-joint PD plus gravity feedforward drives the arm back to a desired set point.",
+    "arm_computed_torque.png": "Chapter 7 — Computed torque. Inverse-dynamics linearization cancels nonlinear dynamics and enforces linear error dynamics.",
+    "arm_operational_space.png": "Chapter 7 — Operational space. Resolved-acceleration control tracks an end-effector pose via the Jacobian pseudoinverse.",
     "towerfall_seed0.png": "TowerFall — two towers on a tilting platform. The narrow tower is the one that will fall first.",
     "slopeslide_seed0.png": "SlopeSlide — a block on an incline. The answer depends on whether tan(θ) exceeds the static-friction coefficient.",
     "supportbalance_seed0.png": "SupportBalance — a loaded beam. The support must sit at the weighted center of mass for zero net torque.",
@@ -351,12 +356,12 @@ def main() -> None:
       <span class="eyebrow">LearningRobotics</span>
       <h1>What we've built so far</h1>
       <p class="lead">
-        A visual tour of the MuJoCo simulations behind Chapters 1–5 and the
-        PIBench physical-intuition benchmark (Phases 0–4).
+        A visual tour of the MuJoCo simulations behind Chapters 1–7 and the
+        PIBench physical-intuition benchmark (Phases 0–6).
       </p>
       <div class="stats">
         <div class="stat">
-          <span class="stat-value">5</span>
+          <span class="stat-value">7</span>
           <span class="stat-label">Chapters</span>
         </div>
         <div class="stat">
@@ -364,11 +369,11 @@ def main() -> None:
           <span class="stat-label">PIBench suites</span>
         </div>
         <div class="stat">
-          <span class="stat-value">17</span>
+          <span class="stat-value">22</span>
           <span class="stat-label">Scenes</span>
         </div>
         <div class="stat">
-          <span class="stat-value">44</span>
+          <span class="stat-value">48</span>
           <span class="stat-label">Tests passing</span>
         </div>
         <div class="stat">

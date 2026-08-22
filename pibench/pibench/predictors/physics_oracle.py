@@ -16,4 +16,4 @@ class PhysicsOraclePredictor(Predictor):
 
     def predict(self, problem: Problem) -> Prediction:
         gt = problem.ground_truth()
-        return Prediction(answer=gt.answer, reasoning=gt.explanation)
+        return Prediction(answer=gt.answer, reasoning=gt.explanation, confidence=1.0)

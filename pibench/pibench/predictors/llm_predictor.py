@@ -99,12 +99,20 @@ class LLMPredictor(Predictor):
         if self._client is None:
             # API not available: fall back to random but mark reasoning.
             pred = self._random.predict(problem)
-            return Prediction(answer=pred.answer, reasoning="LLM unavailable; random fallback.")
+            return Prediction(
+                answer=pred.answer,
+                reasoning="LLM unavailable; random fallback.",
+                confidence=pred.confidence,
+            )
 
         key = self._cache_key(problem)
         cached = self._load_cache(key)
         if cached is not None:
-            return Prediction(answer=cached["answer"], reasoning=cached.get("reasoning"))
+            return Prediction(
+                answer=cached["answer"],
+                reasoning=cached.get("reasoning"),
+                confidence=cached.get("confidence", 0.7),
+            )
 
         question = problem.question()
         choices_text = ""
@@ -130,9 +138,11 @@ class LLMPredictor(Predictor):
             return Prediction(
                 answer=pred.answer,
                 reasoning=f"API error ({exc}); random fallback.",
+                confidence=pred.confidence,
             )
 
         answer = self._extract_answer(raw_text, problem)
         reasoning = raw_text.strip()
-        self._save_cache(key, {"answer": answer, "reasoning": reasoning})
-        return Prediction(answer=answer, reasoning=reasoning)
+        confidence = 0.7
+        self._save_cache(key, {"answer": answer, "reasoning": reasoning, "confidence": confidence})
+        return Prediction(answer=answer, reasoning=reasoning, confidence=confidence)

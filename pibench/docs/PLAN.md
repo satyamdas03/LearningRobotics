@@ -299,22 +299,31 @@ Files: `pibench/scenes/params/{mass_order,friction_order,counterfactual_mass,cou
 
 ---
 
-### Phase 6 — Model Evaluation Harness + Leaderboard
+### Phase 6 — Model Evaluation Harness + Leaderboard ✅
 
 **Goal:** Evaluate external models and present results on a static dashboard.
 
-**Engine additions:**
-1. `VLMPredictor` using Anthropic / OpenAI vision API (with local caching).
-2. `DiffusionWorldModelPredictor` stub for future integration.
-3. `HumanPredictor` interactive mode.
-4. Calibration metrics: accuracy, concept-wise accuracy, uncertainty calibration.
-5. Leaderboard JSON + static HTML generator.
-6. GitHub Actions workflow to regenerate leaderboard on push.
+**Deliverables:**
+1. `pibench/harness.py` — `EvaluationHarness` wraps `Runner` + result/metrics serialization.
+2. `pibench/evaluation/metrics.py` — per-concept accuracy, ECE, Brier score, optional NLL.
+3. `pibench/evaluation/leaderboard.py` — `Leaderboard` Pydantic model + static HTML generator.
+4. `pibench/predictors/vlm_predictor.py` — `VLMPredictor` using Anthropic vision API with local cache and text-only fallback.
+5. `pibench/cli.py` — `pibench leaderboard` command and `--predictor vlm` support.
+6. `pibench/pibench/tests/test_evaluation.py` — unit tests for metrics and leaderboard plumbing.
+
+**Still to do (future / Phase 7):**
+* `DiffusionWorldModelPredictor` stub for future integration.
+* `HumanPredictor` interactive mode.
+* GitHub Actions workflow to regenerate leaderboard on push.
+* Deploy leaderboard to `gh-pages`.
 
 **Success criteria:**
-* At least one VLM can be evaluated via API on a small subset.
-* `pibench leaderboard --output output/leaderboard.html` produces a shareable page.
-* Dashboard pushed to `gh-pages` or served as artifact.
+* `pibench leaderboard --output-dir output` produces `leaderboard.json` + `leaderboard.html`. ✅
+* Baseline run (`python run_all.py`) generates both result files and the leaderboard. ✅
+* 11 new evaluation tests pass. ✅
+* Dashboard pushed to `gh-pages` or served as artifact. ⏳ Future work.
+
+**Status:** completed 2026-08-20.
 
 ---
 
