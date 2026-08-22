@@ -123,12 +123,11 @@ pibench/
 │   │   ├── __init__.py
 │   │   ├── protocol.py         # ValidationTask / ValidationResult models
 │   │   ├── harness.py          # RealRobotValidationHarness + mock arm
-│   │   ├── calibration.py      # ResidualTracker for online sim-to-real mismatch
-│   │   └── tests/
-│   │       └── test_realrobot.py # 5 tests for validation harness
+│   │   └── calibration.py      # ResidualTracker for online sim-to-real mismatch
 │   ├── harness.py              # Phase 6: EvaluationHarness wrapper
-│   ├── tests/                  # Phase 6 evaluation tests
-│   │   └── test_evaluation.py  # 11 tests for metrics + leaderboard plumbing
+│   ├── tests/                  # Phase 6 + Phase 7 tests
+│   │   ├── test_evaluation.py  # 11 tests for metrics + leaderboard plumbing
+│   │   └── test_realrobot.py   # 5 tests for validation harness
 │   └── utils/
 │       ├── mjcf.py             # Programmatic MJCF helpers
 │       ├── contact.py          # Contact-event and pusher helpers
