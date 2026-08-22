@@ -15,8 +15,8 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 def main() -> None:
     demo = NorthStarDemo(
         scene_xml=SCENE_XML,
-        reach_tolerance=0.05,
-        trajectory_duration=2.0,
+        reach_tolerance=0.08,
+        trajectory_duration=2.5,
     )
 
     reports = []

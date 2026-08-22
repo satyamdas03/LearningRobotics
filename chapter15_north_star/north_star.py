@@ -239,8 +239,9 @@ class NorthStarDemo:
         q_start = np.zeros(self.dynamics.model.nq)
         q_goal, ik_info = self._solve_ik(p_target, q0=q_start)
         log.append(
-            f"IK: converged={ik_info.get('converged')}, "
-            f"final_pos_err={ik_info.get('final_pos_err', -1):.5f}"
+            f"IK: position_error={ik_info.get('position_error', -1):.5f}, "
+            f"rotation_error={ik_info.get('rotation_error', -1):.5f}, "
+            f"iterations={ik_info.get('iterations', -1)}"
         )
 
         # 3. Execute trajectory on virtual arm.
