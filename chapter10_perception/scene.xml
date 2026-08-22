@@ -1,0 +1,75 @@
+<mujoco model="perception_table_scene">
+  <compiler angle="radian" meshdir="."/>
+  <option timestep="0.01" gravity="0 0 -9.81"/>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1="0.2 0.2 0.2" rgb2="0.3 0.3 0.3"/>
+    <material name="table_mat" texture="grid" texrepeat="8 8" reflectance="0.1"/>
+  </asset>
+
+  <worldbody>
+    <light diffuse="0.8 0.8 0.8" pos="1.5 1.0 2.5" dir="-1 -1 -2"/>
+    <light diffuse="0.5 0.5 0.5" pos="-1.0 -1.0 2.0" dir="1 1 -2"/>
+    <geom name="floor" type="plane" size="2 2 0.1" rgba="0.15 0.15 0.15 1"/>
+
+    <!-- Table -->
+    <body name="table" pos="0.8 0 0.4">
+      <geom name="table_top" type="box" size="0.6 0.4 0.02" pos="0 0 0" material="table_mat"/>
+      <geom name="table_leg1" type="cylinder" size="0.03 0.4" pos="-0.5 -0.3 -0.4" rgba="0.4 0.4 0.4 1"/>
+      <geom name="table_leg2" type="cylinder" size="0.03 0.4" pos="0.5 -0.3 -0.4" rgba="0.4 0.4 0.4 1"/>
+      <geom name="table_leg3" type="cylinder" size="0.03 0.4" pos="-0.5 0.3 -0.4" rgba="0.4 0.4 0.4 1"/>
+      <geom name="table_leg4" type="cylinder" size="0.03 0.4" pos="0.5 0.3 -0.4" rgba="0.4 0.4 0.4 1"/>
+    </body>
+
+    <!-- Red block to be manipulated -->
+    <body name="red_block" pos="0.8 0.15 0.46">
+      <freejoint/>
+      <geom name="red_block_geom" type="box" size="0.04 0.04 0.04" rgba="0.9 0.1 0.1 1" mass="0.1"/>
+    </body>
+
+    <!-- Blue block as distractor/reference -->
+    <body name="blue_block" pos="0.8 -0.15 0.46">
+      <freejoint/>
+      <geom name="blue_block_geom" type="box" size="0.04 0.04 0.04" rgba="0.1 0.1 0.9 1" mass="0.1"/>
+    </body>
+
+    <!-- 6-DOF arm mounted at the side of the table -->
+    <body name="arm_base" pos="0 0 0">
+      <geom type="cylinder" size="0.12 0.08" rgba="0.4 0.4 0.4 1" euler="0 0 0"/>
+      <body name="link1" pos="0 0 0.08">
+        <joint name="joint1" type="hinge" axis="0 0 1" range="-3.14 3.14" damping="0.5"/>
+        <geom type="capsule" fromto="0 0 0 0 0 0.5" size="0.06" rgba="0.7 0.7 0.7 1"/>
+        <body name="link2" pos="0 0 0.5">
+          <joint name="joint2" type="hinge" axis="0 1 0" range="-1.57 1.57" damping="0.5"/>
+          <geom type="capsule" fromto="0 0 0 0.5 0 0" size="0.05" rgba="0.6 0.6 0.6 1"/>
+          <body name="link3" pos="0.5 0 0">
+            <joint name="joint3" type="hinge" axis="0 1 0" range="-1.57 1.57" damping="0.5"/>
+            <geom type="capsule" fromto="0 0 0 0.4 0 0" size="0.05" rgba="0.5 0.5 0.5 1"/>
+            <body name="link4" pos="0.4 0 0">
+              <joint name="joint4" type="hinge" axis="1 0 0" range="-3.14 3.14" damping="0.2"/>
+              <geom type="capsule" fromto="0 0 0 0 0 0.15" size="0.04" rgba="0.4 0.4 0.4 1"/>
+              <body name="link5" pos="0 0 0.15">
+                <joint name="joint5" type="hinge" axis="0 1 0" range="-1.57 1.57" damping="0.2"/>
+                <geom type="capsule" fromto="0 0 0 0 0 0.12" size="0.04" rgba="0.3 0.3 0.3 1"/>
+                <body name="link6" pos="0 0 0.12">
+                  <joint name="joint6" type="hinge" axis="0 0 1" range="-3.14 3.14" damping="0.2"/>
+                  <geom type="box" size="0.06 0.02 0.02" rgba="0.2 0.8 0.8 1"/>
+                  <site name="ee" pos="0.08 0 0" size="0.04" rgba="1 1 0 1"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <position name="act_joint1" joint="joint1" kp="100" ctrlrange="-3.14 3.14"/>
+    <position name="act_joint2" joint="joint2" kp="100" ctrlrange="-1.57 1.57"/>
+    <position name="act_joint3" joint="joint3" kp="80" ctrlrange="-1.57 1.57"/>
+    <position name="act_joint4" joint="joint4" kp="30" ctrlrange="-3.14 3.14"/>
+    <position name="act_joint5" joint="joint5" kp="30" ctrlrange="-1.57 1.57"/>
+    <position name="act_joint6" joint="joint6" kp="10" ctrlrange="-3.14 3.14"/>
+  </actuator>
+</mujoco>

@@ -853,6 +853,41 @@ User confirmed the simulation-only strategy: no physical robot arm purchase. Ins
 
 ---
 
+### Session 11 — 2026-08-20 (Milestone 4: Simulated Camera Perception)
+
+#### 11.1 What the user asked
+
+Continue the simulation-only roadmap: implement Milestone 4 (perception + simulated camera stack), give a heads-up when it ends, test it, and commit/push changes.
+
+#### 11.2 What we built
+
+1. **Chapter 10 — Virtual Perception + Simulated Camera Stack**
+   * `chapter10_perception/scene.xml` — manipulation scene with 6-DOF arm, table, red block, and blue block.
+   * `chapter10_perception/arm.xml` — matching gravity-enabled 6-DOF arm for IK/dynamics.
+   * `chapter10_perception/renderer.py` — `MujocoRenderer` wrapper for RGB and depth rendering with configurable free camera.
+   * `chapter10_perception/perception.py` — `SceneObjectDetector` that extracts body poses/colors from MuJoCo, color-based object finder, and `CameraParams` with world-to-pixel projection.
+   * `chapter10_perception/controller.py` — `JointPositionController` that outputs a target joint configuration.
+   * `chapter10_perception/demo_perception_controller.py` — render → detect red block → IK to target above block → command arm joints → verify end-effector reaches the target.
+   * `chapter10_perception/test_perception.py` — 6 passing tests: RGB image non-empty, red/blue detection, color discrimination, SE(3) camera transform, world-to-pixel projection, and full perception-to-reach pipeline.
+
+#### 11.3 Validation results
+
+* `python -m pytest chapter10_perception/test_perception.py -q` — **6 passed**.
+* Full combined suite: `python -m pytest -q` — **150 passed**.
+
+#### 11.4 Documentation updates
+
+* Root `README.md`: added Chapter 10 / Milestone 4 to curriculum table, repo structure, and changelog; updated test count to 150.
+* `memory.md`: this section plus updated status snapshot, file index, commands, and fast-restart summary.
+* `.claude/projects/C--Users-point-projects-LearningRobotics/memory/learning-robotics.md`: updated status to Chapters 1–10 + Milestones 1–4, 150 tests.
+* `.claude/projects/C--Users-point-projects-LearningRobotics/plan.md`: marked Milestone 4 complete, Milestone 5 current.
+
+#### 11.5 Final wrap-up
+
+* Git working tree clean; committed and pushed all changes to `origin/master`.
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
@@ -865,6 +900,8 @@ User confirmed the simulation-only strategy: no physical robot arm purchase. Ins
 | Chapter 6 practical | ✅ Complete — `dynamics.py` + mass matrix / bias / forward / inverse dynamics + 6 tests |
 | Chapter 7 practical | ✅ Complete — `control.py` + PID, computed torque, task/operational-space, uncertainty wrapper, mock real arm + 9 tests |
 | Chapter 8 practical | ✅ Complete — `collision.py` + `planners.py` + `smoother.py` + viewer + 10 tests |
+| Chapter 9 practical | ✅ Complete — cubic/quintic splines + trapezoidal/S-curve time scaling + path→trajectory + 10 tests |
+| Chapter 10 practical | ✅ Complete — `renderer.py` + `perception.py` + simulated camera + object detection + IK-to-controller pipeline + 6 tests |
 | GitHub repo | ✅ Live at https://github.com/satyamdas03/LearningRobotics |
 | README | ✅ Complete (includes Chapters 1–8 + PIBench Phases 0–7) |
 | Revolutionary manifesto | ✅ Complete and pushed (Concept L now has Phase 0–7 plan) |
@@ -881,7 +918,8 @@ User confirmed the simulation-only strategy: no physical robot arm purchase. Ins
 | Milestone 1 | ✅ Complete — Hardened `MockRealArm` with actuator/sensor dynamics + `VirtualArmFactory`, 13 tests |
 | Milestone 2 | ✅ Complete — Chapter 9 trajectory generation: cubic/quintic splines + trapezoidal/S-curve time scaling, 10 tests |
 | Milestone 3 | ✅ Complete — `BatchValidator` sweeps randomized arms/mismatch levels/controllers, accuracy degrades with mismatch, 3 new tests |
-| Next implementation work | ⏳ Milestone 4: Virtual perception + imitation learning (sim camera + behavior cloning) |
+| Milestone 4 | ✅ Complete — `chapter10_perception/` simulated camera stack: RGB/depth renderer, color-based detection, camera projection, IK → position controller, 6 tests |
+| Next implementation work | ⏳ Milestone 5: Imitation learning (record expert trajectories, behavior cloning) |
 | Hardware purchase | ⏳ None; project is simulation-only for the foreseeable future |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -949,6 +987,13 @@ User confirmed the simulation-only strategy: no physical robot arm purchase. Ins
 | `chapter09_trajectory_generation/time_scaling.py` | Trapezoidal and S-curve time scaling | Reuse after path planning to assign timing |
 | `chapter09_trajectory_generation/path_to_trajectory.py` | Path → timed trajectory converter | Bridge between Chapter 8 planners and Chapter 7 controllers |
 | `chapter09_trajectory_generation/test_trajectory_generation.py` | Chapter 9 tests | Run with `pytest` after any trajectory change |
+| `chapter10_perception/scene.xml` | Manipulation scene for camera/perception tests | Update when adding objects / sensors |
+| `chapter10_perception/arm.xml` | Gravity-enabled 6-DOF arm for IK/control | Keep in sync with `scene.xml` arm |
+| `chapter10_perception/renderer.py` | MuJoCo RGB/depth renderer + free camera | Reuse for any simulated camera |
+| `chapter10_perception/perception.py` | Object detection from MuJoCo state + camera projection | Extend for segmentation / depth fusion |
+| `chapter10_perception/controller.py` | Joint position target output | Reuse as planning-to-control interface |
+| `chapter10_perception/demo_perception_controller.py` | Perception → IK → arm command demo | Run to validate the full stack |
+| `chapter10_perception/test_perception.py` | Chapter 10 perception tests | Run with `pytest` after any perception change |
 | `pibench/pibench/core/counterfactual.py` | Counterfactual scene builder | Reuse for any "what if?" scene |
 | `pibench/pibench/evaluation/metrics.py` | Calibration + concept accuracy metrics | Extend when adding new calibration diagnostics |
 | `pibench/pibench/evaluation/leaderboard.py` | Static HTML/JSON leaderboard | Regenerate after each benchmark run |

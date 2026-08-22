@@ -69,11 +69,13 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | **M1** | **Hardened Virtual Real-Robot Bridge** | ✅ Complete | `MockRealArm` actuator/sensor dynamics + `VirtualArmFactory` domain randomization, 13 tests |
 | **M2** | **Trajectory Generation** | ✅ Complete | Cubic/quintic splines + trapezoidal/S-curve time scaling + path→trajectory, 10 tests |
 | **M3** | **Virtual Robot Validation at Scale** | ✅ Complete | `BatchValidator` sweeps randomized arms, mismatch levels, and controllers; accuracy degrades with mismatch, 3 tests |
-| 10 | Virtual Perception + Imitation Learning | ⏳ Planned | Sim camera, object detection, behavior cloning |
-| 11 | Foundation-Model + Physics Verifier | ⏳ Planned | LLM/VLM plans, MuJoCo verifies, retry loop |
-| 12 | Skill Library + Skill Sharing | ⏳ Planned | Reusable skills, composition, federated sharing |
-| 13 | Self-Improving Virtual Real-Sim-Real Loop | ⏳ Planned | Failure detection, system ID, retuning, A/B improvement |
-| 14 | End-to-End North-Star Demo | ⏳ Planned | NL task → plan → trajectory → execute → validate → calibrate → save skill |
+| **M4** | **Perception + Simulated Camera Stack** | ✅ Complete | `chapter10_perception/`: RGB/depth renderer, object detector by color, camera projection, IK → position controller, 6 tests |
+| 10 | Virtual Perception + Imitation Learning | ✅ Complete (Milestone 4) | Sim camera, object detection, controller feed |
+| 11 | Imitation Learning | ⏳ Planned | Behavior cloning / diffusion policy from expert demos |
+| 12 | Foundation-Model + Physics Verifier | ⏳ Planned | LLM/VLM plans, MuJoCo verifies, retry loop |
+| 13 | Skill Library + Skill Sharing | ⏳ Planned | Reusable skills, composition, federated sharing |
+| 14 | Self-Improving Virtual Real-Sim-Real Loop | ⏳ Planned | Failure detection, system ID, retuning, A/B improvement |
+| 15 | End-to-End North-Star Demo | ⏳ Planned | NL task → plan → trajectory → execute → validate → calibrate → save skill |
 
 ---
 
@@ -136,6 +138,14 @@ LearningRobotics/
 │   ├── path_to_trajectory.py      # convert Chapter 8 path to timed trajectory
 │   ├── demo_trajectory_viewer.py  # plan → trajectory → controller playback
 │   └── test_trajectory_generation.py # 10 pytest tests
+├── chapter10_perception/          # Chapter 10: virtual perception + camera stack
+│   ├── scene.xml                  # arm + table + red/blue blocks manipulation scene
+│   ├── arm.xml                    # matching 6-DOF arm with gravity for IK/control
+│   ├── renderer.py                # MuJoCo RGB/depth renderer wrapper
+│   ├── perception.py              # ground-truth object detection + camera projection
+│   ├── controller.py              # joint-position command controller
+│   ├── demo_perception_controller.py # render → detect → IK → command arm
+│   └── test_perception.py         # 6 pytest tests
 └── pibench/                       # Physical Intuition Benchmark (Phases 0-7)
     ├── README.md                  # PIBench overview and quickstart
     ├── requirements.txt           # MuJoCo + benchmark deps
@@ -624,7 +634,7 @@ PIBench is the executable first step toward the *Revolutionary Robotics* north s
 * **CLI:** `pibench list`, `pibench run`, `pibench render`, `pibench view`, `pibench leaderboard`, `pibench validate`.
 * **Phase 6 (complete):** `EvaluationHarness`, static HTML/JSON leaderboard, per-concept and calibration metrics (ECE, Brier, NLL), and optional VLM predictor that renders scenes and asks a vision-language model.
 * **Phase 7 (complete):** `RealRobotValidationHarness` with `ValidationTask`/`ValidationResult` protocol, mock-arm `reach_q` execution, online residual tracker for sim-to-real mismatch, and `pibench validate` CLI command.
-* **Tests:** 144 passing across all chapters (Chapters 2–9), PIBench engine/evaluation/validation suites, and the hardened virtual real-robot bridge.
+* **Tests:** 150 passing across all chapters (Chapters 2–10), PIBench engine/evaluation/validation suites, and the hardened virtual real-robot bridge.
 
 ### Run it
 
@@ -674,6 +684,13 @@ When the virtual loop is solid, a physical arm (Forte / AM-ARM) becomes a drop-i
 ---
 
 ## 📝 Changelog
+
+### 2026-08-20 — Milestone 4 Perception + Simulated Camera Stack Complete
+
+* **Milestone 4 — Perception + Simulated Camera Stack:** added `chapter10_perception/` with `scene.xml`/`arm.xml` (manipulation scene + matching gravity-enabled arm), `renderer.py` (MuJoCo RGB/depth wrapper), `perception.py` (ground-truth color-based object detection + pinhole camera projection), `controller.py` (joint-position command controller), and `demo_perception_controller.py` (render → detect red block → IK → command arm). Added `test_perception.py` (6 tests) covering RGB rendering, color detection, camera transform/projection, and the full perception-to-reach pipeline.
+* **Tests:** full combined suite now **150 passing**.
+* **Documentation:** updated root `README.md`, `memory.md`, and `learning-robotics.md` memory to mark Milestone 4 complete.
+* Committed and pushed all changes to `origin/master`.
 
 ### 2026-08-20 — Milestone 3 Virtual Robot Validation at Scale Complete
 
