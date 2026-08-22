@@ -920,6 +920,39 @@ Continue the simulation-only roadmap: implement Milestone 5 (imitation learning)
 
 ---
 
+### Session 13 — 2026-08-20 (Milestone 6: Foundation-Model + Physics Verifier)
+
+#### 13.1 What the user asked
+
+Continue the simulation-only roadmap: implement Milestone 6 (foundation-model + physics verifier), give a heads-up when it ends, test it, and commit/push changes.
+
+#### 13.2 What we built
+
+1. **Chapter 12 — Foundation-Model + Physics Verifier**
+   * `chapter12_reasoning/task_parser.py` — rule-based natural-language parser that extracts target object, reference object, skill, and spatial relation from instructions like "push the red block left of the blue block".
+   * `chapter12_reasoning/planner.py` — `RulePlanner` computes a deterministic target position from the scene state and requested relation; `LLMPlanner` asks Claude (via Anthropic API) for a JSON plan and falls back to the rule planner when the API is unavailable.
+   * `chapter12_reasoning/physics_verifier.py` — loads the Chapter 10 manipulation scene, applies each plan step, steps physics briefly, and checks whether the target/reference relation holds.
+   * `chapter12_reasoning/reasoning_loop.py` — `PhysicsGroundedReasoningLoop` repeatedly calls the planner, simulates the plan, and feeds failure messages back until success or the attempt budget is exhausted.
+   * `chapter12_reasoning/test_reasoning.py` — 7 passing tests: task parsing, rule planning, verifier accepting a valid plan and rejecting an invalid plan, retry-loop success, and LLM fallback without an API key.
+
+#### 13.3 Validation results
+
+* `python -m pytest chapter12_reasoning/test_reasoning.py -q` — **7 passed**.
+* Full combined suite: `python -m pytest -q` — **163 passing**.
+
+#### 13.4 Documentation updates
+
+* Root `README.md`: added Chapter 12 / Milestone 6 to curriculum table, repo structure, and changelog; updated test count to 163.
+* `memory.md`: this section plus updated status snapshot and file index.
+* `.claude/projects/C--Users-point-projects-LearningRobotics/memory/learning-robotics.md`: updated status to Chapters 1–12 + Milestones 1–6, 163 tests.
+* `.claude/projects/C--Users-point-projects-LearningRobotics/plan.md`: marked Milestone 6 complete, Milestone 7 current.
+
+#### 13.5 Final wrap-up
+
+* Git working tree clean; committed and pushed all changes to `origin/master`.
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
@@ -935,8 +968,9 @@ Continue the simulation-only roadmap: implement Milestone 5 (imitation learning)
 | Chapter 9 practical | ✅ Complete — cubic/quintic splines + trapezoidal/S-curve time scaling + path→trajectory + 10 tests |
 | Chapter 10 practical | ✅ Complete — `renderer.py` + `perception.py` + simulated camera + object detection + IK-to-controller pipeline + 6 tests |
 | Chapter 11 practical | ✅ Complete — `expert.py` + `behavior_cloning.py` + `teleop.py` + expert demonstrations + behavior-cloning MLP + teleop recorder + 6 tests |
+| Chapter 12 practical | ✅ Complete — `task_parser.py` + `planner.py` + `physics_verifier.py` + `reasoning_loop.py` + NL task parser + rule/LLM planner + MuJoCo verifier + retry loop + 7 tests |
 | GitHub repo | ✅ Live at https://github.com/satyamdas03/LearningRobotics |
-| README | ✅ Complete (includes Chapters 1–11 + PIBench Phases 0–7) |
+| README | ✅ Complete (includes Chapters 1–12 + PIBench Phases 0–7) |
 | Revolutionary manifesto | ✅ Complete and pushed (Concept L now has Phase 0–7 plan) |
 | PIBench Phase 0 | ✅ Complete — engine + `TowerFall` |
 | PIBench Phase 1 | ✅ Complete — statics suite: `SlopeSlide`, `SupportBalance`, `ToppleDirection` |
@@ -953,7 +987,8 @@ Continue the simulation-only roadmap: implement Milestone 5 (imitation learning)
 | Milestone 3 | ✅ Complete — `BatchValidator` sweeps randomized arms/mismatch levels/controllers, accuracy degrades with mismatch, 3 new tests |
 | Milestone 4 | ✅ Complete — `chapter10_perception/` simulated camera stack: RGB/depth renderer, color-based detection, camera projection, IK → position controller, 6 tests |
 | Milestone 5 | ✅ Complete — `chapter11_imitation_learning/`: expert trajectory recorder via IK + cubic splines, NumPy MLP behavior cloning (path residual + one-shot goal reaching), teleoperation recorder, 6 tests |
-| Next implementation work | ⏳ Milestone 6: Foundation-model + physics verifier (LLM/VLM plans, MuJoCo verifies, retry loop) |
+| Milestone 6 | ✅ Complete — `chapter12_reasoning/`: NL task parser, rule + optional Claude LLM planner, MuJoCo physics verifier, retry loop with failure feedback, 7 tests |
+| Next implementation work | ⏳ Milestone 7: Skill library + skill sharing (reusable skills, composition, federated sharing) |
 | Hardware purchase | ⏳ None; project is simulation-only for the foreseeable future |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -1032,6 +1067,11 @@ Continue the simulation-only roadmap: implement Milestone 5 (imitation learning)
 | `chapter11_imitation_learning/behavior_cloning.py` | NumPy MLP behavior-cloning policy | Extend with PyTorch/JAX for larger policies |
 | `chapter11_imitation_learning/teleop.py` | Kinesthetic/keyboard recorder | Use to collect human demonstrations |
 | `chapter11_imitation_learning/test_imitation.py` | Chapter 11 imitation-learning tests | Run with `pytest` after any BC/teleop change |
+| `chapter12_reasoning/task_parser.py` | Natural-language manipulation parser | Extend for more relations / objects |
+| `chapter12_reasoning/planner.py` | Rule + optional Claude planner | Reuse as the planning backend for skills |
+| `chapter12_reasoning/physics_verifier.py` | MuJoCo plan verifier | Reuse for any spatial-relation task |
+| `chapter12_reasoning/reasoning_loop.py` | Plan → verify → retry loop | Reuse for foundation-model reasoning |
+| `chapter12_reasoning/test_reasoning.py` | Chapter 12 reasoning tests | Run with `pytest` after any reasoning change |
 | `pibench/pibench/core/counterfactual.py` | Counterfactual scene builder | Reuse for any "what if?" scene |
 | `pibench/pibench/evaluation/metrics.py` | Calibration + concept accuracy metrics | Extend when adding new calibration diagnostics |
 | `pibench/pibench/evaluation/leaderboard.py` | Static HTML/JSON leaderboard | Regenerate after each benchmark run |
@@ -1193,4 +1233,4 @@ A new GitHub repository, **RoboCAD** (`https://github.com/satyamdas03/RoboCAD`),
 
 ---
 
-*Last updated: 2026-08-20 (Session 12 — Milestones 1–5 complete, 156 tests passing)*
+*Last updated: 2026-08-20 (Session 13 — Milestones 1–6 complete, 163 tests passing)*
