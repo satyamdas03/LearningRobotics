@@ -205,9 +205,9 @@ LearningRobotics/
 
 This is the best-performing demo so far. The animation shows the 6-DOF arm in MuJoCo executing the same joint-space reach task under two controllers, side by side.
 
-![Self-improvement demo: baseline vs retuned controller](docs/assets/self_improve_baseline_vs_retuned.gif)
+![Self-improvement demo: baseline vs retuned controller](https://raw.githubusercontent.com/satyamdas03/LearningRobotics/master/docs/assets/self_improve_baseline_vs_retuned.gif)
 
-*Higher-quality MP4 with audio-free playback controls: [`docs/assets/self_improve_baseline_vs_retuned.mp4`](docs/assets/self_improve_baseline_vs_retuned.mp4)*
+*Higher-quality MP4 with audio-free playback controls: [`self_improve_baseline_vs_retuned.mp4`](docs/assets/self_improve_baseline_vs_retuned.mp4)*
 
 | | Baseline controller | Retuned controller |
 |---|---|---|
