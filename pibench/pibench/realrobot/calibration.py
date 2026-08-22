@@ -84,7 +84,10 @@ class ResidualTracker:
         for q_target in q_path:
             for _ in range(settle_steps):
                 state = arm.get_state()
-                tau = controller(state, q_target)
+                if hasattr(controller, "compute"):
+                    tau = controller.compute(state.q, state.qdot, q_des=q_target, dt=dt)
+                else:
+                    tau = controller(state, q_target)
                 arm.send_torques(tau, dt=dt)
                 next_state = arm.get_state()
                 self.observe(
