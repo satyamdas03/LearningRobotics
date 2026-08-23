@@ -261,11 +261,20 @@ What happens end-to-end:
 
 ### Reproduce it
 
+Run from the repo root so Python can resolve the `chapter16_vision_learning` package:
+
 ```powershell
-cd chapter16_vision_learning
-. .venv\Scripts\Activate.ps1
+cd C:\Users\point\projects\LearningRobotics
+chapter16_vision_learning\.venv\Scripts\python.exe -m chapter16_vision_learning.demo_vision_learning
+chapter16_vision_learning\.venv\Scripts\python.exe -m pytest chapter16_vision_learning/test_vision_learning.py -v
+```
+
+Or, if the venv is already activated:
+
+```powershell
+cd C:\Users\point\projects\LearningRobotics
 python -m chapter16_vision_learning.demo_vision_learning
-python -m pytest test_vision_learning.py -v
+python -m pytest chapter16_vision_learning/test_vision_learning.py -v
 ```
 
 Expected output: the demo prints `Verifier success: True` and `Replay success: True`, and the test suite reports **5 passed**.
