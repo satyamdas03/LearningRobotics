@@ -1368,4 +1368,66 @@ A new GitHub repository, **RoboCAD** (`https://github.com/satyamdas03/RoboCAD`),
 
 ---
 
-*Last updated: 2026-08-22 (Session 17 — Milestones 1–9 complete, PIBench leaderboard live on GitHub Pages, vision-based learning complete, 187 tests passing)*
+## 12. Milestone 10C / GEDA Bridge — planned next phase
+
+### What it is
+
+The **Generative Embodied Design Agent (GEDA)** phase connects RoboCAD (sister parametric-CAD repo) to the LearningRobotics MuJoCo + skill-verification stack.
+
+**Goal:** a single local-first pipeline:
+
+```
+natural-language prompt
+    ↓
+RoboCAD generates parametric design + manufacturing report
+    ↓
+Exporter converts build123d → MuJoCo-ready MJCF/URDF with inertial data
+    ↓
+Scene composer assembles robot + part + task objects
+    ↓
+LearningRobotics runs skill learning / physics verification
+    ↓
+Verifier checks success criteria (grasp / place / push / insert / hang / rotate)
+    ↓
+Bundle packager writes Design + Skill + Sim + Report package
+    ↓
+Marketplace schema records the verified capability
+```
+
+### Why it matters
+
+The intersection of generative CAD, robot simulation, and embodied AI foundation models is unoccupied. Individual markets are:
+
+- Generative design / AI CAD: ~$0.4B–$5B today.
+- Robot simulation / digital twin: ~$0.9B–$47B depending on definition.
+- Embodied AI / robot foundation models: $150B long-term opportunity.
+- Robot end effectors / grippers: $2B+ today, 13.5% CAGR.
+- Robot skill app stores: $90M → $521M by 2034.
+
+The recommended business model: **open-core desktop product + verified capability marketplace + grants + custom EOAT services**.
+
+### Success criteria
+
+- [ ] Terminal command takes a prompt and outputs a bundle directory.
+- [ ] At least 3 verified example bundles committed in `RoboCAD/bundles/examples/`.
+- [ ] Each bundle contains: design source, MJCF, skill metrics, video/GIF, manufacturing report, verification report.
+- [ ] `pytest` passes for all new modules.
+- [ ] README / PLAN / memory updated in both repos.
+
+### Implementation modules (RoboCAD side)
+
+| Module | File | Purpose |
+|---|---|---|
+| Geometry exporter | `ai_cad/geda_bridge/exporter.py` | build123d/STEP → MJCF/URDF + inertial data |
+| Scene composer | `ai_cad/geda_bridge/composer.py` | robot + part + task assembly |
+| Skill runner | `ai_cad/geda_bridge/skill_runner.py` | wrap LearningRobotics skill APIs |
+| Verifier | `ai_cad/geda_bridge/verifier.py` | success criteria + composite score |
+| Packager | `ai_cad/geda_bridge/packager.py` | write verified bundle zip/directory |
+| API | `web/backend/main.py` | `/designs/{id}/simulate`, `/designs/{id}/bundle`, `/capabilities` |
+| CLI | `python -m ai_cad.geda_bridge` | one-shot prompt → bundle command |
+
+For the full super master prompt and market research, see `C:\Users\point\.claude\projects\C--Users-point-projects-LearningRobotics\memory\geda-bridge.md`.
+
+---
+
+*Last updated: 2026-08-22 (Sessions 17–18 — Milestones 1–10B complete, PIBench leaderboard live on GitHub Pages, vision-based learning complete, 187 tests passing; GEDA Bridge to RoboCAD planned as next strategic phase)*

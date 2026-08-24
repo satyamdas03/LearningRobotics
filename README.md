@@ -82,6 +82,7 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | 15 | End-to-End North-Star Demo | ✅ Complete | Same as M9 — textbook chapter aligned with the milestone |
 | **M10** | **Vision-Based Learning from Ordinary Video** | ✅ Complete | `chapter16_vision_learning/`: synthetic video, heuristic/Claude vision parser, video→`SkillInstance`, physics verifier, replay, 5 tests |
 | 16 | Vision-Based Learning from Ordinary Video | ✅ Complete | Learn manipulation skills by watching ordinary RGB videos of the scene |
+| **M10C** | **GEDA Bridge — Prompt → Part → MuJoCo Skill → Verified Bundle** | 🚧 Planned | Connect RoboCAD parametric CAD to LearningRobotics MuJoCo simulation + skill verification |
 
 ---
 
