@@ -82,7 +82,7 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | 15 | End-to-End North-Star Demo | ✅ Complete | Same as M9 — textbook chapter aligned with the milestone |
 | **M10** | **Vision-Based Learning from Ordinary Video** | ✅ Complete | `chapter16_vision_learning/`: synthetic video, heuristic/Claude vision parser, video→`SkillInstance`, physics verifier, replay, 5 tests |
 | 16 | Vision-Based Learning from Ordinary Video | ✅ Complete | Learn manipulation skills by watching ordinary RGB videos of the scene |
-| **M10C** | **GEDA Bridge — Prompt → Part → MuJoCo Skill → Verified Bundle** | 🚧 Planned | Connect RoboCAD parametric CAD to LearningRobotics MuJoCo simulation + skill verification |
+| **M10C** | **GEDA Bridge — Prompt → Part → MuJoCo Skill → Verified Bundle** | ⏸️ On hold until RoboCAD Phase 14 | Connect RoboCAD parametric CAD to LearningRobotics MuJoCo simulation + skill verification |
 
 ---
 
@@ -208,6 +208,22 @@ LearningRobotics/
     ├── test_vision_learning.py    # 5 pytest tests
     └── requirements.txt           # chapter-specific deps
 ```
+
+---
+
+## ✅ Running the tests
+
+The repo now has a root `pyproject.toml` that discovers all chapter and PIBench tests.
+
+```bash
+# Run the full 187-test suite
+pytest
+
+# Run with coverage report (terminal + HTML in docs/coverage/)
+pytest --cov --cov-report=term-missing --cov-report=html:docs/coverage
+```
+
+**Current baseline:** 187/187 tests passing, ~83 % source coverage. The suite is deterministic and was verified with 3 consecutive green runs.
 
 ---
 

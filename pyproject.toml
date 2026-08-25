@@ -1,0 +1,41 @@
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = [
+    "chapter02_rigid_body_motions",
+    "chapter03_forward_kinematics",
+    "chapter04_velocity_kinematics",
+    "chapter05_inverse_kinematics",
+    "chapter06_dynamics",
+    "chapter07_control",
+    "chapter08_motion_planning",
+    "chapter09_trajectory_generation",
+    "chapter10_perception",
+    "chapter11_imitation_learning",
+    "chapter12_reasoning",
+    "chapter13_skills",
+    "chapter14_self_improvement",
+    "chapter15_north_star",
+    "chapter16_vision_learning",
+    "pibench",
+]
+python_files = ["test_*.py"]
+addopts = "--strict-markers -v"
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/test_*.py",
+    "*/demo_*.py",
+    "docs/*",
+    "tmp/*",
+]
+
+[tool.coverage.report]
+precision = 1
+skip_covered = false
+omit = [
+    "*/test_*.py",
+    "*/demo_*.py",
+    "docs/*",
+    "tmp/*",
+]

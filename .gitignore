@@ -6,3 +6,5 @@ output/
 .pytest_cache/
 *.egg-info/
 MUJOCO_LOG.TXT
+.coverage
+
