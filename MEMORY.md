@@ -15,7 +15,7 @@
 | **Mission** | Learn robotics and AI from first principles fast, and build something extraordinary and revolutionary that solves real-world problems. |
 | **Owner** | Satyam Das (@satyamdas03, satyamdas03@gmail.com) |
 | **Start date** | 2026-08-13 |
-| **Current date** | 2026-08-22 |
+| **Current date** | 2026-08-25 |
 
 ---
 
@@ -1065,6 +1065,62 @@ Continue the simulation-only roadmap: scaffold Milestone 9 (end-to-end north-sta
 
 ---
 
+### Session 19 — 2026-08-25
+
+#### What the user asked
+
+Restarted session after context compaction. User asked to:
+1. Regain full context for LearningRobotics / RoboCAD / GEDA Bridge.
+2. Stop all RoboCAD code edits (those are handled by another session/model).
+3. Research whether GEDA Bridge is revolutionary or if a simulation-only alternative is better.
+4. Think from market perspective and shortlist the highest-value ideas.
+5. Prepare the super master prompt for RoboCAD after Phase 14.
+6. Update all dossiers and memory files with everything done.
+
+#### Research done
+
+- Web-searched market sizes for:
+  - Robot skill-learning platforms / LfD / imitation learning (2026: ~$2.1–5.4 B, CAGR 28–34%).
+  - AI copilots for robot programming / AI PLC code generation (2026: ~$0.45–2.75 B, code-gen segment growing at 50% CAGR).
+  - Generative design / generative AI in robotics (2026: ~$0.3–3.2 B).
+  - Digital twin for robotics / manufacturing (2026: ~$8.7–47 B depending on definition).
+- Concluded that **RoboCompiler** (video → physics-grounded, verified skill) has the highest market-value wedge because it attacks the data-scarcity bottleneck (real episodes cost $4–30 each; human videos are free).
+- Concluded that **PhysHack** (LLM writes controller code + MuJoCo self-debug verifier) is #2 as a practical developer tool.
+- Decided that **GEDA Bridge should wait until RoboCAD Phase 14** is complete and verified; a premature bridge wastes effort because isolated simple STL blocks are not valuable enough to integrate.
+
+#### What we built / decided
+
+1. **Updated project memory files** in `C:\Users\point\.claude\projects\C--Users-point-projects-LearningRobotics\memory\`:
+   - `geda-bridge.md` — marked on hold until RoboCAD Phase 14; reframed GEDA as delivery infrastructure for RoboCompiler.
+   - `learning-robotics.md` — added standalone task sequence and RoboCompiler as capstone.
+   - `robocad-phase15-prompt.md` — new super master prompt for the RoboCAD model.
+   - `MEMORY.md` index — added Phase 15 prompt entry.
+2. **Test-suite hardening (#16)** in LearningRobotics:
+   - Added root `pyproject.toml` with pytest testpaths and pytest-cov config.
+   - Installed missing deps into the 3.11 venv (mujoco, imageio, etc.).
+   - Ran full suite: **187/187 tests passing**.
+   - Verified stability with 3 consecutive green runs.
+   - Generated HTML coverage report at `docs/coverage/` (~83% source coverage).
+   - Updated `.gitignore` to ignore `.coverage`.
+   - Documented test/coverage commands in `README.md`.
+3. **PIBench public site expansion (#1)**:
+   - Added `docs/index.html` project hub linking leaderboard, coverage, GitHub.
+   - Upgraded `pibench/pibench/evaluation/leaderboard.py` to produce interactive leaderboard with theme toggle, predictor filter, collapsible tables, sortable columns.
+   - Regenerated `docs/pibench_leaderboard.html`.
+   - Verified all 187 tests still pass.
+4. **RoboCAD Phase 15 handoff artifact**:
+   - Wrote `docs/ROBOCAD_PHASE15_PROMPT.md` and committed/pushed it.
+   - Contains exact export API, bundle schema v2, verification thresholds, CLI/API endpoints, non-goals, and handoff checklist.
+   - Explicit rule: RoboCAD model must **not** modify LearningRobotics files.
+
+#### Commits pushed
+
+- `test(#16): harden 187-test suite + coverage report`
+- `feat(pibench): expand public site with hub + interactive leaderboard`
+- `docs: add RoboCAD Phase 15 super master prompt`
+
+---
+
 ## 5. Current Status Snapshot
 
 | Area | Status |
@@ -1106,7 +1162,13 @@ Continue the simulation-only roadmap: scaffold Milestone 9 (end-to-end north-sta
 | Milestone 7 | ✅ Complete — `chapter13_skills/`: reusable parameterized skills, plan composition, JSON skill library, 7 tests |
 | Milestone 8 | ✅ Complete — `chapter14_self_improvement/`: failure detector, online system ID, retuner, A/B experiment, self-improvement loop, 6 tests |
 | Milestone 9 | ✅ Complete — `chapter15_north_star/`: NL task → skill plan → IK → trajectory → arm execution → residual tracking → skill library, 6 tests |
-| Next implementation work | ✅ All simulation-only milestones complete (M1–M9). Consider next: PIBench Phase 8 dashboard deploy, Isaac Lab RL chapter, or optional real-arm adapter. |
+| Milestone 10A | ✅ Complete — PIBench static leaderboard published to GitHub Pages |
+| Milestone 10B | ✅ Complete — `chapter16_vision_learning/`: vision-based learning from ordinary video, 5 tests |
+| Standalone task #16 | ✅ Complete — root `pyproject.toml`, 187/187 tests passing, 3× stability verified, HTML coverage report at `docs/coverage/` (~83%) |
+| Standalone task #1 | ✅ Complete — PIBench public site expanded with `docs/index.html` hub + interactive leaderboard (theme/filter/sort/collapse) |
+| GEDA Bridge (M10C) | ⏸️ On hold until RoboCAD Phase 14 is complete and verified |
+| Revolutionary capstone | 🎯 Scoped — **RoboCompiler** (human video → physics-grounded, verified robot skill); PhysHack (#2) deferred |
+| Next implementation work | 🚧 Standalone sequence: #2 new PIBench scenes → #6 skill library expansion → #7 IK/trajectory execution → #5 real-arm adapter stubs → #4 Chapter 17 RL → RoboCompiler prototype |
 | Hardware purchase | ⏳ None; project is simulation-only for the foreseeable future |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -1114,14 +1176,18 @@ Continue the simulation-only roadmap: scaffold Milestone 9 (end-to-end north-sta
 
 ## 6. Open Decisions / Questions
 
-1. **What is the next major goal?** All simulation-only milestones (M1–M9) are complete. Options:
-   - Publish the PIBench static leaderboard (`output/leaderboard.html`) to GitHub Pages.
-   - Add an Isaac Lab / RL chapter for policy learning at scale.
-   - Build an optional real-arm adapter (`ForteAMArmAdapter`) when budget allows.
-2. **Hardware target:** Documented in `pibench/docs/HARDWARE_BOM.md` — **Forte starter stack (~$285)** or **AM-ARM full stack (~$480-540)**. Purchase is paused; simulation-first remains the strategy.
-3. **Public website:** Consider publishing `README.md` and the PIBench leaderboard via GitHub Pages to make the project shareable.
-4. **Isaac Sim:** Not installed. Revisit when a specific milestone (massive RL parallelization) requires it.
-5. **Dashboard technology:** Static HTML (current) is sufficient for GitHub Pages; reassess if live interactivity is needed later.
+1. **What is the next major goal?** Execute the standalone LearningRobotics sequence while RoboCAD finishes Phases 10–14:
+   - #2 Add new PIBench scenes.
+   - #6 Expand skill library.
+   - #7 Wire skill execution through IK + trajectory.
+   - #5 Add real-arm adapter stubs.
+   - #4 Add Chapter 17 RL.
+   - Scope and prototype **RoboCompiler** as the revolutionary capstone.
+2. **RoboCAD integration timing:** GEDA Bridge is paused until RoboCAD Phase 14 is complete and verified. The super master prompt (`docs/ROBOCAD_PHASE15_PROMPT.md`) is ready to hand off.
+3. **Hardware target:** Documented in `pibench/docs/HARDWARE_BOM.md` — **Forte starter stack (~$285)** or **AM-ARM full stack (~$480-540)**. Purchase is paused; simulation-first remains the strategy.
+4. **Public website:** Hub + leaderboard + coverage live at https://satyamdas03.github.io/LearningRobotics/. Further UX improvements are optional.
+5. **Isaac Sim:** Not installed. Revisit when Chapter 17 RL requires massive GPU parallelization.
+6. **Revolutionary direction:** Locked on **RoboCompiler** (#1 market-value idea). PhysHack (#2) is a future optional spin-off.
 
 ---
 
@@ -1219,6 +1285,15 @@ Continue the simulation-only roadmap: scaffold Milestone 9 (end-to-end north-sta
 | `pibench/pibench/scenes/deformable/` | PIBench Phase 4 deformable scenes | Add one file per new deformable problem |
 | `pibench/pibench/scenes/params/` | PIBench Phase 5 parameter/counterfactual scenes | Add one file per new estimation problem |
 | `.gitignore` | Git exclusions | Update if new tooling adds artifacts |
+| `pyproject.toml` | Root pytest + pytest-cov configuration | Update when adding testpaths or coverage settings |
+| `docs/index.html` | Project hub page for GitHub Pages | Update when adding new public pages |
+| `docs/pibench_leaderboard.html` | Interactive PIBench leaderboard | Regenerate after each benchmark run |
+| `docs/coverage/` | HTML coverage report | Regenerate with `pytest --cov --cov-report=html:docs/coverage` |
+| `docs/ROBOCAD_PHASE15_PROMPT.md` | Super master prompt for RoboCAD after Phase 14 | Update if handoff requirements change |
+| `chapter16_vision_learning/synthetic_video.py` | Generate synthetic manipulation videos | Reuse for any video-to-skill experiment |
+| `chapter16_vision_learning/vision_parser.py` | Heuristic + optional Claude vision parser | Extend for new object/relation types |
+| `chapter16_vision_learning/video_to_skill.py` | Video → SkillInstance + physics verifier | Core building block for RoboCompiler |
+| `chapter16_vision_learning/test_vision_learning.py` | Chapter 16 tests | Run with `pytest` after any vision-learning change |
 
 ---
 
@@ -1304,6 +1379,28 @@ $env:PYTHONPATH = "C:\Users\point\projects\LearningRobotics\pibench"
 python pibench/pibench/cli.py validate --output output/validate_dummy.json
 ```
 
+### Run full LearningRobotics suite
+
+```powershell
+cd C:\Users\point\projects\LearningRobotics
+C:\Users\point\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe -m pytest
+```
+
+### Run full suite with coverage
+
+```powershell
+cd C:\Users\point\projects\LearningRobotics
+C:\Users\point\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe -m pytest --cov --cov-report=term-missing --cov-report=html:docs/coverage
+```
+
+### Regenerate PIBench leaderboard
+
+```powershell
+cd C:\Users\point\projects\LearningRobotics
+C:\Users\point\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe pibench/run_all.py
+cp output/leaderboard.html docs/pibench_leaderboard.html
+```
+
 ### Commit and push future changes
 
 ```powershell
@@ -1314,6 +1411,8 @@ git push origin master
 ```
 
 Note: this repo is independent of the `C:\Users\point` mega-repo. Do not accidentally stage files outside `LearningRobotics`.
+
+Note: coverage artifacts are intentionally generated into `docs/coverage/` so they are published with GitHub Pages. `.coverage` is gitignored.
 
 ---
 
@@ -1332,7 +1431,7 @@ Note: this repo is independent of the `C:\Users\point` mega-repo. Do not acciden
 
 If you are resuming this session with no other context, here is the one-paragraph summary:
 
-> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–15 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward kinematics, velocity kinematics/Jacobians, inverse kinematics, dynamics, control, motion planning, trajectory generation, simulated perception, imitation learning, foundation-model + physics verifier, skill library + skill sharing, self-improving virtual real-sim-real loop, and end-to-end north-star demo). **PIBench (Physical Intuition Benchmark) Phases 0–7 are complete:** a runnable MuJoCo-based benchmark engine with statics, dynamics, contact/friction, articulated/deformable, parameter-estimation/counterfactual, model-harness/leaderboard/calibration, and real-robot validation suites; physics-oracle/random/optional-LLM/optional-VLM baselines; a counterfactual builder; a CLI; static HTML showcase and leaderboard; and passing tests. **Milestones 1–9 of the simulation-only north star are complete:** hardened virtual real-robot bridge, trajectory generation, virtual validation at scale, simulated perception, imitation learning, foundation-model + physics verifier, skill library + skill sharing, self-improving virtual real-sim-real loop, and end-to-end north-star demo (182 tests passing). **Optional milestone 10A is complete:** the PIBench leaderboard is published to GitHub Pages at https://satyamdas03.github.io/LearningRobotics/pibench_leaderboard.html. **Optional milestone 10B is complete:** `chapter16_vision_learning/` adds vision-based learning from ordinary video — synthetic video generation, heuristic/Claude vision parser, video→`SkillInstance` conversion, physics verification, and replay (5 new tests). The project remains simulation-only (no physical arm purchase).
+> We are building `LearningRobotics`, a public learning journal and research lab for robotics + AI. Chapters 1–16 are complete in MuJoCo (C-space/DOF, rigid-body transforms, forward/inverse kinematics, Jacobians, dynamics, control, motion planning, trajectory generation, simulated perception, imitation learning, foundation-model + physics verifier, skill library + skill sharing, self-improving virtual real-sim-real loop, end-to-end north-star demo, and vision-based learning from ordinary video). **PIBench (Physical Intuition Benchmark) Phases 0–7 are complete:** a runnable MuJoCo-based benchmark engine with statics, dynamics, contact/friction, articulated/deformable, parameter-estimation/counterfactual, model-harness/leaderboard/calibration, and real-robot validation suites; physics-oracle/random/optional-LLM/optional-VLM baselines; a counterfactual builder; a CLI; static HTML showcase and leaderboard; and passing tests. **187 tests are passing** with a root `pyproject.toml` test configuration, 3× stability verification, and an HTML coverage report at `docs/coverage/` (~83% source coverage). **The public site is expanded:** a project hub at https://satyamdas03.github.io/LearningRobotics/index.html, an interactive PIBench leaderboard, and coverage report. **GEDA Bridge to RoboCAD is on hold** until RoboCAD completes Phase 14 (assemblies, DFM/tolerances, fine-tuning, packaging/export). The revolutionary capstone is **RoboCompiler** — human video → physics-grounded, verified robot skill — because it attacks the data-scarcity bottleneck (real episodes cost $4–30; human videos are free). A super master prompt for RoboCAD Phase 15 is ready at `docs/ROBOCAD_PHASE15_PROMPT.md`. The project remains simulation-only (no physical arm purchase).
 
 ---
 
@@ -1358,7 +1457,8 @@ A new GitHub repository, **RoboCAD** (`https://github.com/satyamdas03/RoboCAD`),
 - Phase 0 complete and pushed: `validate.py` passes **8/8 prompts (100%)** on first attempt.
 - Key fixes: Anthropic SDK 1.0 compatibility, executor f-string escaping, corrected build123d hole/subtraction patterns in system prompt + examples.
 - Phase 1 in progress: robust backend, parameter extraction, expanded benchmark.
-- Next action: wrap generator/executor/validator into a Pydantic `generate(prompt)` response, extract named parameters, expand benchmark to 20 prompts, add tests.
+- Phases 10–14 planned: sketch constraints, assemblies/mates, DFM/FEA/tolerances, model fine-tuning, packaging/export.
+- **Important:** LearningRobotics model/session is **not** editing RoboCAD code. RoboCAD development is handled by a separate session/model.
 
 **Local path:** `C:\Users\point\projects\RoboCAD`  
 **Branch:** `master`  
@@ -1368,7 +1468,7 @@ A new GitHub repository, **RoboCAD** (`https://github.com/satyamdas03/RoboCAD`),
 
 ---
 
-## 12. Milestone 10C / GEDA Bridge — planned next phase
+## 12. Milestone 10C / GEDA Bridge — on hold until RoboCAD Phase 14
 
 ### What it is
 
@@ -1406,8 +1506,37 @@ The intersection of generative CAD, robot simulation, and embodied AI foundation
 
 The recommended business model: **open-core desktop product + verified capability marketplace + grants + custom EOAT services**.
 
-### Success criteria
+### Status: paused
 
+**GEDA Bridge is on hold until RoboCAD Phase 14 is complete and verified.**
+
+Reason: a premature bridge imports isolated simple STL blocks into MuJoCo and wastes effort. To make the integration valuable, RoboCAD needs:
+- Phase 10 — sketch constraints and feature tree (in progress)
+- Phase 11 — assemblies and mates
+- Phase 12 — DFM, FEA, tolerances
+- Phase 13 — model fine-tuning / reliability
+- Phase 14 — packaging, export, BOM, manufacturing report
+
+**GEDA Bridge is delivery infrastructure for RoboCompiler**, the chosen revolutionary engine (human video → physics-grounded, verified robot skill).
+
+### Handoff artifact ready
+
+The super master prompt to give to the RoboCAD session/model after Phase 14 is complete:
+
+- Repo copy: `docs/ROBOCAD_PHASE15_PROMPT.md`
+- Memory copy: `C:\Users\point\.claude\projects\C--Users-point-projects-LearningRobotics\memory\robocad-phase15-prompt.md`
+
+It defines:
+- Exact export API and invariants (units, density-scaled inertia, determinism).
+- Bundle schema v2.
+- CLI / API endpoints.
+- Verification thresholds.
+- Phase 15A (RoboCAD-only readiness) and Phase 15B (cross-repo handshake) scopes.
+- Strict non-goal: **do not modify LearningRobotics files**.
+
+### Success criteria (pending RoboCAD Phase 14)
+
+- [ ] RoboCAD Phase 14 test suite passes.
 - [ ] Terminal command takes a prompt and outputs a bundle directory.
 - [ ] At least 3 verified example bundles committed in `RoboCAD/bundles/examples/`.
 - [ ] Each bundle contains: design source, MJCF, skill metrics, video/GIF, manufacturing report, verification report.
@@ -1426,8 +1555,8 @@ The recommended business model: **open-core desktop product + verified capabilit
 | API | `web/backend/main.py` | `/designs/{id}/simulate`, `/designs/{id}/bundle`, `/capabilities` |
 | CLI | `python -m ai_cad.geda_bridge` | one-shot prompt → bundle command |
 
-For the full super master prompt and market research, see `C:\Users\point\.claude\projects\C--Users-point-projects-LearningRobotics\memory\geda-bridge.md`.
+For the original market research and GEDA plan, see `C:\Users\point\.claude\projects\C--Users-point-projects-LearningRobotics\memory\geda-bridge.md`.
 
 ---
 
-*Last updated: 2026-08-22 (Sessions 17–18 — Milestones 1–10B complete, PIBench leaderboard live on GitHub Pages, vision-based learning complete, 187 tests passing; GEDA Bridge to RoboCAD planned as next strategic phase)*
+*Last updated: 2026-08-25 (Session 19 — 187 tests passing, coverage report live, PIBench public site expanded, GEDA Bridge on hold pending RoboCAD Phase 14, RoboCompiler scoped as revolutionary capstone, RoboCAD Phase 15 super master prompt ready)*

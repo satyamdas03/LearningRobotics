@@ -2,7 +2,7 @@
 
 > **Mission:** Learn robotics and AI from first principles — fast — and build something extraordinary and revolutionary.
 >
-> **Current focus:** Foundations → Rigid-body motions → Kinematics → Dynamics → Control → Motion planning → Reinforcement Learning → Real-world embodiment.
+> **Current focus:** Locking the 187-test baseline, expanding PIBench, hardening the skill stack, and scoping **RoboCompiler** — a human-video-to-physics-grounded-verified-skill compiler that turns ordinary RGB video into reusable robot skills. GEDA Bridge to RoboCAD is on hold until RoboCAD Phase 14 is complete.
 
 This repo is a public learning journal. Every chapter is documented, every experiment is reproducible, and every robot model is code.
 
@@ -224,6 +224,32 @@ pytest --cov --cov-report=term-missing --cov-report=html:docs/coverage
 ```
 
 **Current baseline:** 187/187 tests passing, ~83 % source coverage. The suite is deterministic and was verified with 3 consecutive green runs.
+
+---
+
+## 🌐 Public Pages
+
+| Page | URL |
+|---|---|
+| **Project Hub** | https://satyamdas03.github.io/LearningRobotics/index.html |
+| **PIBench Leaderboard** | https://satyamdas03.github.io/LearningRobotics/pibench_leaderboard.html |
+| **Test Coverage** | https://satyamdas03.github.io/LearningRobotics/coverage/index.html |
+
+---
+
+## 🎯 Revolutionary Capstone: RoboCompiler
+
+After market research, the highest-value revolutionary direction is **RoboCompiler** — a human-video → physics-grounded, verified robot skill compiler.
+
+**Why it wins:**
+- Real robot episodes cost **$4–30 each**. Human videos are free and abundant.
+- It turns the internet into a robot training set.
+- It directly consumes every LearningRobotics chapter built so far: vision, skills, verifier, composer, system ID.
+- Adjacent TAM 2026: robot skill-learning platforms **$4.2–5.4 B**, learning-from-demonstration **$3.2–4.1 B**, imitation learning **$2.1–2.8 B**.
+
+**Second idea:** **PhysHack** — LLM writes controller code + MuJoCo self-debug verifier (AI copilots for robot programming **$2.75 B** in 2026). This is a practical developer tool but a narrower moat than RoboCompiler.
+
+**GEDA Bridge to RoboCAD** is on hold until RoboCAD Phase 14 is complete. It will serve as **delivery infrastructure** for RoboCompiler, not the revolution itself.
 
 ---
 

@@ -502,7 +502,33 @@ That is extraordinary, revolutionary, and technically possible from where we sta
 
 ---
 
-## 8. Sources & Further Reading
+## 8. Market-Driven Decision (2026-08-25)
+
+After a new round of web research on 2026 market sizes and a review of the sister project RoboCAD's roadmap, we made the following decisions:
+
+| Rank | Idea | 2026 adjacent TAM | Why it wins |
+|---|---|---|---|
+| **1** | **RoboCompiler** — human video → physics-grounded, verified robot skill | Robot skill-learning platforms **$4.2–5.4 B**, robot learning from demonstration **$3.2–4.1 B**, imitation learning **$2.1–2.8 B** | Attacks the data-scarcity bottleneck: real robot episodes cost **$4–30 each**, while human videos are free and abundant. Directly consumes every LearningRobotics chapter built so far. |
+| **2** | **PhysHack** — LLM writes controller code + MuJoCo self-debug verifier | AI copilots for robot programming **$2.75 B** in 2026; AI PLC/industrial-copilot code generation **$0.45 B** but growing at **50 % CAGR to $25.95 B by 2036** | Practical developer tool — "GitHub Copilot for robot control" — but a narrower moat than RoboCompiler. |
+
+**Deferred for now:** morphology-control co-design and differentiable system ID. Scientifically exciting, but smaller/more-fragmented addressable markets today (generative design ~$0.3–0.4 B, digital-twin robotics ~$8.7–12.1 B with heavy industrial-incumbent competition).
+
+**GEDA Bridge timing:** The formal GEDA Bridge integration with RoboCAD is **on hold until RoboCAD Phase 14** is complete and verified. GEDA Bridge will serve as **delivery infrastructure** for RoboCompiler, not the revolution itself. A premature bridge wastes effort because Phase 9/10 RoboCAD only produces isolated simple parts.
+
+**Standalone LearningRobotics sequence while waiting:**
+1. #16 Test-suite hardening — done.
+2. #1 PIBench public site expansion — done.
+3. #2 Add new PIBench scenes.
+4. #6 Skill library expansion + #7 IK/trajectory execution.
+5. #5 Real-arm adapter stubs.
+6. #4 Chapter 17 RL.
+7. Scope and prototype RoboCompiler as the revolutionary capstone.
+
+The super master prompt for RoboCAD Phase 15 is ready at `docs/ROBOCAD_PHASE15_PROMPT.md`.
+
+---
+
+## 9. Sources & Further Reading
 
 ### VLA / Foundation Models for Robotics
 * [DexSim2Real: Foundation Model-Guided Sim-to-Real Transfer](https://arxiv.org/html/2605.05241)
