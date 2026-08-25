@@ -55,6 +55,21 @@ The platform tilts to a random angle. MuJoCo rolls the simulation forward until 
 
 ---
 
+### `HangingBeam`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/statics/hanging_beam.py` |
+| **Question** | A uniform beam is hinged horizontally at one end. A mass hangs from the free end. Does the beam tip down under the load? |
+| **Answer type** | Boolean: `"yes"`, `"no"` |
+| **Concepts** | Torque balance, lever arm, hanging loads, static equilibrium |
+| **Textbook link** | Chapter 2 — rigid-body moments / static equilibrium |
+| **Ground truth** | MuJoCo rollout: beam tips if final hinge angle exceeds 15° |
+
+**Latent parameters:** `beam_length`, `beam_mass`, `load_mass`, `final_angle_deg`.
+
+---
+
 ### `ToppleDirection`
 
 | Field | Value |
@@ -161,6 +176,36 @@ The platform tilts to a random angle. MuJoCo rolls the simulation forward until 
 | **Ground truth** | MuJoCo rollout: fits if wedge tip advances past the gap |
 
 **Latent parameters:** `wedge_base_width`, `wedge_length`, `gap_width`, `wedge_delta_x`.
+
+---
+
+### `StackOverhang`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/contact/stack_overhang.py` |
+| **Question** | Two stacks of identical blocks stand side by side. The top block of each stack is overhung by a different amount. Which stack topples? |
+| **Answer type** | Choice: `"A"`, `"B"`, `"both"`, `"neither"` |
+| **Concepts** | Center of mass, support polygon, stacking stability |
+| **Textbook link** | Chapter 2 — rigid-body stability |
+| **Ground truth** | MuJoCo rollout: stack topples if any block tilts beyond 10° |
+
+**Latent parameters:** `n_blocks`, `block_mass`, `overhang_a`, `overhang_b`.
+
+---
+
+### `PegInHole`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/contact/peg_in_hole.py` |
+| **Question** | A cylindrical peg is lowered into a hole. Does it fit cleanly or jam on the top surface? |
+| **Answer type** | Choice: `"fits"`, `"jams"` |
+| **Concepts** | Contact geometry, clearance, insertion, jamming |
+| **Textbook link** | Chapter 4 — contact constraints |
+| **Ground truth** | MuJoCo rollout: peg fits if its center drops below the block surface |
+
+**Latent parameters:** `peg_radius`, `hole_radius`, `peg_length`, `hole_depth`, `final_z`.
 
 ---
 
@@ -273,6 +318,21 @@ The platform tilts to a random angle. MuJoCo rolls the simulation forward until 
 
 ---
 
+### `RopeSag`
+
+| Field | Value |
+|---|---|
+| **File** | `pibench/scenes/deformable/rope_sag.py` |
+| **Question** | Two deformable chains hang from the same height. Chain A has more capsules than chain B. Which chain's free end hangs lower after settling? |
+| **Answer type** | Choice: `"A"`, `"B"`, `"same"` |
+| **Concepts** | Deformable-body approximation, sag, gravity, chain length |
+| **Textbook link** | Chapter 5 — introduction to deformables / constraints |
+| **Ground truth** | MuJoCo rollout: compares final free-end heights of the two chains |
+
+**Latent parameters:** `n_capsules_a`, `n_capsules_b`, `capsule_radius`, `capsule_half_len`, `mass_per_capsule`, `height_a`, `height_b`.
+
+---
+
 ## Parameter Estimation / Counterfactual Suite
 
 ### `MassOrder`
@@ -352,26 +412,28 @@ The platform tilts to a random angle. MuJoCo rolls the simulation forward until 
 
 ## Concept coverage map
 
-| Concept | TowerFall | SlopeSlide | SupportBalance | ToppleDirection | CollisionBounce | PendulumSwing | ProjectileHit | PushTipVsSlide | StackStability | WedgeInsert | FrictionPile | SlipGrip | DrawerPull | DoorSwing | RopeTension | GearTurn | ChainDrape | MassOrder | FrictionOrder | CounterfactualMass | CounterfactualFriction | BalanceAfterMove |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Center of mass | ✅ | ✅ | ✅ | ✅ | | | | ✅ | ✅ | | | | | | | | | | | | | |
-| Support polygon | ✅ | | ✅ | ✅ | | | | | ✅ | | | | | | | | | | | | | |
-| Friction / angle of repose | | ✅ | | | | | | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | | | | | ✅ | | ✅ | |
-| Torque balance | | | ✅ | | | | | ✅ | | | | | | ✅ | | | | | | | | ✅ |
-| Toppling direction | | | | ✅ | | | | ✅ | | | | | | | | | | | | ✅ | | |
-| Conservation of momentum | | | | | ✅ | | | | ✅ | | | | | | | | | ✅ | | | | |
-| Conservation of energy | | | | | ✅ | ✅ | | | | | | | | | | | | ✅ | | | | |
-| Period / length scaling | | | | | | ✅ | | | | | | | | | | | | | | | | |
-| Projectile range | | | | | | | ✅ | | | | | | | | | | | | | | | |
-| Contact geometry / jamming | | | | | | | | | | ✅ | | | | | | | | | | | | |
-| Grip friction / static threshold | | | | | | | | | | | ✅ | ✅ | | | | | | | ✅ | | | |
-| Prismatic / hinge constraints | | | | | | | | | | | | | ✅ | ✅ | | | | | | | | |
-| Tendons / pulleys | | | | | | | | | | | | | | | ✅ | | | | | | | |
-| Gear meshing / kinematic chains | | | | | | | | | | | | | | | | ✅ | | | | | | |
-| Deformable-body approximation | | | | | | | | | | | | | | | | | ✅ | | | | | |
-| Mass / inertia | | | | | ✅ | | | | | | ✅ | | | | | | | ✅ | | ✅ | | |
-| Counterfactual reasoning | | | | | | | | | | | | | | | | | | | | ✅ | ✅ | |
-| Parameter estimation | | | | | | | | | | | | | | | | | | ✅ | ✅ | | | |
+| Concept | TowerFall | SlopeSlide | SupportBalance | HangingBeam | ToppleDirection | CollisionBounce | PendulumSwing | ProjectileHit | PushTipVsSlide | StackStability | StackOverhang | WedgeInsert | PegInHole | FrictionPile | SlipGrip | DrawerPull | DoorSwing | RopeTension | GearTurn | ChainDrape | RopeSag | MassOrder | FrictionOrder | CounterfactualMass | CounterfactualFriction | BalanceAfterMove |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Center of mass | ✅ | ✅ | ✅ | | ✅ | | | | ✅ | ✅ | ✅ | | | | | | | | | | | | | | | |
+| Support polygon | ✅ | | ✅ | | ✅ | | | | | ✅ | ✅ | | | | | | | | | | | | | | | |
+| Friction / angle of repose | | ✅ | | | | | | | ✅ | | | ✅ | | ✅ | ✅ | ✅ | ✅ | | | | | | | ✅ | | ✅ | |
+| Torque balance | | | ✅ | ✅ | | | | | ✅ | | | | | | | | ✅ | | | | | | | | | ✅ |
+| Toppling direction | | | | | ✅ | | | | ✅ | | ✅ | | | | | | | | | | | | | ✅ | | |
+| Hanging loads / lever arms | | | | ✅ | | | | | | | | | | | | | | | | | | | | | | |
+| Conservation of momentum | | | | | | ✅ | | | | ✅ | | | | | | | | | | | | ✅ | | | | |
+| Conservation of energy | | | | | | ✅ | ✅ | | | | | | | | | | | | | | | ✅ | | | | |
+| Period / length scaling | | | | | | | ✅ | | | | | | | | | | | | | | | | | | | |
+| Projectile range | | | | | | | | ✅ | | | | | | | | | | | | | | | | | | |
+| Contact geometry / jamming | | | | | | | | | | | | ✅ | ✅ | | | | | | | | | | | | | |
+| Grip friction / static threshold | | | | | | | | | | | | | | ✅ | ✅ | | | | | | | | ✅ | | | |
+| Prismatic / hinge constraints | | | | | | | | | | | | | | | | ✅ | ✅ | | | | | | | | | | |
+| Tendons / pulleys | | | | | | | | | | | | | | | | | | ✅ | | | | | | | | |
+| Gear meshing / kinematic chains | | | | | | | | | | | | | | | | | | | ✅ | | | | | | | |
+| Deformable-body approximation | | | | | | | | | | | | | | | | | | | | ✅ | ✅ | | | | | |
+| Chain sag / length scaling | | | | | | | | | | | | | | | | | | | | | ✅ | | | | | |
+| Mass / inertia | | | | | | ✅ | | | | | | | | ✅ | | | | | | | | ✅ | | ✅ | | |
+| Counterfactual reasoning | | | | | | | | | | | | | | | | | | | | | | | | ✅ | ✅ | |
+| Parameter estimation | | | | | | | | | | | | | | | | | | | | | | ✅ | ✅ | | | |
 
 ---
 
@@ -434,4 +496,4 @@ Expected output: validation accuracy 100.0% (3/3) with `[OK]` markers.
 
 ---
 
-*Last updated: 2026-08-20*
+*Last updated: 2026-08-25*

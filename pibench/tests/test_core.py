@@ -13,12 +13,14 @@ from pibench.predictors.random_predictor import RandomPredictor
 from pibench.scenes.articulated import DoorSwing, DrawerPull, GearTurn, RopeTension
 from pibench.scenes.contact import (
     FrictionPile,
+    PegInHole,
     PushTipVsSlide,
     SlipGrip,
+    StackOverhang,
     StackStability,
     WedgeInsert,
 )
-from pibench.scenes.deformable import ChainDrape
+from pibench.scenes.deformable import ChainDrape, RopeSag
 from pibench.scenes.dynamics import CollisionBounce, PendulumSwing, ProjectileHit
 from pibench.scenes.params import (
     BalanceAfterMove,
@@ -27,14 +29,14 @@ from pibench.scenes.params import (
     FrictionOrder,
     MassOrder,
 )
-from pibench.scenes.statics import SlopeSlide, SupportBalance, ToppleDirection, TowerFall
+from pibench.scenes.statics import HangingBeam, SlopeSlide, SupportBalance, ToppleDirection, TowerFall
 
 
-STATICS_CLASSES = [TowerFall, SlopeSlide, SupportBalance, ToppleDirection]
+STATICS_CLASSES = [TowerFall, SlopeSlide, SupportBalance, ToppleDirection, HangingBeam]
 DYNAMICS_CLASSES = [PendulumSwing, CollisionBounce, ProjectileHit]
-CONTACT_CLASSES = [PushTipVsSlide, StackStability, WedgeInsert, FrictionPile, SlipGrip]
+CONTACT_CLASSES = [PushTipVsSlide, StackStability, WedgeInsert, FrictionPile, SlipGrip, StackOverhang, PegInHole]
 ARTICULATED_CLASSES = [DrawerPull, DoorSwing, RopeTension, GearTurn]
-DEFORMABLE_CLASSES = [ChainDrape]
+DEFORMABLE_CLASSES = [ChainDrape, RopeSag]
 PARAMS_CLASSES = [MassOrder, FrictionOrder, CounterfactualMass, CounterfactualFriction, BalanceAfterMove]
 ALL_CLASSES = STATICS_CLASSES + DYNAMICS_CLASSES + CONTACT_CLASSES + ARTICULATED_CLASSES + DEFORMABLE_CLASSES + PARAMS_CLASSES
 

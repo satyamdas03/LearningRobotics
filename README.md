@@ -2,7 +2,7 @@
 
 > **Mission:** Learn robotics and AI from first principles — fast — and build something extraordinary and revolutionary.
 >
-> **Current focus:** Locking the 187-test baseline, expanding PIBench, hardening the skill stack, and scoping **RoboCompiler** — a human-video-to-physics-grounded-verified-skill compiler that turns ordinary RGB video into reusable robot skills. GEDA Bridge to RoboCAD is on hold until RoboCAD Phase 14 is complete.
+> **Current focus:** Locking the 200-test baseline, expanding PIBench with new scenes (stacking, hanging, insertion, deformable rope), hardening the skill stack, and scoping **RoboCompiler** — a human-video-to-physics-grounded-verified-skill compiler that turns ordinary RGB video into reusable robot skills. GEDA Bridge to RoboCAD is on hold until RoboCAD Phase 14 is complete.
 
 This repo is a public learning journal. Every chapter is documented, every experiment is reproducible, and every robot model is code.
 
@@ -53,12 +53,12 @@ Each chapter gets its own virtual environment so dependencies stay clean.
 | 2 | Rigid-Body Motions (frames, rotations, transforms) | ✅ Complete | `chapter02_rigid_body_motions/` with SO(3)/SE(3) demo + tests |
 | 3 | Forward Kinematics | ✅ Complete | `chapter03_forward_kinematics/` with DH + PoE FK for 6-DOF arm |
 | **P0** | **PIBench — Physical Intuition Benchmark** | ✅ Phase 0 Complete | Engine + `TowerFall` statics scene |
-| **P1** | **PIBench — Statics Suite** | ✅ Complete | `SlopeSlide`, `SupportBalance`, `ToppleDirection` |
+| **P1** | **PIBench — Statics Suite** | ✅ Complete | `SlopeSlide`, `SupportBalance`, `ToppleDirection`, `HangingBeam` |
 | **P2** | **PIBench — Dynamics Suite** | ✅ Complete | `PendulumSwing`, `CollisionBounce`, `ProjectileHit` |
 | 4 | Velocity Kinematics & Jacobians | ✅ Complete | `chapter04_velocity_kinematics/` with analytic + numeric Jacobian, viewer demo |
-| **P3** | **PIBench — Contact Suite** | ✅ Complete | `PushTipVsSlide`, `StackStability`, `WedgeInsert`, `FrictionPile`, `SlipGrip` |
+| **P3** | **PIBench — Contact Suite** | ✅ Complete | `PushTipVsSlide`, `StackStability`, `WedgeInsert`, `FrictionPile`, `SlipGrip`, `StackOverhang`, `PegInHole` |
 | 5 | Inverse Kinematics | ✅ Complete | `chapter05_inverse_kinematics/` with numeric/analytic IK + null-space redundancy |
-| **P4** | **PIBench — Articulated & Deformable Suite** | ✅ Complete | `DrawerPull`, `DoorSwing`, `RopeTension`, `GearTurn`, `ChainDrape` |
+| **P4** | **PIBench — Articulated & Deformable Suite** | ✅ Complete | `DrawerPull`, `DoorSwing`, `RopeTension`, `GearTurn`, `ChainDrape`, `RopeSag` |
 | 6 | Dynamics | ✅ Complete | `ArmDynamics`: mass matrix, Coriolis+gravity, forward/inverse dynamics |
 | **P5** | **PIBench — Parameter Estimation & Counterfactuals** | ✅ Complete | `MassOrder`, `FrictionOrder`, `CounterfactualMass`, `CounterfactualFriction`, `BalanceAfterMove` |
 | 7 | Control | ✅ Complete | Controller family (gravity comp, PID, computed torque, operational space), uncertainty-aware safety wrapper, `MockRealArm` sim-to-real bridge |
@@ -223,7 +223,7 @@ pytest
 pytest --cov --cov-report=term-missing --cov-report=html:docs/coverage
 ```
 
-**Current baseline:** 187/187 tests passing, ~83 % source coverage. The suite is deterministic and was verified with 3 consecutive green runs.
+**Current baseline:** 200/200 tests passing, ~83 % source coverage. The suite is deterministic and was verified with 3 consecutive green runs.
 
 ---
 

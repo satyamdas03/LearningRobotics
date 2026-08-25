@@ -1098,7 +1098,7 @@ Restarted session after context compaction. User asked to:
 2. **Test-suite hardening (#16)** in LearningRobotics:
    - Added root `pyproject.toml` with pytest testpaths and pytest-cov config.
    - Installed missing deps into the 3.11 venv (mujoco, imageio, etc.).
-   - Ran full suite: **187/187 tests passing**.
+   - Ran full suite: **200/200 tests passing**.
    - Verified stability with 3 consecutive green runs.
    - Generated HTML coverage report at `docs/coverage/` (~83% source coverage).
    - Updated `.gitignore` to ignore `.coverage`.
@@ -1108,7 +1108,16 @@ Restarted session after context compaction. User asked to:
    - Upgraded `pibench/pibench/evaluation/leaderboard.py` to produce interactive leaderboard with theme toggle, predictor filter, collapsible tables, sortable columns.
    - Regenerated `docs/pibench_leaderboard.html`.
    - Verified all 187 tests still pass.
-4. **RoboCAD Phase 15 handoff artifact**:
+4. **Add new PIBench scenes (#2)**:
+   - Added `StackOverhang` (contact suite): two block stacks with different top-block overhangs; which topples?
+   - Added `HangingBeam` (statics suite): hinged beam with hanging load; does it tip?
+   - Added `PegInHole` (contact suite): cylindrical peg lowered into a hole; fits or jams?
+   - Added `RopeSag` (deformable suite): two chains of different length; which sags lower?
+   - Added `pibench/pibench/tests/test_scenes.py` with registration + 3-seed sanity tests for each new scene.
+   - Updated `pibench/tests/test_core.py` class lists to include the four new problems.
+   - Regenerated leaderboard HTML and copied to `docs/`.
+   - Full suite: **200/200 tests passing**.
+5. **RoboCAD Phase 15 handoff artifact**:
    - Wrote `docs/ROBOCAD_PHASE15_PROMPT.md` and committed/pushed it.
    - Contains exact export API, bundle schema v2, verification thresholds, CLI/API endpoints, non-goals, and handoff checklist.
    - Explicit rule: RoboCAD model must **not** modify LearningRobotics files.
@@ -1164,11 +1173,12 @@ Restarted session after context compaction. User asked to:
 | Milestone 9 | ✅ Complete — `chapter15_north_star/`: NL task → skill plan → IK → trajectory → arm execution → residual tracking → skill library, 6 tests |
 | Milestone 10A | ✅ Complete — PIBench static leaderboard published to GitHub Pages |
 | Milestone 10B | ✅ Complete — `chapter16_vision_learning/`: vision-based learning from ordinary video, 5 tests |
-| Standalone task #16 | ✅ Complete — root `pyproject.toml`, 187/187 tests passing, 3× stability verified, HTML coverage report at `docs/coverage/` (~83%) |
+| Standalone task #16 | ✅ Complete — root `pyproject.toml`, 200/200 tests passing, 3× stability verified, HTML coverage report at `docs/coverage/` (~83%) |
 | Standalone task #1 | ✅ Complete — PIBench public site expanded with `docs/index.html` hub + interactive leaderboard (theme/filter/sort/collapse) |
+| Standalone task #2 | ✅ Complete — added `StackOverhang`, `HangingBeam`, `PegInHole`, `RopeSag` with tests; 200/200 tests passing |
 | GEDA Bridge (M10C) | ⏸️ On hold until RoboCAD Phase 14 is complete and verified |
 | Revolutionary capstone | 🎯 Scoped — **RoboCompiler** (human video → physics-grounded, verified robot skill); PhysHack (#2) deferred |
-| Next implementation work | 🚧 Standalone sequence: #2 new PIBench scenes → #6 skill library expansion → #7 IK/trajectory execution → #5 real-arm adapter stubs → #4 Chapter 17 RL → RoboCompiler prototype |
+| Next implementation work | 🚧 Standalone sequence: #6 skill library expansion → #7 IK/trajectory execution → #5 real-arm adapter stubs → #4 Chapter 17 RL → RoboCompiler prototype |
 | Hardware purchase | ⏳ None; project is simulation-only for the foreseeable future |
 | Isaac Sim installed | ⏳ Not installed; will revisit for RL chapters |
 
@@ -1177,7 +1187,6 @@ Restarted session after context compaction. User asked to:
 ## 6. Open Decisions / Questions
 
 1. **What is the next major goal?** Execute the standalone LearningRobotics sequence while RoboCAD finishes Phases 10–14:
-   - #2 Add new PIBench scenes.
    - #6 Expand skill library.
    - #7 Wire skill execution through IK + trajectory.
    - #5 Add real-arm adapter stubs.
@@ -1559,4 +1568,4 @@ For the original market research and GEDA plan, see `C:\Users\point\.claude\proj
 
 ---
 
-*Last updated: 2026-08-25 (Session 19 — 187 tests passing, coverage report live, PIBench public site expanded, GEDA Bridge on hold pending RoboCAD Phase 14, RoboCompiler scoped as revolutionary capstone, RoboCAD Phase 15 super master prompt ready)*
+*Last updated: 2026-08-25 (Session 19 — 200 tests passing, new PIBench scenes added, coverage report live, PIBench public site expanded, GEDA Bridge on hold pending RoboCAD Phase 14, RoboCompiler scoped as revolutionary capstone, RoboCAD Phase 15 super master prompt ready)*

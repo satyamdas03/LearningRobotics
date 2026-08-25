@@ -1,0 +1,1276 @@
+{
+  "entries": [
+    {
+      "predictor": "physics_oracle",
+      "overall_accuracy": 1.0,
+      "n_total": 260,
+      "n_correct": 260.0,
+      "suite_metrics": [
+        {
+          "suite": "articulated",
+          "n_total": 40,
+          "n_correct": 40.0,
+          "accuracy": 1.0
+        },
+        {
+          "suite": "contact",
+          "n_total": 70,
+          "n_correct": 70.0,
+          "accuracy": 1.0
+        },
+        {
+          "suite": "deformable",
+          "n_total": 20,
+          "n_correct": 20.0,
+          "accuracy": 1.0
+        },
+        {
+          "suite": "dynamics",
+          "n_total": 30,
+          "n_correct": 30.0,
+          "accuracy": 1.0
+        },
+        {
+          "suite": "params",
+          "n_total": 50,
+          "n_correct": 50.0,
+          "accuracy": 1.0
+        },
+        {
+          "suite": "statics",
+          "n_total": 50,
+          "n_correct": 50.0,
+          "accuracy": 1.0
+        }
+      ],
+      "concept_metrics": [
+        {
+          "concept": "analytic_range",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "angle_deg",
+          "n_total": 30,
+          "n_correct": 30.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "applied_force",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "applied_torque",
+          "n_total": 20,
+          "n_correct": 20.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "articulated",
+          "n_total": 40,
+          "n_correct": 40.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "balance_x",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "ball_mass",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "ball_speed",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "bar_height",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "beam_length",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "beam_mass",
+          "n_total": 30,
+          "n_correct": 30.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "block_mass",
+          "n_total": 50,
+          "n_correct": 50.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "capsule_half_len",
+          "n_total": 20,
+          "n_correct": 20.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "capsule_radius",
+          "n_total": 20,
+          "n_correct": 20.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "contact",
+          "n_total": 70,
+          "n_correct": 70.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "counterfactual_top_mass",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "deformable",
+          "n_total": 20,
+          "n_correct": 20.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "displacement_a",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "displacement_b",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "displacement_c",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "door_mass",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "drawer_mass",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "dynamics",
+          "n_total": 30,
+          "n_correct": 30.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "final_angle_deg",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "final_z",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "final_z_a",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "final_z_b",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "frictionloss",
+          "n_total": 20,
+          "n_correct": 20.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "gap_width",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "gear_a_rotation_deg",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "grip_force",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "half_height",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "half_width",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "height_a",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "height_b",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "hole_depth",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "hole_radius",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "impact_height",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "initial_balance",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "length_a",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "length_b",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "load_mass",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "mass",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "mass_a",
+          "n_total": 60,
+          "n_correct": 60.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "mass_b",
+          "n_total": 60,
+          "n_correct": 60.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "mass_c",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "mass_offset",
+          "n_total": 20,
+          "n_correct": 20.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "mass_per_capsule",
+          "n_total": 20,
+          "n_correct": 20.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "masses",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "max_angle_deg",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "max_displacement",
+          "n_total": 20,
+          "n_correct": 20.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "max_displacement_a",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "max_displacement_b",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "max_displacement_c",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "max_overhang",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "max_tilt_deg",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "move_distance",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "mu_a",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "mu_b",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "mu_c",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "mu_s",
+          "n_total": 40,
+          "n_correct": 40.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "n_blocks",
+          "n_total": 30,
+          "n_correct": 30.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "n_capsules",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "n_capsules_a",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "n_capsules_b",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "new_balance",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "original_slides",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "original_top_mass",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "original_topples",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "overhang_a",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "overhang_b",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "overhang_direction",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "params",
+          "n_total": 50,
+          "n_correct": 50.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "peg_length",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "peg_radius",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "point_mass",
+          "n_total": 20,
+          "n_correct": 20.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "push_height",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "radius_a",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "radius_b",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "release_angle_deg",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "simulated",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "simulated_range",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "spacing",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "speed",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "statics",
+          "n_total": 50,
+          "n_correct": 50.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "thresholds",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "tilt_angle_deg",
+          "n_total": 30,
+          "n_correct": 30.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "tilt_direction",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "total_friction_capacity",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "tower_a_blocks",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "tower_b_blocks",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "tower_height",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "velocity_a",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "wedge_base_width",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "wedge_delta_x",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "wedge_length",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        },
+        {
+          "concept": "weight",
+          "n_total": 10,
+          "n_correct": 10.0,
+          "accuracy": 1.0
+        }
+      ],
+      "calibration": {
+        "ece": 0.0,
+        "brier": 0.0,
+        "nll": null,
+        "n_with_confidence": 260,
+        "n_total": 260
+      },
+      "results_path": "output\\results_physics_oracle.json"
+    },
+    {
+      "predictor": "random",
+      "overall_accuracy": 0.35,
+      "n_total": 260,
+      "n_correct": 91.0,
+      "suite_metrics": [
+        {
+          "suite": "articulated",
+          "n_total": 40,
+          "n_correct": 17.0,
+          "accuracy": 0.425
+        },
+        {
+          "suite": "contact",
+          "n_total": 70,
+          "n_correct": 29.0,
+          "accuracy": 0.4142857142857143
+        },
+        {
+          "suite": "deformable",
+          "n_total": 20,
+          "n_correct": 5.0,
+          "accuracy": 0.25
+        },
+        {
+          "suite": "dynamics",
+          "n_total": 30,
+          "n_correct": 5.0,
+          "accuracy": 0.16666666666666666
+        },
+        {
+          "suite": "params",
+          "n_total": 50,
+          "n_correct": 17.0,
+          "accuracy": 0.34
+        },
+        {
+          "suite": "statics",
+          "n_total": 50,
+          "n_correct": 18.0,
+          "accuracy": 0.36
+        }
+      ],
+      "concept_metrics": [
+        {
+          "concept": "analytic_range",
+          "n_total": 10,
+          "n_correct": 0.0,
+          "accuracy": 0.0
+        },
+        {
+          "concept": "angle_deg",
+          "n_total": 30,
+          "n_correct": 7.0,
+          "accuracy": 0.23333333333333334
+        },
+        {
+          "concept": "applied_force",
+          "n_total": 10,
+          "n_correct": 4.0,
+          "accuracy": 0.4
+        },
+        {
+          "concept": "applied_torque",
+          "n_total": 20,
+          "n_correct": 13.0,
+          "accuracy": 0.65
+        },
+        {
+          "concept": "articulated",
+          "n_total": 40,
+          "n_correct": 17.0,
+          "accuracy": 0.425
+        },
+        {
+          "concept": "balance_x",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "ball_mass",
+          "n_total": 10,
+          "n_correct": 6.0,
+          "accuracy": 0.6
+        },
+        {
+          "concept": "ball_speed",
+          "n_total": 10,
+          "n_correct": 6.0,
+          "accuracy": 0.6
+        },
+        {
+          "concept": "bar_height",
+          "n_total": 10,
+          "n_correct": 0.0,
+          "accuracy": 0.0
+        },
+        {
+          "concept": "beam_length",
+          "n_total": 10,
+          "n_correct": 7.0,
+          "accuracy": 0.7
+        },
+        {
+          "concept": "beam_mass",
+          "n_total": 30,
+          "n_correct": 12.0,
+          "accuracy": 0.4
+        },
+        {
+          "concept": "block_mass",
+          "n_total": 50,
+          "n_correct": 17.0,
+          "accuracy": 0.34
+        },
+        {
+          "concept": "capsule_half_len",
+          "n_total": 20,
+          "n_correct": 5.0,
+          "accuracy": 0.25
+        },
+        {
+          "concept": "capsule_radius",
+          "n_total": 20,
+          "n_correct": 5.0,
+          "accuracy": 0.25
+        },
+        {
+          "concept": "contact",
+          "n_total": 70,
+          "n_correct": 29.0,
+          "accuracy": 0.4142857142857143
+        },
+        {
+          "concept": "counterfactual_top_mass",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "deformable",
+          "n_total": 20,
+          "n_correct": 5.0,
+          "accuracy": 0.25
+        },
+        {
+          "concept": "displacement_a",
+          "n_total": 10,
+          "n_correct": 1.0,
+          "accuracy": 0.1
+        },
+        {
+          "concept": "displacement_b",
+          "n_total": 10,
+          "n_correct": 1.0,
+          "accuracy": 0.1
+        },
+        {
+          "concept": "displacement_c",
+          "n_total": 10,
+          "n_correct": 1.0,
+          "accuracy": 0.1
+        },
+        {
+          "concept": "door_mass",
+          "n_total": 10,
+          "n_correct": 7.0,
+          "accuracy": 0.7
+        },
+        {
+          "concept": "drawer_mass",
+          "n_total": 10,
+          "n_correct": 4.0,
+          "accuracy": 0.4
+        },
+        {
+          "concept": "dynamics",
+          "n_total": 30,
+          "n_correct": 5.0,
+          "accuracy": 0.16666666666666666
+        },
+        {
+          "concept": "final_angle_deg",
+          "n_total": 10,
+          "n_correct": 7.0,
+          "accuracy": 0.7
+        },
+        {
+          "concept": "final_z",
+          "n_total": 10,
+          "n_correct": 2.0,
+          "accuracy": 0.2
+        },
+        {
+          "concept": "final_z_a",
+          "n_total": 10,
+          "n_correct": 0.0,
+          "accuracy": 0.0
+        },
+        {
+          "concept": "final_z_b",
+          "n_total": 10,
+          "n_correct": 0.0,
+          "accuracy": 0.0
+        },
+        {
+          "concept": "frictionloss",
+          "n_total": 20,
+          "n_correct": 11.0,
+          "accuracy": 0.55
+        },
+        {
+          "concept": "gap_width",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "gear_a_rotation_deg",
+          "n_total": 10,
+          "n_correct": 6.0,
+          "accuracy": 0.6
+        },
+        {
+          "concept": "grip_force",
+          "n_total": 10,
+          "n_correct": 6.0,
+          "accuracy": 0.6
+        },
+        {
+          "concept": "half_height",
+          "n_total": 10,
+          "n_correct": 3.0,
+          "accuracy": 0.3
+        },
+        {
+          "concept": "half_width",
+          "n_total": 10,
+          "n_correct": 3.0,
+          "accuracy": 0.3
+        },
+        {
+          "concept": "height_a",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "height_b",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "hole_depth",
+          "n_total": 10,
+          "n_correct": 2.0,
+          "accuracy": 0.2
+        },
+        {
+          "concept": "hole_radius",
+          "n_total": 10,
+          "n_correct": 2.0,
+          "accuracy": 0.2
+        },
+        {
+          "concept": "impact_height",
+          "n_total": 10,
+          "n_correct": 6.0,
+          "accuracy": 0.6
+        },
+        {
+          "concept": "initial_balance",
+          "n_total": 10,
+          "n_correct": 0.0,
+          "accuracy": 0.0
+        },
+        {
+          "concept": "length_a",
+          "n_total": 10,
+          "n_correct": 2.0,
+          "accuracy": 0.2
+        },
+        {
+          "concept": "length_b",
+          "n_total": 10,
+          "n_correct": 2.0,
+          "accuracy": 0.2
+        },
+        {
+          "concept": "load_mass",
+          "n_total": 10,
+          "n_correct": 7.0,
+          "accuracy": 0.7
+        },
+        {
+          "concept": "mass",
+          "n_total": 10,
+          "n_correct": 0.0,
+          "accuracy": 0.0
+        },
+        {
+          "concept": "mass_a",
+          "n_total": 60,
+          "n_correct": 16.0,
+          "accuracy": 0.26666666666666666
+        },
+        {
+          "concept": "mass_b",
+          "n_total": 60,
+          "n_correct": 16.0,
+          "accuracy": 0.26666666666666666
+        },
+        {
+          "concept": "mass_c",
+          "n_total": 10,
+          "n_correct": 1.0,
+          "accuracy": 0.1
+        },
+        {
+          "concept": "mass_offset",
+          "n_total": 20,
+          "n_correct": 5.0,
+          "accuracy": 0.25
+        },
+        {
+          "concept": "mass_per_capsule",
+          "n_total": 20,
+          "n_correct": 5.0,
+          "accuracy": 0.25
+        },
+        {
+          "concept": "masses",
+          "n_total": 10,
+          "n_correct": 6.0,
+          "accuracy": 0.6
+        },
+        {
+          "concept": "max_angle_deg",
+          "n_total": 10,
+          "n_correct": 7.0,
+          "accuracy": 0.7
+        },
+        {
+          "concept": "max_displacement",
+          "n_total": 20,
+          "n_correct": 10.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "max_displacement_a",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "max_displacement_b",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "max_displacement_c",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "max_overhang",
+          "n_total": 10,
+          "n_correct": 1.0,
+          "accuracy": 0.1
+        },
+        {
+          "concept": "max_tilt_deg",
+          "n_total": 10,
+          "n_correct": 3.0,
+          "accuracy": 0.3
+        },
+        {
+          "concept": "move_distance",
+          "n_total": 10,
+          "n_correct": 0.0,
+          "accuracy": 0.0
+        },
+        {
+          "concept": "mu_a",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "mu_b",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "mu_c",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "mu_s",
+          "n_total": 40,
+          "n_correct": 19.0,
+          "accuracy": 0.475
+        },
+        {
+          "concept": "n_blocks",
+          "n_total": 30,
+          "n_correct": 12.0,
+          "accuracy": 0.4
+        },
+        {
+          "concept": "n_capsules",
+          "n_total": 10,
+          "n_correct": 0.0,
+          "accuracy": 0.0
+        },
+        {
+          "concept": "n_capsules_a",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "n_capsules_b",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "new_balance",
+          "n_total": 10,
+          "n_correct": 0.0,
+          "accuracy": 0.0
+        },
+        {
+          "concept": "original_slides",
+          "n_total": 10,
+          "n_correct": 6.0,
+          "accuracy": 0.6
+        },
+        {
+          "concept": "original_top_mass",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "original_topples",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "overhang_a",
+          "n_total": 10,
+          "n_correct": 1.0,
+          "accuracy": 0.1
+        },
+        {
+          "concept": "overhang_b",
+          "n_total": 10,
+          "n_correct": 1.0,
+          "accuracy": 0.1
+        },
+        {
+          "concept": "overhang_direction",
+          "n_total": 10,
+          "n_correct": 1.0,
+          "accuracy": 0.1
+        },
+        {
+          "concept": "params",
+          "n_total": 50,
+          "n_correct": 17.0,
+          "accuracy": 0.34
+        },
+        {
+          "concept": "peg_length",
+          "n_total": 10,
+          "n_correct": 2.0,
+          "accuracy": 0.2
+        },
+        {
+          "concept": "peg_radius",
+          "n_total": 10,
+          "n_correct": 2.0,
+          "accuracy": 0.2
+        },
+        {
+          "concept": "point_mass",
+          "n_total": 20,
+          "n_correct": 5.0,
+          "accuracy": 0.25
+        },
+        {
+          "concept": "push_height",
+          "n_total": 10,
+          "n_correct": 3.0,
+          "accuracy": 0.3
+        },
+        {
+          "concept": "radius_a",
+          "n_total": 10,
+          "n_correct": 6.0,
+          "accuracy": 0.6
+        },
+        {
+          "concept": "radius_b",
+          "n_total": 10,
+          "n_correct": 6.0,
+          "accuracy": 0.6
+        },
+        {
+          "concept": "release_angle_deg",
+          "n_total": 10,
+          "n_correct": 2.0,
+          "accuracy": 0.2
+        },
+        {
+          "concept": "simulated",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "simulated_range",
+          "n_total": 10,
+          "n_correct": 0.0,
+          "accuracy": 0.0
+        },
+        {
+          "concept": "spacing",
+          "n_total": 10,
+          "n_correct": 0.0,
+          "accuracy": 0.0
+        },
+        {
+          "concept": "speed",
+          "n_total": 10,
+          "n_correct": 0.0,
+          "accuracy": 0.0
+        },
+        {
+          "concept": "statics",
+          "n_total": 50,
+          "n_correct": 18.0,
+          "accuracy": 0.36
+        },
+        {
+          "concept": "thresholds",
+          "n_total": 10,
+          "n_correct": 6.0,
+          "accuracy": 0.6
+        },
+        {
+          "concept": "tilt_angle_deg",
+          "n_total": 30,
+          "n_correct": 10.0,
+          "accuracy": 0.3333333333333333
+        },
+        {
+          "concept": "tilt_direction",
+          "n_total": 10,
+          "n_correct": 1.0,
+          "accuracy": 0.1
+        },
+        {
+          "concept": "total_friction_capacity",
+          "n_total": 10,
+          "n_correct": 6.0,
+          "accuracy": 0.6
+        },
+        {
+          "concept": "tower_a_blocks",
+          "n_total": 10,
+          "n_correct": 4.0,
+          "accuracy": 0.4
+        },
+        {
+          "concept": "tower_b_blocks",
+          "n_total": 10,
+          "n_correct": 4.0,
+          "accuracy": 0.4
+        },
+        {
+          "concept": "tower_height",
+          "n_total": 10,
+          "n_correct": 1.0,
+          "accuracy": 0.1
+        },
+        {
+          "concept": "velocity_a",
+          "n_total": 10,
+          "n_correct": 3.0,
+          "accuracy": 0.3
+        },
+        {
+          "concept": "wedge_base_width",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "wedge_delta_x",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "wedge_length",
+          "n_total": 10,
+          "n_correct": 5.0,
+          "accuracy": 0.5
+        },
+        {
+          "concept": "weight",
+          "n_total": 10,
+          "n_correct": 6.0,
+          "accuracy": 0.6
+        }
+      ],
+      "calibration": {
+        "ece": 0.017391304347826077,
+        "brier": 0.2307971014492754,
+        "nll": 0.6535841101935908,
+        "n_with_confidence": 230,
+        "n_total": 260
+      },
+      "results_path": "output\\results_random.json"
+    }
+  ]
+}
