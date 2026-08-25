@@ -12,15 +12,35 @@
       --border: #dddddd;
       --accent: #2563eb;
       --accent-soft: #dbeafe;
+      --nav-bg: #f8fafc;
+    }
+    :root[data-theme="dark"] {
+      --bg: #0f172a;
+      --fg: #e2e8f0;
+      --muted: #94a3b8;
+      --border: #334155;
+      --accent: #60a5fa;
+      --accent-soft: #1e293b;
+      --nav-bg: #1e293b;
+    }
+    :root[data-theme="light"] {
+      --bg: #ffffff;
+      --fg: #1a1a1a;
+      --muted: #555555;
+      --border: #dddddd;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --nav-bg: #f8fafc;
     }
     @media (prefers-color-scheme: dark) {
-      :root {
+      :root:not([data-theme]) {
         --bg: #0f172a;
         --fg: #e2e8f0;
         --muted: #94a3b8;
         --border: #334155;
         --accent: #60a5fa;
         --accent-soft: #1e293b;
+        --nav-bg: #1e293b;
       }
     }
     body {
@@ -28,13 +48,61 @@
       background: var(--bg);
       color: var(--fg);
       margin: 0;
-      padding: 2rem;
+      padding: 0;
       line-height: 1.5;
     }
-    h1, h2 { color: var(--accent); }
+    nav {
+      background: var(--nav-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+    }
+    nav .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    nav a:hover { text-decoration: underline; }
+    nav .spacer { flex: 1; }
     .container {
       max-width: 1100px;
       margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    h1, h2 { color: var(--accent); margin-top: 0; }
+    .meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .controls input[type="text"] {
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 0.25rem;
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 0.95rem;
+    }
+    .controls label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      font-size: 0.95rem;
     }
     table {
       width: 100%;
@@ -51,22 +119,57 @@
       background: var(--accent-soft);
       color: var(--accent);
       font-weight: 600;
+      cursor: pointer;
+      user-select: none;
     }
+    th:hover { filter: brightness(0.95); }
     tr:nth-child(even) { background: var(--accent-soft); }
-    .meta {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-bottom: 1.5rem;
-    }
+    tr.hidden { display: none; }
     .scroll {
       overflow-x: auto;
+      margin-bottom: 2rem;
+    }
+    .collapsed { display: none; }
+    button.toggle {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    button.toggle:hover { filter: brightness(0.95); }
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+      margin-top: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
     }
   </style>
 </head>
 <body>
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html">LearningRobotics Hub</a>
+      <a href="pibench_leaderboard.html">PIBench Leaderboard</a>
+      <a href="coverage/index.html">Coverage</a>
+      <a href="https://github.com/satyamdas03/LearningRobotics">GitHub</a>
+      <span class="spacer"></span>
+      <button class="toggle" id="themeBtn" aria-label="Toggle theme">🌓 Theme</button>
+    </div>
+  </nav>
+
   <div class="container">
     <h1>PIBench Leaderboard</h1>
-    <p class="meta">Generated automatically from <code>output/results_*.json</code>.</p>
+    <p class="meta">Generated automatically from <code>output/results_*.json</code> on 2026-08-25 01:23 UTC.</p>
+
+    <div class="controls">
+      <input type="text" id="filter" placeholder="Filter predictors…" aria-label="Filter predictors">
+      <label><input type="checkbox" id="showSuite" checked> Show per-suite table</label>
+      <label><input type="checkbox" id="showConcept" checked> Show per-concept table</label>
+    </div>
 
     
     <h2>Overall</h2>
@@ -80,7 +183,7 @@
     </table>
     
 
-    <div class="scroll">
+    <div class="scroll" id="suiteWrap">
       
     <h2>Per-Suite Accuracy</h2>
     <table>
@@ -94,7 +197,7 @@
     
     </div>
 
-    <div class="scroll">
+    <div class="scroll" id="conceptWrap">
       
     <h2>Per-Concept Accuracy</h2>
     <table>
@@ -107,6 +210,76 @@
     </table>
     
     </div>
+
+    <footer>
+      Part of the <a href="https://github.com/satyamdas03/LearningRobotics">LearningRobotics</a> public learning journal.
+    </footer>
   </div>
+
+  <script>
+    (function() {
+      const root = document.documentElement;
+      const themeBtn = document.getElementById('themeBtn');
+      const stored = localStorage.getItem('lr-theme');
+      if (stored) root.setAttribute('data-theme', stored);
+      themeBtn.addEventListener('click', () => {
+        const current = root.getAttribute('data-theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        let next;
+        if (!current) next = prefersDark ? 'light' : 'dark';
+        else if (current === 'dark') next = 'light';
+        else next = 'dark';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('lr-theme', next);
+      });
+
+      function normalize(text) {
+        return text.toLowerCase().replace(/[^a-z0-9]/g, '');
+      }
+
+      function filterTables(query) {
+        const q = normalize(query);
+        document.querySelectorAll('table tbody tr').forEach(row => {
+          const firstCell = row.querySelector('td');
+          if (!firstCell) return;
+          const name = normalize(firstCell.textContent || '');
+          row.classList.toggle('hidden', q && !name.includes(q));
+        });
+      }
+
+      const filterInput = document.getElementById('filter');
+      filterInput.addEventListener('input', e => filterTables(e.target.value));
+
+      function setupSort(table) {
+        const headers = table.querySelectorAll('thead th');
+        headers.forEach((th, idx) => {
+          let dir = 1;
+          th.addEventListener('click', () => {
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            rows.sort((a, b) => {
+              const av = a.children[idx].textContent.trim();
+              const bv = b.children[idx].textContent.trim();
+              const an = parseFloat(av.replace('%', ''));
+              const bn = parseFloat(bv.replace('%', ''));
+              if (!isNaN(an) && !isNaN(bn)) return dir * (an - bn);
+              return dir * av.localeCompare(bv);
+            });
+            rows.forEach(r => tbody.appendChild(r));
+            dir *= -1;
+          });
+        });
+      }
+
+      document.querySelectorAll('table').forEach(setupSort);
+
+      document.getElementById('showSuite').addEventListener('change', e => {
+        document.getElementById('suiteWrap').classList.toggle('collapsed', !e.target.checked);
+      });
+      document.getElementById('showConcept').addEventListener('change', e => {
+        document.getElementById('conceptWrap').classList.toggle('collapsed', !e.target.checked);
+      });
+    })();
+  </script>
 </body>
 </html>

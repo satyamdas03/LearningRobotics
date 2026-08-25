@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LearningRobotics — Simulation-First Robotics Lab</title>
+  <title>LearningRobotics Hub</title>
   <style>
     :root {
       --bg: #ffffff;
@@ -12,15 +12,35 @@
       --border: #dddddd;
       --accent: #2563eb;
       --accent-soft: #dbeafe;
+      --card: #f8fafc;
+    }
+    :root[data-theme="dark"] {
+      --bg: #0f172a;
+      --fg: #e2e8f0;
+      --muted: #94a3b8;
+      --border: #334155;
+      --accent: #60a5fa;
+      --accent-soft: #1e293b;
+      --card: #1e293b;
+    }
+    :root[data-theme="light"] {
+      --bg: #ffffff;
+      --fg: #1a1a1a;
+      --muted: #555555;
+      --border: #dddddd;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --card: #f8fafc;
     }
     @media (prefers-color-scheme: dark) {
-      :root {
+      :root:not([data-theme]) {
         --bg: #0f172a;
         --fg: #e2e8f0;
         --muted: #94a3b8;
         --border: #334155;
         --accent: #60a5fa;
         --accent-soft: #1e293b;
+        --card: #1e293b;
       }
     }
     body {
@@ -28,96 +48,165 @@
       background: var(--bg);
       color: var(--fg);
       margin: 0;
-      padding: 2rem;
+      padding: 0;
       line-height: 1.6;
     }
-    .container {
-      max-width: 900px;
+    nav {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+    }
+    nav .nav-inner {
+      max-width: 1100px;
       margin: 0 auto;
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap;
     }
-    h1 {
+    nav a {
       color: var(--accent);
-      margin-bottom: 0.25rem;
+      text-decoration: none;
+      font-weight: 500;
     }
-    .subtitle {
-      color: var(--muted);
-      font-size: 1.1rem;
-      margin-top: 0;
+    nav a:hover { text-decoration: underline; }
+    nav .spacer { flex: 1; }
+    button.toggle {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    h1 { color: var(--accent); margin-top: 0; }
+    .subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 2rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
     }
     .card {
+      background: var(--card);
       border: 1px solid var(--border);
       border-radius: 0.5rem;
-      padding: 1.5rem;
-      margin: 1.5rem 0;
-      background: var(--accent-soft);
+      padding: 1.25rem;
     }
     .card h2 {
       margin-top: 0;
       color: var(--accent);
+      font-size: 1.15rem;
     }
-    a {
+    .card p { color: var(--muted); margin-bottom: 1rem; }
+    .card a {
+      display: inline-block;
       color: var(--accent);
       text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    .button {
-      display: inline-block;
-      padding: 0.6rem 1rem;
-      border-radius: 0.375rem;
-      background: var(--accent);
-      color: #fff;
       font-weight: 600;
-      margin-top: 0.5rem;
     }
-    .button:hover {
-      text-decoration: none;
-      opacity: 0.9;
+    .card a:hover { text-decoration: underline; }
+    .stats {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin: 2rem 0;
     }
-    .meta {
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem 1.5rem;
+      min-width: 140px;
+    }
+    .stat .number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .stat .label { color: var(--muted); font-size: 0.9rem; }
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      margin-top: 2rem;
       color: var(--muted);
       font-size: 0.9rem;
-    }
-    ul {
-      padding-left: 1.25rem;
-    }
-    li {
-      margin: 0.35rem 0;
     }
   </style>
 </head>
 <body>
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html">LearningRobotics Hub</a>
+      <a href="pibench_leaderboard.html">PIBench Leaderboard</a>
+      <a href="coverage/index.html">Coverage</a>
+      <a href="https://github.com/satyamdas03/LearningRobotics">GitHub</a>
+      <span class="spacer"></span>
+      <button class="toggle" id="themeBtn" aria-label="Toggle theme">🌓 Theme</button>
+    </div>
+  </nav>
+
   <div class="container">
     <h1>🤖 LearningRobotics</h1>
-    <p class="subtitle">A public simulation-first robotics + AI learning journal.</p>
+    <p class="subtitle">Public learning journal for robotics + AI — from first principles to autonomous, physics-grounded robot skills.</p>
 
-    <div class="card">
-      <h2>📊 PIBench Live Leaderboard</h2>
-      <p>
-        PIBench is the MuJoCo-based physical-intuition benchmark built alongside the textbook curriculum.
-        The leaderboard below is regenerated from the latest saved results and served straight from this repo.
-      </p>
-      <p class="meta">Current baseline: physics_oracle vs random across statics, dynamics, contact, articulated, deformable, and parameter-estimation suites.</p>
-      <a class="button" href="pibench_leaderboard.html">Open the leaderboard</a>
+    <div class="stats">
+      <div class="stat"><div class="number">16</div><div class="label">Chapters complete</div></div>
+      <div class="stat"><div class="number">187</div><div class="label">Tests passing</div></div>
+      <div class="stat"><div class="number">83%</div><div class="label">Source coverage</div></div>
+      <div class="stat"><div class="number">7</div><div class="label">PIBench phases</div></div>
     </div>
 
-    <div class="card">
-      <h2>🚀 Project Links</h2>
-      <ul>
-        <li><a href="https://github.com/satyamdas03/LearningRobotics">GitHub repository</a></li>
-        <li><a href="https://github.com/satyamdas03/LearningRobotics#readme">Project README / curriculum log</a></li>
-        <li><a href="https://github.com/satyamdas03/LearningRobotics/tree/master/pibench">PIBench source</a></li>
-      </ul>
+    <div class="grid">
+      <div class="card">
+        <h2>PIBench Leaderboard</h2>
+        <p>Physical-intuition benchmark with per-suite and per-concept accuracy breakdowns, calibration metrics, and interactive filtering.</p>
+        <a href="pibench_leaderboard.html">Open leaderboard →</a>
+      </div>
+      <div class="card">
+        <h2>Test Coverage</h2>
+        <p>HTML coverage report for the full 187-test suite, generated with pytest-cov.</p>
+        <a href="coverage/index.html">View coverage →</a>
+      </div>
+      <div class="card">
+        <h2>Repository</h2>
+        <p>Follow the build log, chapters, and code on GitHub.</p>
+        <a href="https://github.com/satyamdas03/LearningRobotics">Go to GitHub →</a>
+      </div>
+      <div class="card">
+        <h2>Roadmap</h2>
+        <p>Next: PIBench new scenes, skill execution with IK + trajectory, real-arm adapter stubs, Chapter 17 RL, and RoboCompiler.</p>
+        <a href="https://github.com/satyamdas03/LearningRobotics#-curriculum--progress-log">See roadmap →</a>
+      </div>
     </div>
 
-    <div class="card">
-      <h2>🎬 Latest Demo</h2>
-      <p>Self-improving virtual real-sim-real loop — baseline vs retuned controller:</p>
-      <img src="https://raw.githubusercontent.com/satyamdas03/LearningRobotics/master/docs/assets/self_improve_baseline_vs_retuned.gif" alt="Self-improvement demo" style="max-width:100%; border-radius:0.375rem;">
-    </div>
-
-    <p class="meta">Built by Satyam Das · <a href="https://github.com/satyamdas03/LearningRobotics">@satyamdas03</a></p>
+    <footer>
+      Built by <a href="https://github.com/satyamdas03">Satyam Das</a> as a public learning journal.
+      Capstone direction: <strong>RoboCompiler</strong> — human video → physics-grounded, verified robot skill.
+    </footer>
   </div>
+
+  <script>
+    (function() {
+      const root = document.documentElement;
+      const stored = localStorage.getItem('lr-theme');
+      if (stored) root.setAttribute('data-theme', stored);
+      document.getElementById('themeBtn').addEventListener('click', () => {
+        const current = root.getAttribute('data-theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        let next;
+        if (!current) next = prefersDark ? 'light' : 'dark';
+        else if (current === 'dark') next = 'light';
+        else next = 'dark';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('lr-theme', next);
+      });
+    })();
+  </script>
 </body>
 </html>
